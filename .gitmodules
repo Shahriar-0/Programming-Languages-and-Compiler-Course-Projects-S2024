@@ -1,0 +1,6 @@
+[submodule "Archive/V1"]
+	path = Archive/V1
+	url = https://github.com/MisaghM/Compiler-Course-Projects
+[submodule "Archive/V2"]
+	path = Archive/V2
+	url = https://github.com/SamanEN/LogicPL-Compiler
