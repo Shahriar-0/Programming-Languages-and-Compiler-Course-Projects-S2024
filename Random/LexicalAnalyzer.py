@@ -78,6 +78,7 @@ class Lexical:
                 self.index += max_length
             else:
                 if self.error_handling_method == ErrorHandlingMethod.PANIC_MODE:
+                    self.output.update({self.input[self.index] : "PANIC"})
                     self.index += 1
             if self.index < len(self.input):
                 self.current = self.input[self.index]
