@@ -10,35 +10,33 @@ class ErrorHandlingMethod(Enum):
 
 
 class Lexical:
-    def __init__(self, input):
+    def __init__(self, input, **akwargs):
         self.input = input
         self.index = 0
         self.current: str = input[0]
-        self.__tokens_init()
-        self.error_handling_method = ErrorHandlingMethod.PANIC_MODE
+        self.tokens = akwargs.get("tokens", self.__tokens_init())
+        self.error_handling_method = (
+            ErrorHandlingMethod.PANIC_MODE
+            if akwargs.get("error_handling_method") is None
+            else akwargs.get("error_handling_method")
+        )
 
     def __tokens_init(self):
-        # FIXME: the following tokens are just for testing purposes
-        # self.tokens = [
-        #     ("INTEGER", r"\d+"),
-        #     ("LPAREN", r"\("),
-        #     ("RPAREN", r"\)"),
-        #     ("WS", r"\s+")
-        #     ("ID", r"[a-zA-Z_][a-zA-Z0-9_]*")
-        #     ("OPERATOR", r"\+|\-|\*|\/"),
-        #     ("ASSIGN", r"\="),
-        #     ("SEMICOLON", r"\;")
-        #     ("FLOAT", r"\d+\.\d+")
-        #     ("STRING", r"\".*?\"")
-        #     ("KEYWORD", r"if|else|while|for|def|return|class|import|from|as|elif|try|except|finally|raise|assert|pass|break|continue|del|global|nonlocal|lambda|yield|with|in|is|not|and|or|True|False|None")
-        #     ("COMPARISON", r"\<|\>|\=\=|\!\=|\>\=|\<\=")
-        # ]
-        
-        self.tokens = (
-            ("T1", r"(a?)(b|c)*a"),
-            ("T2", r"(b?)(a|c)*b"),
-            ("T3", r"(c?)(a|b)*c"),
-        )
+        return [
+            ("INTEGER", r"\d+"),
+            ("LPAREN", r"\("),
+            ("RPAREN", r"\)"),
+            ("WS", r"\s+"),
+            ("ID", r"[a-zA-Z_][a-zA-Z0-9_]*"),
+            ("OPERATOR", r"\+|\-|\*|\/"),
+            ("ASSIGN", r"\="),
+            ("SEMICOLON", r"\;"),
+            ("FLOAT", r"\d+\.\d+"),
+            ("STRING", r"\".*?\""),
+            ("KEYWORD", r"if|else|while|for|def|return|class|import|from|as|elif|try|except|finally|raise|assert|pass|break|continue|del|global|nonlocal|lambda|yield|with|in|is|not|and|or|True|False|None",
+            ),
+            ("COMPARISON", r"\<|\>|\=\=|\!\=|\>\=|\<\="),
+        ]
 
     def advance(self):
         self.index += 1
@@ -73,19 +71,23 @@ class Lexical:
                     max_length = match.end() - match.start()
                     max_token = name
             if max_token is not None:
-                tokens.append((max_token, self.input[self.index : self.index + max_length]))
-                self.output.update({self.input[self.index : self.index + max_length] : max_token})
+                tokens.append(
+                    (max_token, self.input[self.index : self.index + max_length])
+                )
+                self.output.update(
+                    {self.input[self.index : self.index + max_length]: max_token}
+                )
                 self.index += max_length
             else:
                 if self.error_handling_method == ErrorHandlingMethod.PANIC_MODE:
-                    self.output.update({self.input[self.index] : "PANIC"})
+                    self.output.update({self.input[self.index]: "PANIC"})
                     self.index += 1
             if self.index < len(self.input):
                 self.current = self.input[self.index]
             else:
                 self.current = None
         return tokens
-    
+
     def show_result(self):
         lengths = [max(len(key), len(value)) for key, value in self.output.items()]
         for key, length in zip(self.output.keys(), lengths):
@@ -93,10 +95,15 @@ class Lexical:
         print()
         for value, length in zip(self.output.values(), lengths):
             print(f"{value:>{length}}| ", end="")
-            
+
 
 if __name__ == "__main__":
     input = "bbaacdabcaaabaa"
-    lexer = Lexical(input)
+    tokens = (
+        ("T1", r"(a?)(b|c)*a"),
+        ("T2", r"(b?)(a|c)*b"),
+        ("T3", r"(c?)(a|b)*c"),
+    )
+    lexer = Lexical(input, tokens=tokens)
     tokens = lexer.tokenize()
     lexer.show_result()
