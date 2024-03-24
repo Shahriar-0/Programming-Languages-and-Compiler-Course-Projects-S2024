@@ -31,7 +31,7 @@ class Node:
     def set_value(self, value: str) -> None:
         self._value = value
     
-    def draw(self, graph: Digraph, id: int) -> int:
+    def draw(self, graph: Digraph, id: int = 0) -> int:
         label = f"{self._value}_{id}"
         for child in self._children:
             id += 1

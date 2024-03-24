@@ -142,7 +142,7 @@ class CFG:
             elif is_non_terminal(created[0]):
                 rules = self.get_rules(created[0])
                 match = 0
-                node : Node = None
+                node: Node = None
                 for rule in rules:
                     match, node = self.__match(word, rule)
                     if match:
@@ -150,7 +150,7 @@ class CFG:
 
                 if not match:
                     return (0, Node())
-                
+
                 node.set_value(created[0])
                 root_copy.add_child(deepcopy(node))
                 word = word[match:]
@@ -161,7 +161,7 @@ class CFG:
                 return (0, Node())
 
             root = deepcopy(root_copy)
-            
+
         return (count, deepcopy(root)) if not created else (0, Node())
 
     def recognize(self, word: str) -> str:
@@ -172,7 +172,8 @@ class CFG:
             if matched == len(word)
             else f"False, biggest match: {word[:matched]}"
         )
-        root = root.get_children()[0]
-        root.draw(self._graph, 1)
-        self._graph.render("output", format="png", cleanup=True)
+        if root.get_children():
+            root = root.get_children()[0]
+            root.draw(self._graph)
+            self._graph.render("output", format="png", cleanup=True)
         return msg
