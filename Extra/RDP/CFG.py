@@ -131,6 +131,8 @@ class CFG:
             return ""
         
         for rule in self._rules:
+            # FIXME: it doesn't work with multiple non-terminals in the right side and 
+            # it's not completely checked
             if rule.left == created[idx]:
                 for r in rule.right:
                     """beware not to use next line
