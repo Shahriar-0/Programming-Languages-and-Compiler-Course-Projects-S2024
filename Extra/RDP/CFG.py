@@ -1,10 +1,13 @@
 from collections import Counter
 from itertools import combinations
+import traceback
+from graphviz import Digraph
+from copy import deepcopy
 
 
 from Constants import *
 from Rule import Rule
-import traceback
+from Node import Node
 
 
 class CFG:
@@ -23,6 +26,7 @@ class CFG:
         self._rules: list[Rule] = rules
         self._debug: bool = debug
         self._stack_trace: bool = stack_trace
+        self._graph = Digraph()
 
     def __getitem__(self, index: int) -> Rule:
         return self._rules[index]
@@ -114,7 +118,7 @@ class CFG:
     def __has_non_terminal(self, word: str) -> bool:
         return any(is_non_terminal(char) for char in word)
 
-    def __match(self, word: str, created: str) -> int:
+    def __match(self, word: str, created: str) -> tuple[int, Node]:
 
         if self._debug:
             print("*" * 50)
@@ -125,9 +129,12 @@ class CFG:
             print("*" * 50)
             print()
 
+        root = Node()
         count = 0
         while word and created:
+            root_copy = deepcopy(root)
             if created[0] == word[0]:
+                root_copy.add_child(Node(created[0]))
                 word = word[1:]
                 created = created[1:]
                 count += 1
@@ -135,30 +142,37 @@ class CFG:
             elif is_non_terminal(created[0]):
                 rules = self.get_rules(created[0])
                 match = 0
+                node : Node = None
                 for rule in rules:
-                    match = self.__match(word, rule)
+                    match, node = self.__match(word, rule)
                     if match:
                         break
-                    
+
                 if not match:
-                    return 0
-               
+                    return (0, Node())
+                
+                node.set_value(created[0])
+                root_copy.add_child(deepcopy(node))
                 word = word[match:]
                 created = created[1:]
                 count += match
 
             else:
-                return 0
+                return (0, Node())
 
-        return count if not created else 0
-
+            root = deepcopy(root_copy)
+            
+        return (count, deepcopy(root)) if not created else (0, Node())
 
     def recognize(self, word: str) -> str:
         # self.remove_epsilon_rules()
-        matched = self.__match(word, self._start_symbol)
+        matched, root = self.__match(word, self._start_symbol)
         msg = (
             "True"
             if matched == len(word)
             else f"False, biggest match: {word[:matched]}"
         )
+        root = root.get_children()[0]
+        root.draw(self._graph, 1)
+        self._graph.render("output", format="png", cleanup=True)
         return msg

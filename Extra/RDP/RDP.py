@@ -13,5 +13,5 @@ word = "aaaaaa"
 if __name__ == "__main__":
     print("CFG Rules:")
     print(cfg)
-    print(f"Word: {word}")
+    print()
     print(f"Is '{word}' in the language of the CFG? {cfg.recognize(word)}")

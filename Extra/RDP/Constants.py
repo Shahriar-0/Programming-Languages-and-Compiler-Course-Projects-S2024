@@ -2,6 +2,7 @@ EPSILON = "ε"
 TRANSITION = "→"
 DELIMITER = " | "
 STARTING_SYMBOL = "S"
+ANGLE = 60
 
 original_non_terminals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 terminals = "abcdefghijklmnopqrstuvwxyz[]{}()<>+-*/=,.;:!?@#$%^&|~1234567890"
