@@ -42,6 +42,14 @@ class CFG:
     def get_rules(self) -> list[Rule]:
         return self._rules
 
+    def get_rules(self, left: str) -> list[Rule]:
+        rules = []
+        for rule in self._rules:
+            if rule.left == left:
+                for r in rule.right:
+                    rules.append(r)
+        return rules
+
     def __str__(self) -> str:
         return "\n".join([str(rule) for rule in self._rules])
 
@@ -103,7 +111,10 @@ class CFG:
                 return i
         return None
 
-    def __recognize(self, word: str, created: str) -> str:
+    def __has_non_terminal(self, word: str) -> bool:
+        return any(is_non_terminal(char) for char in word)
+
+    def __match(self, word: str, created: str) -> int:
 
         if self._debug:
             print("*" * 50)
@@ -114,46 +125,40 @@ class CFG:
             print("*" * 50)
             print()
 
-        if not created or word == created:
-            return created
-        
-        if not word:
-            return ""
+        count = 0
+        while word and created:
+            if created[0] == word[0]:
+                word = word[1:]
+                created = created[1:]
+                count += 1
 
-        idx = self.__first_non_terminal(created)
+            elif is_non_terminal(created[0]):
+                rules = self.get_rules(created[0])
+                match = 0
+                for rule in rules:
+                    match = self.__match(word, rule)
+                    if match:
+                        break
+                    
+                if not match:
+                    return 0
+               
+                word = word[match:]
+                created = created[1:]
+                count += match
 
-        if idx is None:
-            if len(word) > len(created):
-                return created if word[:len(created)] == created else ""
-            return ""
-        
-        if idx > len(word) or created[:idx] != word[:idx]:
-            return ""
-        
-        for rule in self._rules:
-            # FIXME: it doesn't work with multiple non-terminals in the right side and 
-            # it's not completely checked
-            if rule.left == created[idx]:
-                for r in rule.right:
-                    """beware not to use next line
-                    if self.__recognize(word, created[:idx] + r + created[idx + 1 :]):
-                    the reason for that it is not equal to the RDP algorithm and recognizes 
-                    some words that are not in the language of the CFG by using RDP"""
-                    
-                    remain_word = word[idx:]
-                    remain_created = r + created[idx + 1:]
-                    match = self.__recognize(remain_word, remain_created)
-                    
-                    if len(match) + len(created[idx + 1:]) > len(remain_word):
-                        continue
-                    
-                    if match or (not match and remain_created == remain_word[:len(remain_created)]):
-                        created = word[:idx] + match
-                        return created
-        return ""
+            else:
+                return 0
+
+        return count if not created else 0
+
 
     def recognize(self, word: str) -> str:
         # self.remove_epsilon_rules()
-        matched = self.__recognize(word, self._start_symbol)
-        msg = "True" if matched == word else f"False, biggest match: {matched}"
+        matched = self.__match(word, self._start_symbol)
+        msg = (
+            "True"
+            if matched == len(word)
+            else f"False, biggest match: {word[:matched]}"
+        )
         return msg
