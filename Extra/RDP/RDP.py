@@ -1,6 +1,6 @@
-from CFG import CFG
-from Constants import *
-from Rule import Rule
+from Extra.RDP.CFG.CFG import CFG
+from Extra.RDP.Constants.Constants import *
+from Extra.RDP.Rule.Rule import Rule
 
 # Rules for the CFG
 

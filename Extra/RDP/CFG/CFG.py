@@ -5,9 +5,9 @@ from graphviz import Digraph
 from copy import deepcopy
 
 
-from Constants import *
-from Rule import Rule
-from Node import Node
+from Extra.RDP.Constants.Constants import *
+from Extra.RDP.Rule.Rule import Rule
+from Extra.RDP.Node.Node import Node
 
 
 class CFG:

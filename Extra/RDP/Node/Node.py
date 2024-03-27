@@ -1,5 +1,5 @@
 from graphviz import Digraph
-from Constants import *
+from Extra.RDP.Constants.Constants import *
 
 class Node:
     def __init__(self, value: str = None, children: list["Node"] = [], parent: "Node" = None):

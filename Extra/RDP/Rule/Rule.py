@@ -1,4 +1,4 @@
-from Constants import *
+from Extra.RDP.Constants.Constants import *
 
 class Rule:
     def __init__(self, left: str, rules: list[str]) -> None:

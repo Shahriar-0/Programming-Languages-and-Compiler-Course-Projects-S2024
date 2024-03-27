@@ -8,6 +8,8 @@ original_non_terminals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 terminals = "abcdefghijklmnopqrstuvwxyz[]{}()<>+-*/=,.;:!?@#$%^&|~1234567890"
 new_non_terminal = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍"
 
+output = "output/output.png"
+
 mapping = {
     original: new for original, new in zip(original_non_terminals, new_non_terminal)
 }
