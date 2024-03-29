@@ -1,0 +1,6 @@
+
+Rules before elimination of left recursion: 
+S → [['A', 'k', 'O']]
+A → [['A', 'd'], ['a', 'B'], ['a', 'C']]
+C → [['c']]
+B → [['b', 'B', 'C'], ['r']]

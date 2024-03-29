@@ -1,0 +1,8 @@
+Firsts and Follow Result table:
+Non-T      FIRST                FOLLOW              
+S          {'a'}                {'$'}               
+A          {'a'}                {'k'}               
+A''        {'r', 'c', 'b'}      {'k'}               
+C          {'c'}                {'k', 'd', 'c'}     
+B          {'r', 'b'}           {'k', 'd', 'c'}     
+A'         {'d', 'ε'}           {'k'}               

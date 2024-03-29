@@ -1,0 +1,11 @@
+             Matched               Buffer                Stack               Action
+                                $ O k r a                  S $       T[S][a] = S → A k O
+                                $ O k r a              A k O $       T[A][a] = A → a A''
+                                $ O k r a          a A'' k O $           Matched: a
+                   a              $ O k r            A'' k O $    T[A''][r] = A'' → B A'
+                   a              $ O k r           B A' k O $           T[B][r] = B → r
+                   a              $ O k r           r A' k O $           Matched: r
+                 a r                $ O k             A' k O $         T[A'][k] = A' → ε
+                 a r                $ O k                k O $           Matched: k
+               a r k                  $ O                  O $           Matched: O
+             a r k O                    $                    $                Valid

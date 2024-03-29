@@ -1,0 +1,7 @@
+Follows:
+follow(S) => {'$'}
+follow(A) => {'k'}
+follow(A'') => {'k'}
+follow(C) => {'k', 'd', 'c'}
+follow(B) => {'k', 'd', 'c'}
+follow(A') => {'k'}

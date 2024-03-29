@@ -2,6 +2,7 @@
 from Constants import *
 from copy import deepcopy
 from Samples.Sample_7 import *  # change this to import other sample files
+import os
 
 
 def removeLeftRecursion(rulesDiction: dict):
@@ -209,13 +210,13 @@ def computeAllFirsts():
             multirhs[i] = multirhs[i].split()
         diction[k[0]] = multirhs
 
-    print_rules("Rules before elimination of left recursion")
+    print_rules("Rules before elimination of left recursion", RULES_FILE)
 
     diction = removeLeftRecursion(diction)
-    print_rules("Rules after elimination of left recursion")
+    print_rules("Rules after elimination of left recursion", LEFT_RECURSION_FILE)
 
     diction = LeftFactoring(diction)
-    print_rules("Rules after left factoring")
+    print_rules("Rules after left factoring", LEFT_FACTORING_FILE)
 
     for y in list(diction.keys()):
         t = set()
@@ -230,20 +231,22 @@ def computeAllFirsts():
 
         firsts[y] = t
 
-    print("\nCalculated firsts: ")
-    key_list = list(firsts.keys())
-    index = 0
-    for gg in firsts:
-        print(f"first({key_list[index]}) " f"=> {firsts.get(gg)}")
-        index += 1
+    with open(FIRSTS_FILE, "w", encoding="utf-8") as f:
+        f.write("Firsts:\n")
+        key_list = list(firsts.keys())
+        index = 0
+        for gg in firsts:
+            f.write(f"first({key_list[index]}) " f"=> {firsts.get(gg)}\n")
+            index += 1
 
 
-def print_rules(title: str):
+def print_rules(title: str, file: str):
     global diction
-    print(f"\n{title}: \n")
-    for y in diction:
-        print(f"{y} {TRANSITION} {diction[y]}")
-    print("\n" + "*" * 50)
+
+    with open(file, "w", encoding="utf-8") as f:
+        f.write(f"\n{title}: \n")
+        for y in diction:
+            f.write(f"{y} {TRANSITION} {diction[y]}\n")
 
 
 def computeAllFollows():
@@ -256,41 +259,20 @@ def computeAllFollows():
                 solset.add(g)
         follows[NT] = solset
 
-    print("\nCalculated follows: ")
-    key_list = list(follows.keys())
-    index = 0
-    for gg in follows:
-        print(f"follow({key_list[index]})" f" => {follows[gg]}")
-        index += 1
+    with open(FOLLOWS_FILE, "w", encoding="utf-8") as f:
+        f.write("Follows:\n")
+        key_list = list(follows.keys())
+        index = 0
+        for gg in follows:
+            f.write(f"follow({key_list[index]}) " f"=> {follows.get(gg)}\n")
+            index += 1
 
 
 def createParseTable():
 
     global diction, firsts, follows, term_userdef
-    print("\nFirsts and Follow Result table\n")
 
-    mx_len_first = 0
-    mx_len_fol = 0
-    for u in diction:
-        k1 = len(str(firsts[u]))
-        k2 = len(str(follows[u]))
-        if k1 > mx_len_first:
-            mx_len_first = k1
-        if k2 > mx_len_fol:
-            mx_len_fol = k2
-
-    print(
-        f"{{:<{10}}} "
-        f"{{:<{mx_len_first + 5}}} "
-        f"{{:<{mx_len_fol + 5}}}".format("Non-T", "FIRST", "FOLLOW")
-    )
-
-    for u in diction:
-        print(
-            f"{{:<{10}}} "
-            f"{{:<{mx_len_first + 5}}} "
-            f"{{:<{mx_len_fol + 5}}}".format(u, str(firsts[u]), str(follows[u]))
-        )
+    generate_first_follow()
 
     # create matrix of row(NT) x [col(T) + 1($)]
     ntlist = list(diction.keys())
@@ -307,17 +289,79 @@ def createParseTable():
 
     grammar_is_LL = classify_grammar(ntlist, terminals, mat)
 
-    print("\nGenerated parsing table:\n")
-    frmt = "{:>12}" * len(terminals)
-    print(frmt.format(*terminals))
-
-    j = 0
-    for y in mat:
-        frmt1 = "{:>12}" * len(y)
-        print(f"{ntlist[j]} {frmt1.format(*y)}")
-        j += 1
+    generate_LA_table(ntlist, terminals, mat)
 
     return (mat, grammar_is_LL, terminals)
+
+
+def add_line(line: str, module=14):
+    modified_string = ""
+    for i, char in enumerate(line):
+        if (i + 1) % 14 == module // 2:
+            modified_string += "|"
+        else:
+            modified_string += char
+    return modified_string
+
+def center_spaces(string: str, size=14):
+    string = string.lstrip().rstrip()
+    length = len(string)
+    
+    if length <= size:
+        return string.center(size)
+    return "too big!"
+    
+def generate_LA_table(ntlist, terminals, mat):
+    with open(LA_TABLE_FILE, "w", encoding="utf-8") as f:
+        f.write("Generated parsing table:\n\n")
+        frmt = "{:>14}" * len(terminals)
+        f.write(add_line(frmt.format(*terminals) + "\n"))
+        f.write("\n")
+        f.write("-" * (14 * len(terminals) + len(terminals) - 1) + "\n")
+        f.write("\n")
+
+        j = 0
+        for y in mat:
+            frmt1 = "{:>14}" * len(y)
+            for i in y:
+                i = center_spaces(i)
+            f.write(add_line(f"{ntlist[j]} {frmt1.format(*y)}" + "\n"))
+            f.write("\n")
+            f.write("-" * (14 * len(y) + len(y) - 1) + "\n")
+            f.write("\n")
+            j += 1
+
+
+def generate_first_follow():
+
+    global diction, firsts, follows, term_userdef
+
+    with open(FIRST_FOLLOW_FILE, "w", encoding="utf-8") as f:
+        f.write("Firsts and Follow Result table:\n")
+
+        mx_len_first = 0
+        mx_len_fol = 0
+        for u in diction:
+            k1 = len(str(firsts[u]))
+            k2 = len(str(follows[u]))
+            if k1 > mx_len_first:
+                mx_len_first = k1
+            if k2 > mx_len_fol:
+                mx_len_fol = k2
+
+        f.write(
+            f"{{:<{10}}} "
+            f"{{:<{mx_len_first + 5}}} "
+            f"{{:<{mx_len_fol + 5}}}".format("Non-T", "FIRST", "FOLLOW") + "\n"
+        )
+
+        for u in diction:
+            f.write(
+                f"{{:<{10}}} "
+                f"{{:<{mx_len_first + 5}}} "
+                f"{{:<{mx_len_fol + 5}}}".format(u, str(firsts[u]), str(follows[u]))
+                + "\n"
+            )
 
 
 def classify_grammar(ntlist, terminals, mat):
@@ -365,69 +409,86 @@ def classify_grammar(ntlist, terminals, mat):
     return grammar_is_LL
 
 
-def validateStringUsingStackBuffer(
+def generate_stack_file(
     parsing_table, ll1, table_term_list, input_string, term_userdef, start_symbol
 ):
-
-    print(f"\nValidate String => {input_string}\n")
-
-    if not ll1:
-        return f"\nInput String = " f'"{input_string}"\n' f"Grammar is not LL(1)"
-
     stack = [start_symbol, STACK_END_INDICATOR]
     buffer = []
 
     input_string = input_string.split()
     input_string.reverse()
     buffer = [STACK_END_INDICATOR] + input_string
+    matched = []
 
-    print("{:>20} {:>20} {:>20}".format("Buffer", "Stack", "Action"))
+    with open(STACK_FILE, "w", encoding="utf-8") as f:
 
-    while True:
-        if stack == [STACK_END_INDICATOR] and buffer == [STACK_END_INDICATOR]:
-            print(
-                "{:>20} {:>20} {:>20}".format(
-                    " ".join(buffer), " ".join(stack), "Valid"
-                )
-            )
-            return "\nValid String!"
+        f.write("{:>20} {:>20} {:>20} {:>20}".format("Matched", "Buffer", "Stack", "Action") + "\n")
 
-        elif stack[0] not in term_userdef:
-            x = list(diction.keys()).index(stack[0])
-            y = table_term_list.index(buffer[-1])
-
-            if parsing_table[x][y] != "":
-                entry = parsing_table[x][y]
-                print(
-                    "{:>20} {:>20} {:>25}".format(
-                        " ".join(buffer),
-                        " ".join(stack),
-                        f"T[{stack[0]}][{buffer[-1]}] = {entry}",
+        while True:
+            if stack == [STACK_END_INDICATOR] and buffer == [STACK_END_INDICATOR]:
+                f.write(
+                    "{:>20} {:>20} {:>20} {:>20}".format(
+                        " ".join(matched) ," ".join(buffer), " ".join(stack), "Valid"
                     )
+                    + "\n"
                 )
+                return "Valid String!"
 
-                lhs_rhs = entry.split(TRANSITION)
-                lhs_rhs[1] = lhs_rhs[1].replace(EPSILON, "").strip()
-                entryrhs = lhs_rhs[1].split()
-                stack = entryrhs + stack[1:]
+            elif stack[0] not in term_userdef:
+                x = list(diction.keys()).index(stack[0])
+                y = table_term_list.index(buffer[-1])
+
+                if parsing_table[x][y] != "":
+                    entry = parsing_table[x][y]
+                    f.write(
+                        "{:>20} {:>20} {:>20} {:>25}".format(
+                            " ".join(matched),
+                            " ".join(buffer),
+                            " ".join(stack),
+                            f"T[{stack[0]}][{buffer[-1]}] = {entry}",
+                        )
+                        + "\n"
+                    )
+
+                    lhs_rhs = entry.split(TRANSITION)
+                    lhs_rhs[1] = lhs_rhs[1].replace(EPSILON, "").strip()
+                    entryrhs = lhs_rhs[1].split()
+                    stack = entryrhs + stack[1:]
+
+                else:
+                    return (
+                        f"Invalid String! No rule at "
+                        f"Table[{stack[0]}][{buffer[-1]}]."
+                    )
 
             else:
-                return (
-                    f"\nInvalid String! No rule at " f"Table[{stack[0]}][{buffer[-1]}]."
-                )
-
-        else:
-            if stack[0] == buffer[-1]:  # stack top is Terminal
-                print(
-                    "{:>20} {:>20} {:>20}".format(
-                        " ".join(buffer), " ".join(stack), f"Matched:{stack[0]}"
+                if stack[0] == buffer[-1]:  # stack top is Terminal
+                    f.write(
+                        "{:>20} {:>20} {:>20} {:>20}".format(
+                            " ".join(matched), " ".join(buffer), " ".join(stack), f"Matched: {stack[0]}"
+                        )
+                        + "\n"
                     )
-                )
 
-                buffer = buffer[:-1]
-                stack = stack[1:]
-            else:
-                return "\nInvalid String! " "Unmatched terminal symbols"
+                    matched.append(stack[0])
+                    buffer = buffer[:-1]
+                    stack = stack[1:]
+                else:
+                    return "Invalid String! " "Unmatched terminal symbols"
+
+
+def validateStringUsingStackBuffer(
+    parsing_table, ll1, table_term_list, input_string, term_userdef, start_symbol
+):
+
+    print(f"Validate String => {input_string}")
+
+    if not ll1:
+        return f"Input String = " f'"{input_string}"\n' f"Grammar is not LL(1)"
+
+    return generate_stack_file(
+        parsing_table, ll1, table_term_list, input_string, term_userdef, start_symbol
+    )
 
 
 diction = {}
@@ -447,4 +508,4 @@ if sample_input_string != None:
     )
     print(validity)
 else:
-    print("\nNo input String detected")
+    print("No input String detected")

@@ -1,0 +1,7 @@
+Firsts:
+first(S) => {'a'}
+first(A) => {'a'}
+first(A'') => {'r', 'c', 'b'}
+first(C) => {'c'}
+first(B) => {'r', 'b'}
+first(A') => {'d', 'ε'}
