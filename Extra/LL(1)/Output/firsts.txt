@@ -1,7 +1,6 @@
 Firsts:
-first(S) => {'a'}
-first(A) => {'a'}
-first(A'') => {'r', 'c', 'b'}
-first(C) => {'c'}
-first(B) => {'r', 'b'}
-first(A') => {'d', 'ε'}
+first(S) => {'c', 'f', 'a', 'e', 'b'}
+first(X) => {'ε', 'c'}
+first(X') => {'a', 'd'}
+first(Y) => {'e', 'f', 'ε'}
+first(Y') => {'e', 'ε'}

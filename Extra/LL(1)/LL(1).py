@@ -1,9 +1,7 @@
 # Acknowledgement: https://www.geeksforgeeks.org/compiler-design-ll1-parser-in-python/
 from Constants import *
 from copy import deepcopy
-from Samples.Sample_7 import *  # change this to import other sample files
-import os
-
+from Samples.Sample_9 import *  # change this to import other sample files
 
 def removeLeftRecursion(rulesDiction: dict):
     """
@@ -294,16 +292,16 @@ def createParseTable():
     return (mat, grammar_is_LL, terminals)
 
 
-def add_line(line: str, module=14):
+def add_line(line: str, module=31):
     modified_string = ""
     for i, char in enumerate(line):
-        if (i + 1) % 14 == module // 2:
+        if (i + 1) % 31 == module // 2:
             modified_string += "|"
         else:
             modified_string += char
     return modified_string
 
-def center_spaces(string: str, size=14):
+def center_spaces(string: str, size=31):
     string = string.lstrip().rstrip()
     length = len(string)
     
@@ -314,20 +312,20 @@ def center_spaces(string: str, size=14):
 def generate_LA_table(ntlist, terminals, mat):
     with open(LA_TABLE_FILE, "w", encoding="utf-8") as f:
         f.write("Generated parsing table:\n\n")
-        frmt = "{:>14}" * len(terminals)
+        frmt = "{:>31}" * len(terminals)
         f.write(add_line(frmt.format(*terminals) + "\n"))
         f.write("\n")
-        f.write("-" * (14 * len(terminals) + len(terminals) - 1) + "\n")
+        f.write("-" * (31 * len(terminals) + len(terminals) - 1) + "\n")
         f.write("\n")
 
         j = 0
         for y in mat:
-            frmt1 = "{:>14}" * len(y)
-            for i in y:
-                i = center_spaces(i)
-            f.write(add_line(f"{ntlist[j]} {frmt1.format(*y)}" + "\n"))
+            frmt1 = "{:>31}" * len(y)
+            # for i in y:
+            #     i = center_spaces(i)
+            f.write(add_line(f"{ntlist[j]} {frmt1.format(*y):>31}" + "\n"))
             f.write("\n")
-            f.write("-" * (14 * len(y) + len(y) - 1) + "\n")
+            f.write("-" * (31 * len(y) + len(y) - 1) + "\n")
             f.write("\n")
             j += 1
 

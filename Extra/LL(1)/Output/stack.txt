@@ -1,11 +1,33 @@
-             Matched               Buffer                Stack               Action
-                                $ O k r a                  S $       T[S][a] = S → A k O
-                                $ O k r a              A k O $       T[A][a] = A → a A''
-                                $ O k r a          a A'' k O $           Matched: a
-                   a              $ O k r            A'' k O $    T[A''][r] = A'' → B A'
-                   a              $ O k r           B A' k O $           T[B][r] = B → r
-                   a              $ O k r           r A' k O $           Matched: r
-                 a r                $ O k             A' k O $         T[A'][k] = A' → ε
-                 a r                $ O k                k O $           Matched: k
-               a r k                  $ O                  O $           Matched: O
-             a r k O                    $                    $                Valid
+             Matched                          Buffer                                    Stack               Action
+                                         $ b e f e a a c a d c a d c c c                  S $       T[S][c] = S → X a Y
+                                         $ b e f e a a c a d c a d c c c              X a Y $      T[X][c] = X → c X X'
+                                         $ b e f e a a c a d c a d c c c         c X X' a Y $           Matched: c
+                            c            $ b e f e a a c a d c a d c c             X X' a Y $      T[X][c] = X → c X X'
+                            c            $ b e f e a a c a d c a d c c        c X X' X' a Y $           Matched: c
+                          c c            $ b e f e a a c a d c a d c            X X' X' a Y $      T[X][c] = X → c X X'
+                          c c            $ b e f e a a c a d c a d c       c X X' X' X' a Y $           Matched: c
+                        c c c            $ b e f e a a c a d c a d           X X' X' X' a Y $           T[X][d] = X → ε
+                        c c c            $ b e f e a a c a d c a d             X' X' X' a Y $    T[X'][d] = X' → d X' c
+                        c c c            $ b e f e a a c a d c a d         d X' c X' X' a Y $           Matched: d
+                      c c c d            $ b e f e a a c a d c a             X' c X' X' a Y $         T[X'][a] = X' → a
+                      c c c d            $ b e f e a a c a d c a              a c X' X' a Y $           Matched: a
+                    c c c d a            $ b e f e a a c a d c                  c X' X' a Y $           Matched: c
+                  c c c d a c            $ b e f e a a c a d                      X' X' a Y $    T[X'][d] = X' → d X' c
+                  c c c d a c            $ b e f e a a c a d                  d X' c X' a Y $           Matched: d
+                c c c d a c d            $ b e f e a a c a                      X' c X' a Y $         T[X'][a] = X' → a
+                c c c d a c d            $ b e f e a a c a                       a c X' a Y $           Matched: a
+              c c c d a c d a            $ b e f e a a c                           c X' a Y $           Matched: c
+            c c c d a c d a c            $ b e f e a a                               X' a Y $         T[X'][a] = X' → a
+            c c c d a c d a c            $ b e f e a a                                a a Y $           Matched: a
+          c c c d a c d a c a            $ b e f e a                                    a Y $           Matched: a
+        c c c d a c d a c a a            $ b e f e                                        Y $       T[Y][e] = Y → e Y b
+        c c c d a c d a c a a            $ b e f e                                    e Y b $           Matched: e
+      c c c d a c d a c a a e            $ b e f                                        Y b $        T[Y][f] = Y → f Y'
+      c c c d a c d a c a a e            $ b e f                                     f Y' b $           Matched: f
+    c c c d a c d a c a a e f            $ b e                                         Y' b $      T[Y'][e] = Y' → e Y'
+    c c c d a c d a c a a e f            $ b e                                       e Y' b $           Matched: e
+  c c c d a c d a c a a e f e            $ b                                           Y' b $         T[Y'][b] = Y' → ε
+  c c c d a c d a c a a e f e            $ b                                              b $           Matched: b
+c c c d a c d a c a a e f e b            $                                                  $                Valid
+
+

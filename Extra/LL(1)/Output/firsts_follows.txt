@@ -1,8 +1,7 @@
 Firsts and Follow Result table:
-Non-T      FIRST                FOLLOW              
-S          {'a'}                {'$'}               
-A          {'a'}                {'k'}               
-A''        {'r', 'c', 'b'}      {'k'}               
-C          {'c'}                {'k', 'd', 'c'}     
-B          {'r', 'b'}           {'k', 'd', 'c'}     
-A'         {'d', 'ε'}           {'k'}               
+Non-T      FIRST                          FOLLOW                   
+S          {'c', 'f', 'a', 'e', 'b'}      {'$'}                    
+X          {'ε', 'c'}                     {'a', '$', 'd'}          
+X'         {'a', 'd'}                     {'a', '$', 'd', 'c'}     
+Y          {'e', 'f', 'ε'}                {'$', 'b'}               
+Y'         {'e', 'ε'}                     {'$', 'b'}               
