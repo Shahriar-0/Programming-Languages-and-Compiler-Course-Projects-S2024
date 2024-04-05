@@ -4,3 +4,6 @@
 [submodule "Archive/V2"]
 	path = Archive/V2
 	url = https://github.com/SamanEN/LogicPL-Compiler
+[submodule "Archive/V3"]
+	path = Archive/V3
+	url = https://github.com/mmd-nemati/Compiler-F02-Projects.git
