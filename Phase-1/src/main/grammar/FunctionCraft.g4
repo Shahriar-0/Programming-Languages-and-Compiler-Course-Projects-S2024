@@ -38,7 +38,8 @@ funcCallArgs
     ;
 
 funcCall
-    : ((IDENTIFIER | lambdaFunc) funcCallArgs | builtInFunc)
+    : (IDENTIFIER | lambdaFunc) funcCallArgs
+    | builtInFunc
     ;
 
 funcBody
@@ -47,37 +48,20 @@ funcBody
 
 statement
     : assignment SEMICOLON
-    | funcCall SEMICOLON
+    | expresion SEMICOLON
     | if
     | loopDo
     | for
-    | expresion SEMICOLON // FIXME: not sure about this
     ;
-
-// cast:
-// typeDef LPAR expresion RPAR;
-
-lvalue
-    : IDENTIFIER
-    | listIndexing
-    ;
-
-append
-    : lvalue (APPEND expresion)+
-    ;
-
-lambdaFuncCall
-    : lambdaFunc funcCallArgs
-    ;
-
 
 lambdaFunc
     : ARROW funcArgs LBRACE funcBody RBRACE
-    // ? funcArgs takes default arguments do lambda functions have default arguments? they should but not sure
+     // FIXME: kinda sure that these don't have dafault arguments
     ;
 
 funcptr
     : METHOD LPAR COLON IDENTIFIER RPAR
+    | lambdaFunc
     ;
 
 list
@@ -89,7 +73,7 @@ pattern // FIXME: kinda sure that these don't have dafault arguments
     ;
 
 patternBody
-    : (PATTERNIND condition ASSIGN expresion)+ // FIXME: not checked
+    : (PATTERNIND condition ASSIGN expresion)+
     ;
 
 paternMatch
@@ -97,45 +81,26 @@ paternMatch
     ;
 
 assignment
-    : (IDENTIFIER assigner expresion) | (IDENTIFIER (INC | DEC))
+    : (IDENTIFIER assigner expresion)
+    | (IDENTIFIER (INC | DEC))
     ;
 
 condition
-    : singleCondition (logicalOperator singleCondition)* // FIXME: not checked
-    ;
-
-logicalOperator
-    : AND
-    | OR
-    ;
-
-singleCondition
-    : LPAR condition RPAR // for when we need to group conditions
-    | LPAR expresion RPAR // not sure about this but if we have conversion from expresion to boolean then it should work
-                          // things like if (a) but if not then it should change
-                          // ? what about lambdaFunc without call?
+    : LPAR expresion RPAR
     ;
 
 expresion
     : LPAR expresion RPAR
     | expresion numericOperator expresion
+    | expresion booleanOperator expresion
+    | expresion APPEND expresion
+    | funcCall
     | value
     | IDENTIFIER
-    | funcCall
-    | expresion booleanOperator expresion
-    | paternMatch
-    | listIndexing 
-    | lambdaFuncCall // probably need something like this to show it's been called immediately
-    | lambdaFunc
-    | append
     ;
 
 if
     : IF condition body (ELSEIF condition body)* (ELSE body)? END
-    ;
-
-for 
-    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
     ;
 
 rangeGenerator
@@ -150,6 +115,10 @@ loopBody
     : (statement | loopCondition)*
     ;
 
+for
+    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+    ;
+
 loopDo
     : LOOP DO loopBody END
     ;
@@ -160,6 +129,7 @@ builtInFunc
     | chop
     | chomp
     | push
+    | paternMatch
     ;
 
 puts
@@ -198,20 +168,21 @@ listIndexing
     ;
 
 value
-    : INT_VAL 
-    | FLOAT_VAL 
-    | string 
-    | TRUE 
-    | FALSE 
-    | list 
+    : INT_VAL
+    | FLOAT_VAL
+    | STRING_VAL
+    | TRUE
+    | FALSE
+    | list
     | funcptr
+    | listIndexing
     ;
 
 numericOperator
-    : PLUS 
-    | MINUS 
-    | DIV 
-    | MULT 
+    : PLUS
+    | MINUS
+    | DIV
+    | MULT
     | MOD
     ;
 
@@ -225,11 +196,6 @@ booleanOperator
     | GEQ
     | LES
     | LEQ
-    ;
-
-string
-    : (IDENTIFIER | STRING_VAL) (APPEND (IDENTIFIER | STRING_VAL))* // FIXME: this line should change 
-                                                        // since expressions and other things could generate string as well
     ;
 
 eof
@@ -278,7 +244,7 @@ TRUE:         'true';
 FALSE:        'false';
 INT_VAL:      [0-9]+;
 FLOAT_VAL:    INT_VAL '.' INT_VAL;
-STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ; 
+STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ;
 ////////////////////////////////////////////////////////////
 // statement keywords
 
