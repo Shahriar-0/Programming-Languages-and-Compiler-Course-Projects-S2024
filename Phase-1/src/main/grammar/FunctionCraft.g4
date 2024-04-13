@@ -2,7 +2,11 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern)* main
+    : (funcDef | pattern | comments)* main (comments)* EOF
+    ;
+
+comments
+    : (COMMENT | MLCOMMENT)*
     ;
 
 main
@@ -14,7 +18,7 @@ funcDef
     ;
 
 funcArgs
-    : LPAR (((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)? | defaultArgs)? RPAR
+    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
     ;
     // case1: a()
     // case2: a([])
@@ -22,7 +26,7 @@ funcArgs
     // case4: a(x1, x2, ..., [])
 
 defaultArgs
-    : LBRACKET (IDENTIFIER ASSIGN expresion COMMA)* IDENTIFIER ASSIGN expresion RBRACKET
+    : LBRACKET (IDENTIFIER ASSIGN expresion COMMA)* (IDENTIFIER ASSIGN expresion) RBRACKET
     ;
 
 funcCallArgs
@@ -37,21 +41,37 @@ funcBody
     : body (RETURN (expresion)? SEMICOLON)?
     ;
 
-body
+body // don't like this name
     : (statement)*
+    ;
+
+statement
+    : assignment SEMICOLON
+    | funcCall SEMICOLON
+    | if
+    | loopDo
+    | for
     ;
 
 // cast:
 // typeDef LPAR expresion RPAR;
 
-append
+append // TODO: complete append
+       // Draft: append is statement which would take arbitrary number of expressions so
+       // statement: ... | append SEMICOLON
+       // append: IDENTIFIER (APPEND expresion)+
     : expresion APPEND expresion
     ;
 
-lambdaFunc
-    : ARROW funcArgs LBRACE funcBody RBRACE
+lambdaFuncCall
+    : lambdaFunc funcCallArgs
     ;
 
+
+lambdaFunc
+    : ARROW funcArgs LBRACE funcBody RBRACE
+    // ? funcArgs takes default arguments do lambda functions have default arguments? they should but not sure
+    ;
 
 funcptr
     : METHOD LPAR COLON IDENTIFIER RPAR
@@ -61,12 +81,15 @@ list
     : (LBRACKET ((expresion COMMA)* expresion)? RBRACKET)
     ;
 
-patternBody
-    : (DELIMIETER condition ASSIGN expresion)+
+pattern // FIXME: kinda sure that these don't have dafault arguments
+    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
     ;
 
-pattern
-    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
+patternBody
+    : PATTERNIND (PATTERNDELIM condition ASSIGN expresion)+ // FIXME: this line works with more than 4 spaces cause it's ignored by WS
+                                                            // possible solution:
+                                                            // PATTERNDELIM = '    |' | '\t|';
+                                                            // patternBody: (PATTERNDELIM condition ASSIGN expresion)+;
     ;
 
 paternMatch
@@ -74,31 +97,44 @@ paternMatch
     ;
 
 assignment
-    : (IDENTIFIER assigner expresion | IDENTIFIER (INC | DEC)) SEMICOLON
-    ;
-
-statement
-    : assignment
-    | funcCall SEMICOLON
-    | if
-    | loopDo
-    | for
+    : (IDENTIFIER assigner expresion) | (IDENTIFIER (INC | DEC))
     ;
 
 condition
-    : expresion
+    : singleCondition (logicalOperator singleCondition)* // FIXME: not checked
+    ;
+
+logicalOperator
+    : AND
+    | OR
+    ;
+
+singleCondition
+    : LPAR condition RPAR // for when we need to group conditions
+    | LPAR expresion RPAR // not sure about this but if we have conversion from expresion to boolean then it should work
+                          // things like if (a) but if not then it should change
+                          // ? what about lambdaFunc without call?
     ;
 
 expresion
     : LPAR expresion RPAR
-    | expresion numericOperation expresion
+    | numericOperation
     | value
     | IDENTIFIER
     | funcCall
-    | expresion boolOperation expresion
+    | booleanOperation
     | paternMatch
-    | listIndexing
+    | listIndexing // can i change this to list dereferencing?
+    | lambdaFuncCall // probably need something like lambdaFuncCall to show it's been called immediately
     | lambdaFunc
+    ;
+
+numericOperation
+    : expresion numericOperator expresion
+    ;
+
+booleanOperation
+    : expresion booleanOperator expresion
     ;
 
 if
@@ -106,7 +142,11 @@ if
     ;
 
 for 
-    : FOR IDENTIFIER IN LPAR expresion RANGE expresion RPAR loopBody END
+    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+    ;
+
+rangeGenerator
+    : expresion RANGE expresion
     ;
 
 loopCondition
@@ -126,12 +166,12 @@ builtInFunc
     | len
     | chop
     | chomp
-    | chomp
     | push
     ;
 
 puts
-    : PUTS LPAR expresion RPAR
+    : PUTS LPAR expresion RPAR // I know you did this to only pass one parameter but i don't think that lexical should be responsible for this
+                               // the better way i thinkg would be to use funcCallArgs, for this and other build-in functions
     ;
 
 len
@@ -150,7 +190,8 @@ push
     : PUSH LPAR expresion COMMA expresion RPAR
     ;
 
-assigner
+assigner // convert this to token?
+        // assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
     : ASSIGN
     | ADDASSIGN
     | DECASSIGN
@@ -160,10 +201,10 @@ assigner
     ;
 
 listIndexing
-    : IDENTIFIER (LBRACKET expresion RBRACKET)+
+    : IDENTIFIER (LBRACKET expresion RBRACKET)+ // intExpression maybe?
     ;
 
-value
+value 
     : INT_VAL 
     | FLOAT_VAL 
     | STRING_VAL 
@@ -173,7 +214,7 @@ value
     | funcptr
     ;
 
-numericOperation
+numericOperator
     : PLUS 
     | MINUS 
     | DIV 
@@ -181,7 +222,7 @@ numericOperation
     | MOD
     ;
 
-boolOperation
+booleanOperator
     : AND
     | OR
     | NOT
@@ -211,7 +252,7 @@ METHOD:       'method';
 ////////////////////////////////////////////////////////////
 // characters
 
-DELIMIETER:   '|';
+PATTERNDELIM:   '|';
 COMMA:        ',';
 SEMICOLON:    ';';
 COLON:        ':';
@@ -270,8 +311,8 @@ AND:          '&&';
 OR:           '||';
 NOT:          '!';
 APPEND:       '<<';
-EQ:           'is' | '==' ;
-NEQ:          'is not' | '!=';
+EQ:           'is' | '==' ; // TODO: delete is
+NEQ:          'is not' | '!='; // TODO: delete is not
 GTR:          '>';
 GEQ:          '>=';
 LES:          '<';
@@ -280,7 +321,9 @@ LEQ:          '<=';
 // others
 
 IDENTIFIER:   [a-zA-Z_][a-zA-Z0-9_]*;
-WS:           [ \t\r\n] -> skip;
+PATTERNIND:   '\t' | '    '; // it's important that this line is above WS cause it's necessary to match it first
 COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
+WS:           [ \t\r\n] -> skip;
+EOF:          '\0';
 ////////////////////////////////////////////////////////////
