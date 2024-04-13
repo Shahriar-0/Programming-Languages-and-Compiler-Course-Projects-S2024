@@ -2,15 +2,19 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern | comments)* main (comments)* EOF
+    : (funcDef | pattern | comments)* main (comments)* eof
     ;
 
 comments
-    : (COMMENT | MLCOMMENT)*
+    : (COMMENT | MLCOMMENT)+
     ;
 
 main
     : DEF MAIN LPAR RPAR funcBody END
+    ;
+
+body
+    : (statement)*
     ;
 
 funcDef
@@ -41,26 +45,25 @@ funcBody
     : body (RETURN (expresion)? SEMICOLON)?
     ;
 
-body // don't like this name
-    : (statement)*
-    ;
-
 statement
     : assignment SEMICOLON
     | funcCall SEMICOLON
     | if
     | loopDo
     | for
+    | expresion SEMICOLON // FIXME: not sure about this
     ;
 
 // cast:
 // typeDef LPAR expresion RPAR;
 
-append // TODO: complete append
-       // Draft: append is statement which would take arbitrary number of expressions so
-       // statement: ... | append SEMICOLON
-       // append: IDENTIFIER (APPEND expresion)+
-    : expresion APPEND expresion
+lvalue
+    : IDENTIFIER
+    | listIndexing
+    ;
+
+append
+    : lvalue (APPEND expresion)+
     ;
 
 lambdaFuncCall
@@ -86,10 +89,7 @@ pattern // FIXME: kinda sure that these don't have dafault arguments
     ;
 
 patternBody
-    : PATTERNIND (PATTERNDELIM condition ASSIGN expresion)+ // FIXME: this line works with more than 4 spaces cause it's ignored by WS
-                                                            // possible solution:
-                                                            // PATTERNDELIM = '    |' | '\t|';
-                                                            // patternBody: (PATTERNDELIM condition ASSIGN expresion)+;
+    : (PATTERNIND condition ASSIGN expresion)+ // FIXME: not checked
     ;
 
 paternMatch
@@ -118,23 +118,16 @@ singleCondition
 
 expresion
     : LPAR expresion RPAR
-    | numericOperation
+    | expresion numericOperator expresion
     | value
     | IDENTIFIER
     | funcCall
-    | booleanOperation
+    | expresion booleanOperator expresion
     | paternMatch
     | listIndexing // can i change this to list dereferencing?
     | lambdaFuncCall // probably need something like lambdaFuncCall to show it's been called immediately
     | lambdaFunc
-    ;
-
-numericOperation
-    : expresion numericOperator expresion
-    ;
-
-booleanOperation
-    : expresion booleanOperator expresion
+    | append
     ;
 
 if
@@ -204,10 +197,10 @@ listIndexing
     : IDENTIFIER (LBRACKET expresion RBRACKET)+ // intExpression maybe?
     ;
 
-value 
+value
     : INT_VAL 
     | FLOAT_VAL 
-    | STRING_VAL 
+    | string 
     | TRUE 
     | FALSE 
     | list 
@@ -234,8 +227,13 @@ booleanOperator
     | LEQ
     ;
 
+string
+    : (IDENTIFIER | STRING_VAL) (APPEND (IDENTIFIER | STRING_VAL))*
+    ;
 
-
+eof
+    : // epsilon
+    ;
 
 ////////////////////////////////////////////////////////////
 // built-in functions
@@ -279,7 +277,7 @@ TRUE:         'true';
 FALSE:        'false';
 INT_VAL:      [0-9]+;
 FLOAT_VAL:    INT_VAL '.' INT_VAL;
-STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ;
+STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ; 
 ////////////////////////////////////////////////////////////
 // statement keywords
 
@@ -321,9 +319,8 @@ LEQ:          '<=';
 // others
 
 IDENTIFIER:   [a-zA-Z_][a-zA-Z0-9_]*;
-PATTERNIND:   '\t' | '    '; // it's important that this line is above WS cause it's necessary to match it first
+PATTERNIND:   '\t|' | '    |'; // it's important that this line is above WS cause it's necessary to match it first
 COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
 WS:           [ \t\r\n] -> skip;
-EOF:          '\0';
 ////////////////////////////////////////////////////////////
