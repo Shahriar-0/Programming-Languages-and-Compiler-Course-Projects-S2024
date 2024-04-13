@@ -124,8 +124,8 @@ expresion
     | funcCall
     | expresion booleanOperator expresion
     | paternMatch
-    | listIndexing // can i change this to list dereferencing?
-    | lambdaFuncCall // probably need something like lambdaFuncCall to show it's been called immediately
+    | listIndexing 
+    | lambdaFuncCall // probably need something like this to show it's been called immediately
     | lambdaFunc
     | append
     ;
@@ -194,7 +194,7 @@ assigner // convert this to token?
     ;
 
 listIndexing
-    : IDENTIFIER (LBRACKET expresion RBRACKET)+ // intExpression maybe?
+    : IDENTIFIER (LBRACKET expresion RBRACKET)+
     ;
 
 value
@@ -228,7 +228,8 @@ booleanOperator
     ;
 
 string
-    : (IDENTIFIER | STRING_VAL) (APPEND (IDENTIFIER | STRING_VAL))*
+    : (IDENTIFIER | STRING_VAL) (APPEND (IDENTIFIER | STRING_VAL))* // FIXME: this line should change 
+                                                        // since expressions and other things could generate string as well
     ;
 
 eof
