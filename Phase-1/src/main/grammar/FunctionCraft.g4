@@ -2,11 +2,11 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern)* main
+    : (funcDef | pattern | comments)* main (comments)* eof
     ;
 
-main
-    : DEF MAIN LPAR RPAR funcBody END
+comments
+    : (COMMENT | MLCOMMENT)+
     ;
 
 funcDef
@@ -14,7 +14,7 @@ funcDef
     ;
 
 funcArgs
-    : LPAR (((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)? | defaultArgs)? RPAR
+    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
     ;
     // case1: a()
     // case2: a([])
@@ -22,135 +22,44 @@ funcArgs
     // case4: a(x1, x2, ..., [])
 
 defaultArgs
-    : LBRACKET (IDENTIFIER ASSIGN expresion COMMA)* IDENTIFIER ASSIGN expresion RBRACKET
+    : LBRACKET (IDENTIFIER ASSIGN expression COMMA)* (IDENTIFIER ASSIGN expression) RBRACKET
     ;
 
-funcCallArgs
-    : LPAR ((expresion COMMA)* expresion)? RPAR
+pattern // FIXME: kinda sure that these don't have dafault arguments
+    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
     ;
 
-funcCall
-    : ((IDENTIFIER | lambdaFunc) funcCallArgs | builtInFunc)
+patternBody
+    : (PATTERNIND condition ASSIGN expression)+
+    ;
+
+main
+    : DEF MAIN LPAR RPAR funcBody END
     ;
 
 funcBody
-    : body (RETURN (expresion)? SEMICOLON)?
+    : body (RETURN (expression)? SEMICOLON)?
     ;
 
 body
     : (statement)*
     ;
 
-// cast:
-// typeDef LPAR expresion RPAR;
-
-append
-    : expresion APPEND expresion
-    ;
-
-lambdaFunc
-    : ARROW funcArgs LBRACE funcBody RBRACE
-    ;
-
-
-funcptr
-    : METHOD LPAR COLON IDENTIFIER RPAR
-    ;
-
-list
-    : (LBRACKET ((expresion COMMA)* expresion)? RBRACKET)
-    ;
-
-patternBody
-    : (DELIMIETER condition ASSIGN expresion)+
-    ;
-
-pattern
-    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
-    ;
-
-paternMatch
-    : IDENTIFIER DOT MATCH funcCallArgs
-    ;
-
-assignment
-    : (IDENTIFIER assigner expresion | IDENTIFIER (INC | DEC)) SEMICOLON
-    ;
-
 statement
-    : assignment
-    | funcCall SEMICOLON
-    | if
+    : assignment SEMICOLON // isn't this also an expression?
+    | expression SEMICOLON
+    | if        // draft: move these three to something called controlFlow dunno if it's a good idea
     | loopDo
     | for
     ;
 
-condition
-    : expresion
+assignment
+    : (IDENTIFIER assigner expression)
+    | (IDENTIFIER (INC | DEC))
     ;
 
-expresion
-    : LPAR expresion RPAR
-    | expresion numericOperation expresion
-    | value
-    | IDENTIFIER
-    | funcCall
-    | expresion boolOperation expresion
-    | paternMatch
-    | listIndexing
-    | lambdaFunc
-    ;
-
-if
-    : IF condition body (ELSEIF condition body)* (ELSE body)? END
-    ;
-
-for 
-    : FOR IDENTIFIER IN LPAR expresion RANGE expresion RPAR loopBody END
-    ;
-
-loopCondition
-    : (NEXT | BREAK) (IF condition)? SEMICOLON
-    ;
-
-loopBody
-    : (statement | loopCondition)*
-    ;
-
-loopDo
-    : LOOP DO loopBody END
-    ;
-
-builtInFunc
-    : puts
-    | len
-    | chop
-    | chomp
-    | chomp
-    | push
-    ;
-
-puts
-    : PUTS LPAR expresion RPAR
-    ;
-
-len
-    : LEN LPAR expresion RPAR
-    ;
-
-chop
-    : CHOP LPAR expresion RPAR
-    ;
-
-chomp
-    : CHOMP LPAR expresion RPAR
-    ;
-
-push
-    : PUSH LPAR expresion COMMA expresion RPAR
-    ;
-
-assigner
+assigner // convert this to token?
+        // assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
     : ASSIGN
     | ADDASSIGN
     | DECASSIGN
@@ -159,29 +68,25 @@ assigner
     | MODASSIGN
     ;
 
-listIndexing
-    : IDENTIFIER (LBRACKET expresion RBRACKET)+
+expression
+    : LPAR expression RPAR
+    | expression numericOperator expression
+    | expression booleanOperator expression
+    | expression APPEND expression
+    | funcCall
+    | value
+    | IDENTIFIER
     ;
 
-value
-    : INT_VAL 
-    | FLOAT_VAL 
-    | STRING_VAL 
-    | TRUE 
-    | FALSE 
-    | list 
-    | funcptr
-    ;
-
-numericOperation
-    : PLUS 
-    | MINUS 
-    | DIV 
-    | MULT 
+numericOperator
+    : PLUS
+    | MINUS
+    | DIV
+    | MULT
     | MOD
     ;
 
-boolOperation
+booleanOperator
     : AND
     | OR
     | NOT
@@ -193,8 +98,87 @@ boolOperation
     | LEQ
     ;
 
+funcCall
+    : (IDENTIFIER | lambdaFunc | builtInFunc) funcCallArgs
+    ;
 
+funcCallArgs
+    : LPAR ((expression COMMA)* expression)? RPAR
+    ;
 
+lambdaFunc
+    : ARROW funcArgs LBRACE funcBody RBRACE
+     // FIXME: kinda sure that these don't have dafault arguments
+    ;
+
+builtInFunc
+    : PUTS
+    | LEN
+    | CHOP
+    | CHOMP
+    | PUSH
+    | paternMatch
+    ;
+
+paternMatch
+    : IDENTIFIER DOT MATCH
+    ;
+
+value
+    : INT_VAL
+    | FLOAT_VAL
+    | STRING_VAL
+    | TRUE
+    | FALSE
+    | list
+    | funcptr
+    | listIndexing
+    ;
+
+list
+    : (LBRACKET ((expression COMMA)* expression)? RBRACKET)
+    ;
+
+funcptr
+    : METHOD LPAR COLON IDENTIFIER RPAR
+    | lambdaFunc
+    ;
+
+listIndexing
+    : IDENTIFIER (LBRACKET expression RBRACKET)+
+    ;
+
+if
+    : IF condition body (ELSEIF condition body)* (ELSE body)? END
+    ;
+
+condition
+    : LPAR expression RPAR
+    ;
+
+loopDo
+    : LOOP DO loopBody END
+    ;
+
+loopBody
+    : (statement | loopCondition)*
+    ;
+
+loopCondition
+    : (NEXT | BREAK) (IF condition)? SEMICOLON
+    ;
+
+for
+    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+    ;
+
+rangeGenerator
+    : expression RANGE expression
+    ;
+
+eof
+    : // epsilon
+    ;
 
 ////////////////////////////////////////////////////////////
 // built-in functions
@@ -211,7 +195,7 @@ METHOD:       'method';
 ////////////////////////////////////////////////////////////
 // characters
 
-DELIMIETER:   '|';
+PATTERNDELIM:   '|';
 COMMA:        ',';
 SEMICOLON:    ';';
 COLON:        ':';
@@ -270,8 +254,8 @@ AND:          '&&';
 OR:           '||';
 NOT:          '!';
 APPEND:       '<<';
-EQ:           'is' | '==' ;
-NEQ:          'is not' | '!=';
+EQ:           'is' | '==' ; // TODO: delete is
+NEQ:          'is not' | '!='; // TODO: delete is not
 GTR:          '>';
 GEQ:          '>=';
 LES:          '<';
@@ -280,7 +264,8 @@ LEQ:          '<=';
 // others
 
 IDENTIFIER:   [a-zA-Z_][a-zA-Z0-9_]*;
-WS:           [ \t\r\n] -> skip;
+PATTERNIND:   '\t|' | '    |'; // it's important that this line is above WS cause it's necessary to match it first
 COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
+WS:           [ \t\r\n] -> skip;
 ////////////////////////////////////////////////////////////
