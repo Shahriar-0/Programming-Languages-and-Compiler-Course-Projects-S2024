@@ -2,184 +2,187 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern | comments)* main (comments)* eof
-    ;
+	: (funcDef | pattern | comments)* main (comments)* eof
+	;
 
 comments
-    : (COMMENT | MLCOMMENT)+
-    ;
+	: (COMMENT | MLCOMMENT)+
+	;
 
 funcDef
-    : DEF IDENTIFIER funcArgs funcBody END
-    ;
+	: DEF IDENTIFIER funcArgs funcBody END
+	;
 
 funcArgs
-    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
-    ;
-    // case1: a()
-    // case2: a([])
-    // case3: a(x1, x2, ...)
-    // case4: a(x1, x2, ..., [])
+	: LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
+	;
+// case1: a()
+// case2: a([])
+// case3: a(x1, x2, ...)
+// case4: a(x1, x2, ..., [])
 
 defaultArgs
-    : LBRACKET (IDENTIFIER ASSIGN expression COMMA)* (IDENTIFIER ASSIGN expression) RBRACKET
-    ;
+	: LBRACKET (IDENTIFIER ASSIGN expression COMMA)* (IDENTIFIER ASSIGN expression) RBRACKET
+	;
 
 pattern // FIXME: kinda sure that these don't have dafault arguments
-    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
-    ;
+	: PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
+	;
 
 patternBody
-    : (PATTERNIND condition ASSIGN expression)+
-    ;
+	: (PATTERNIND condition ASSIGN expression)+
+	;
 
 main
-    : DEF MAIN LPAR RPAR funcBody END
-    ;
+	: DEF MAIN LPAR RPAR funcBody END
+	;
 
 funcBody
-    : body (RETURN (expression)? SEMICOLON)?
-    ;
+	: body (RETURN (expression)? SEMICOLON)?
+	;
 
 body
-    : (statement)*
-    ;
+	: (statement)*
+	;
 
 statement
-    : assignment SEMICOLON // isn't this also an expression?
-    | expression SEMICOLON
-    | if        // draft: move these three to something called controlFlow dunno if it's a good idea
-    | loopDo
-    | for
-    ;
+	: assignment SEMICOLON // isn't this also an expression?
+	| expression SEMICOLON
+	| if // draft: move these three to something called controlFlow dunno if it's a good idea
+	| loopDo
+	| for
+	;
 
 assignment
-    : (IDENTIFIER assigner expression)
-    | (IDENTIFIER (INC | DEC))
-    ;
+	: (IDENTIFIER assigner expression)
+	| (IDENTIFIER (INC | DEC))
+	;
 
 assigner // convert this to token?
-        // assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
-    : ASSIGN
-    | ADDASSIGN
-    | DECASSIGN
-    | MULTASSIGN
-    | DIVASSIGN
-    | MODASSIGN
-    ;
+	// assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
+	: ASSIGN
+	| ADDASSIGN
+	| DECASSIGN
+	| MULTASSIGN
+	| DIVASSIGN
+	| MODASSIGN
+	;
 
 expression
-    : LPAR expression RPAR
-    | expression numericOperator expression
-    | expression booleanOperator expression
-    | expression APPEND expression
-    | funcCall
-    | value
-    | IDENTIFIER
-    ;
+	: LPAR expression RPAR
+	| expression numericOperator expression
+	| expression booleanOperator expression
+	| expression APPEND expression
+	| funcCall
+	| value
+	| IDENTIFIER
+	;
 
 numericOperator
-    : PLUS
-    | MINUS
-    | DIV
-    | MULT
-    | MOD
-    ;
+	: PLUS
+	| MINUS
+	| DIV
+	| MULT
+	| MOD
+	;
 
 booleanOperator
-    : AND
-    | OR
-    | NOT
-    | EQ
-    | NEQ
-    | GTR
-    | GEQ
-    | LES
-    | LEQ
-    ;
+	: AND
+	| OR
+	| NOT
+	| EQ
+	| NEQ
+	| GTR
+	| GEQ
+	| LES
+	| LEQ
+	;
 
 funcCall
-    : (IDENTIFIER | lambdaFunc | builtInFunc) funcCallArgs
-    ;
+	: (IDENTIFIER | lambdaFunc | builtInFunc) funcCallArgs
+	;
 
 funcCallArgs
-    : LPAR ((expression COMMA)* expression)? RPAR
-    ;
+	: LPAR ((expression COMMA)* expression)? RPAR
+	;
 
 lambdaFunc
-    : ARROW funcArgs LBRACE funcBody RBRACE
-     // FIXME: kinda sure that these don't have dafault arguments
-    ;
+	: ARROW funcArgs LBRACE funcBody RBRACE
+	// FIXME: kinda sure that these don't have dafault arguments
+	;
 
 builtInFunc
-    : PUTS
-    | LEN
-    | CHOP
-    | CHOMP
-    | PUSH
-    | paternMatch
-    ;
+	: PUTS
+	| LEN
+	| CHOP
+	| CHOMP
+	| PUSH
+	| paternMatch
+	;
 
 paternMatch
-    : IDENTIFIER DOT MATCH
-    ;
+	: IDENTIFIER DOT MATCH
+	;
 
 value
-    : INT_VAL
-    | FLOAT_VAL
-    | STRING_VAL
-    | TRUE
-    | FALSE
-    | list
-    | funcptr
-    | listIndexing
-    ;
+	: INT_VAL
+	| FLOAT_VAL
+	| STRING_VAL
+	| TRUE
+	| FALSE
+	| list
+	| funcptr
+	| listIndexing
+	;
 
 list
-    : (LBRACKET ((expression COMMA)* expression)? RBRACKET)
-    ;
+	: (LBRACKET ((expression COMMA)* expression)? RBRACKET)
+	;
 
 funcptr
-    : METHOD LPAR COLON IDENTIFIER RPAR
-    | lambdaFunc
-    ;
+	: METHOD LPAR COLON IDENTIFIER RPAR
+	| lambdaFunc
+	;
 
 listIndexing
-    : IDENTIFIER (LBRACKET expression RBRACKET)+
-    ;
+	: IDENTIFIER (LBRACKET expression RBRACKET)+
+	;
 
 if
-    : IF condition body (ELSEIF condition body)* (ELSE body)? END
-    ;
+	: IF condition body (ELSEIF condition body)* (ELSE body)? END
+	;
 
 condition
-    : LPAR expression RPAR
-    ;
+	: LPAR expression RPAR
+	;
 
 loopDo
-    : LOOP DO loopBody END
-    ;
+	: LOOP DO loopBody END
+	;
 
 loopBody
-    : (statement | loopCondition)*
-    ;
+	: (statement | loopCondition)*
+	;
 
 loopCondition
-    : (NEXT | BREAK) (IF condition)? SEMICOLON
-    ;
+	: (NEXT | BREAK) (IF condition)? SEMICOLON
+	;
 
 for
-    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
-    ;
+	: FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+	;
 
 rangeGenerator
-    : expression RANGE expression
-    ;
+	: expression RANGE expression
+	;
 
 eof
-    : // epsilon
-    ;
+	: // epsilon
+	;
 
+
+
+// $antlr-format off
 ////////////////////////////////////////////////////////////
 // built-in functions
 
@@ -195,7 +198,7 @@ METHOD:       'method';
 ////////////////////////////////////////////////////////////
 // characters
 
-PATTERNDELIM:   '|';
+PATTERNDELIM: '|';
 COMMA:        ',';
 SEMICOLON:    ';';
 COLON:        ':';
