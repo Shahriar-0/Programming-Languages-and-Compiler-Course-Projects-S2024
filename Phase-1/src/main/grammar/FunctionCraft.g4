@@ -9,6 +9,14 @@ comments
     : (COMMENT | MLCOMMENT)+
     ;
 
+main
+    : DEF MAIN LPAR RPAR funcBody END
+    ;
+
+body
+    : (statement)*
+    ;
+
 funcDef
     : DEF IDENTIFIER funcArgs funcBody END
     ;
@@ -22,7 +30,58 @@ funcArgs
     // case4: a(x1, x2, ..., [])
 
 defaultArgs
-    : LBRACKET (IDENTIFIER ASSIGN expression COMMA)* (IDENTIFIER ASSIGN expression) RBRACKET
+    : LBRACKET (IDENTIFIER ASSIGN expresion COMMA)* (IDENTIFIER ASSIGN expresion) RBRACKET
+    ;
+
+funcCallArgs
+    : LPAR ((expresion COMMA)* expresion)? RPAR
+    ;
+
+
+// left recursion removed:
+// funcCall
+//    : (IDENTIFIER | funcptr) funcCallArgs
+//    | builtInFunc
+//    ;
+
+funcCall
+    : (IDENTIFIER | method | lambdaFunc ) funcCallArgs funcCAll_
+    | builtInFunc funcCAll_
+    ;
+
+funcCAll_
+    : funcCallArgs funcCAll_
+    | epsilon
+    ;
+
+funcBody
+    : body (RETURN (expresion)? SEMICOLON)?
+    ;
+
+statement
+    : assignment SEMICOLON
+    | expresion SEMICOLON
+    | if
+    | loopDo
+    | for
+    ;
+
+lambdaFunc
+    : ARROW funcArgs LBRACE funcBody RBRACE
+    ;
+
+method
+    : METHOD LPAR COLON IDENTIFIER RPAR
+    ;
+
+funcptr
+    : method
+    | lambdaFunc
+    | funcCall
+    ;
+
+list
+    : (LBRACKET ((expresion COMMA)* expresion)? RBRACKET)
     ;
 
 pattern // FIXME: kinda sure that these don't have dafault arguments
@@ -30,32 +89,84 @@ pattern // FIXME: kinda sure that these don't have dafault arguments
     ;
 
 patternBody
-    : (PATTERNIND condition ASSIGN expression)+
+    : (PATTERNIND condition ASSIGN expresion)+
     ;
 
-main
-    : DEF MAIN LPAR RPAR funcBody END
-    ;
-
-funcBody
-    : body (RETURN (expression)? SEMICOLON)?
-    ;
-
-body
-    : (statement)*
-    ;
-
-statement
-    : assignment SEMICOLON // isn't this also an expression?
-    | expression SEMICOLON
-    | if        // draft: move these three to something called controlFlow dunno if it's a good idea
-    | loopDo
-    | for
+paternMatch
+    : IDENTIFIER DOT MATCH funcCallArgs
     ;
 
 assignment
-    : (IDENTIFIER assigner expression)
+    : (IDENTIFIER assigner expresion)
     | (IDENTIFIER (INC | DEC))
+    ;
+
+condition
+    : LPAR expresion RPAR
+    ;
+
+expresion
+    : LPAR expresion RPAR
+    | expresion numericOperator expresion
+    | expresion booleanOperator expresion
+    | expresion APPEND expresion
+    | funcCall
+    | value
+    | IDENTIFIER
+    ;
+
+if
+    : IF condition body (ELSEIF condition body)* (ELSE body)? END
+    ;
+
+rangeGenerator
+    : expresion RANGE expresion
+    ;
+
+loopCondition
+    : (NEXT | BREAK) (IF condition)? SEMICOLON
+    ;
+
+loopBody
+    : (statement | loopCondition)*
+    ;
+
+for
+    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+    ;
+
+loopDo
+    : LOOP DO loopBody END
+    ;
+
+builtInFunc
+    : puts
+    | len
+    | chop
+    | chomp
+    | push
+    | paternMatch
+    ;
+
+puts
+    : PUTS LPAR expresion RPAR // I know you did this to only pass one parameter but i don't think that lexical should be responsible for this
+                               // the better way i thinkg would be to use funcCallArgs, for this and other build-in functions
+    ;
+
+len
+    : LEN LPAR expresion RPAR
+    ;
+
+chop
+    : CHOP LPAR expresion RPAR
+    ;
+
+chomp
+    : CHOMP LPAR expresion RPAR
+    ;
+
+push
+    : PUSH LPAR expresion COMMA expresion RPAR
     ;
 
 assigner // convert this to token?
@@ -68,14 +179,19 @@ assigner // convert this to token?
     | MODASSIGN
     ;
 
-expression
-    : LPAR expression RPAR
-    | expression numericOperator expression
-    | expression booleanOperator expression
-    | expression APPEND expression
-    | funcCall
-    | value
-    | IDENTIFIER
+listIndexing
+    : IDENTIFIER (LBRACKET expresion RBRACKET)+
+    ;
+
+value
+    : INT_VAL
+    | FLOAT_VAL
+    | STRING_VAL
+    | TRUE
+    | FALSE
+    | list
+    | funcptr
+    | listIndexing
     ;
 
 numericOperator
@@ -98,87 +214,14 @@ booleanOperator
     | LEQ
     ;
 
-funcCall
-    : (IDENTIFIER | lambdaFunc | builtInFunc) funcCallArgs
-    ;
-
-funcCallArgs
-    : LPAR ((expression COMMA)* expression)? RPAR
-    ;
-
-lambdaFunc
-    : ARROW funcArgs LBRACE funcBody RBRACE
-     // FIXME: kinda sure that these don't have dafault arguments
-    ;
-
-builtInFunc
-    : PUTS
-    | LEN
-    | CHOP
-    | CHOMP
-    | PUSH
-    | paternMatch
-    ;
-
-paternMatch
-    : IDENTIFIER DOT MATCH
-    ;
-
-value
-    : INT_VAL
-    | FLOAT_VAL
-    | STRING_VAL
-    | TRUE
-    | FALSE
-    | list
-    | funcptr
-    | listIndexing
-    ;
-
-list
-    : (LBRACKET ((expression COMMA)* expression)? RBRACKET)
-    ;
-
-funcptr
-    : METHOD LPAR COLON IDENTIFIER RPAR
-    | lambdaFunc
-    ;
-
-listIndexing
-    : IDENTIFIER (LBRACKET expression RBRACKET)+
-    ;
-
-if
-    : IF condition body (ELSEIF condition body)* (ELSE body)? END
-    ;
-
-condition
-    : LPAR expression RPAR
-    ;
-
-loopDo
-    : LOOP DO loopBody END
-    ;
-
-loopBody
-    : (statement | loopCondition)*
-    ;
-
-loopCondition
-    : (NEXT | BREAK) (IF condition)? SEMICOLON
-    ;
-
-for
-    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
-    ;
-
-rangeGenerator
-    : expression RANGE expression
+epsilon
+    :
     ;
 
 eof
-    : // epsilon
+    : epsilon
     ;
+
 
 ////////////////////////////////////////////////////////////
 // built-in functions
@@ -264,7 +307,7 @@ LEQ:          '<=';
 // others
 
 IDENTIFIER:   [a-zA-Z_][a-zA-Z0-9_]*;
-PATTERNIND:   '\t|' | '    |'; // it's important that this line is above WS cause it's necessary to match it first
+PATTERNIND:   ('\n' | '\r')('\t|' | '    |'); // it's important that this line is above WS cause it's necessary to match it first
 COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
 WS:           [ \t\r\n] -> skip;
