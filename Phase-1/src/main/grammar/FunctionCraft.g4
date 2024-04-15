@@ -2,12 +2,12 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern | comments)* main (comments)* eof
-    ;
+	: (funcDef | pattern | comments)* main (comments)* eof
+	;
 
 comments
-    : (COMMENT | MLCOMMENT)+
-    ;
+	: (COMMENT | MLCOMMENT)+
+	;
 
 main
     : DEF MAIN LPAR RPAR funcBody END
@@ -18,53 +18,18 @@ body
     ;
 
 funcDef
-    : DEF IDENTIFIER funcArgs funcBody END
-    ;
+	: DEF IDENTIFIER funcArgs funcBody END
+	;
 
 funcArgs
-    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
-    ;
-    // case1: a()
-    // case2: a([])
-    // case3: a(x1, x2, ...)
-    // case4: a(x1, x2, ..., [])
+	: LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
+	;
+// case1: a()
+// case2: a([])
+// case3: a(x1, x2, ...)
+// case4: a(x1, x2, ..., [])
 
 defaultArgs
-    : LBRACKET (IDENTIFIER ASSIGN expresion COMMA)* (IDENTIFIER ASSIGN expresion) RBRACKET
-    ;
-
-funcCallArgs
-    : LPAR ((expresion COMMA)* expresion)? RPAR
-    ;
-
-
-// left recursion removed:
-// funcCall
-//    : (IDENTIFIER | funcptr) funcCallArgs
-//    | builtInFunc
-//    ;
-
-funcCall
-    : (IDENTIFIER | method | lambdaFunc ) funcCallArgs funcCAll_
-    | builtInFunc funcCAll_
-    ;
-
-funcCAll_
-    : funcCallArgs funcCAll_
-    | epsilon
-    ;
-
-funcBody
-    : body (RETURN (expresion)? SEMICOLON)?
-    ;
-
-statement
-    : assignment SEMICOLON
-    | expresion SEMICOLON
-    | if
-    | loopDo
-    | for
-    ;
 
 lambdaFunc
     : ARROW funcArgs LBRACE funcBody RBRACE
@@ -97,132 +62,6 @@ paternMatch
     ;
 
 assignment
-    : (IDENTIFIER assigner expresion)
-    | (IDENTIFIER (INC | DEC))
-    ;
-
-condition
-    : LPAR expresion RPAR
-    ;
-
-expresion
-    : LPAR expresion RPAR
-    | expresion numericOperator expresion
-    | expresion booleanOperator expresion
-    | expresion APPEND expresion
-    | funcCall
-    | value
-    | IDENTIFIER
-    ;
-
-if
-    : IF condition body (ELSEIF condition body)* (ELSE body)? END
-    ;
-
-rangeGenerator
-    : expresion RANGE expresion
-    ;
-
-loopCondition
-    : (NEXT | BREAK) (IF condition)? SEMICOLON
-    ;
-
-loopBody
-    : (statement | loopCondition)*
-    ;
-
-for
-    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
-    ;
-
-loopDo
-    : LOOP DO loopBody END
-    ;
-
-builtInFunc
-    : puts
-    | len
-    | chop
-    | chomp
-    | push
-    | paternMatch
-    ;
-
-puts
-    : PUTS LPAR expresion RPAR // I know you did this to only pass one parameter but i don't think that lexical should be responsible for this
-                               // the better way i thinkg would be to use funcCallArgs, for this and other build-in functions
-    ;
-
-len
-    : LEN LPAR expresion RPAR
-    ;
-
-chop
-    : CHOP LPAR expresion RPAR
-    ;
-
-chomp
-    : CHOMP LPAR expresion RPAR
-    ;
-
-push
-    : PUSH LPAR expresion COMMA expresion RPAR
-    ;
-
-assigner // convert this to token?
-        // assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
-    : ASSIGN
-    | ADDASSIGN
-    | DECASSIGN
-    | MULTASSIGN
-    | DIVASSIGN
-    | MODASSIGN
-    ;
-
-listIndexing
-    : IDENTIFIER (LBRACKET expresion RBRACKET)+
-    ;
-
-value
-    : INT_VAL
-    | FLOAT_VAL
-    | STRING_VAL
-    | TRUE
-    | FALSE
-    | list
-    | funcptr
-    | listIndexing
-    ;
-
-numericOperator
-    : PLUS
-    | MINUS
-    | DIV
-    | MULT
-    | MOD
-    ;
-
-booleanOperator
-    : AND
-    | OR
-    | NOT
-    | EQ
-    | NEQ
-    | GTR
-    | GEQ
-    | LES
-    | LEQ
-    ;
-
-epsilon
-    :
-    ;
-
-eof
-    : epsilon
-    ;
-
-
 ////////////////////////////////////////////////////////////
 // built-in functions
 
@@ -238,7 +77,7 @@ METHOD:       'method';
 ////////////////////////////////////////////////////////////
 // characters
 
-PATTERNDELIM:   '|';
+PATTERNDELIM: '|';
 COMMA:        ',';
 SEMICOLON:    ';';
 COLON:        ':';
