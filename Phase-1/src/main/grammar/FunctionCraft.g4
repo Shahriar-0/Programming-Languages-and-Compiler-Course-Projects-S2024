@@ -2,15 +2,11 @@ grammar FunctionCraft;
 
 
 program
-    : (funcDef | pattern | comments)* main (comments)* eof
-    ;
-
-comments
-    : (COMMENT | MLCOMMENT)+
+    : (funcDef | pattern)* main eof
     ;
 
 main
-    : DEF MAIN LPAR RPAR funcBody END
+    : DEF MAIN {System.out.println("MAIN");} LPAR RPAR funcBody END 
     ;
 
 body
@@ -18,11 +14,11 @@ body
     ;
 
 funcDef
-    : DEF IDENTIFIER funcArgs funcBody END
+    : DEF (name = IDENTIFIER) {System.out.println("FuncDec: " + $name.text);} funcArgs funcBody END 
     ;
 
 funcArgs
-    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR
+    : LPAR ((((IDENTIFIER COMMA)* IDENTIFIER) (COMMA defaultArgs)?) | defaultArgs)? RPAR 
     ;
     // case1: a()
     // case2: a([])
@@ -34,108 +30,220 @@ defaultArgs
     ;
 
 funcCallArgs
-    : LPAR ((expresion COMMA)* expresion)? RPAR
+    : {System.out.println("FunctionCall");} LPAR ((expresion COMMA)* expresion)? RPAR
     ;
+
+
+// left recursion removed:
+// funcCall
+//    : (IDENTIFIER | funcptr | listIndexing) funcCallArgs
+//    | builtInFunc
+//    ;
 
 funcCall
-    : ((IDENTIFIER | lambdaFunc) funcCallArgs | builtInFunc)
+//  (IDENTIFIER (LBRACKET expresion RBRACKET)* | method | lambdaFunc)
+    : IDENTIFIER funcCallArgs funcCall_
+    | builtInFunc funcCall_
     ;
 
+funcCall_
+    : funcCallArgs funcCall_
+    | (LBRACKET expresion RBRACKET)+ funcCall_
+    | epsilon
+    ;
+
+return
+    : RETURN expresion? SEMICOLON {System.out.println("RETURN");}
+    ;
+
+// body! return for your own sake, the world is not functioning as you wish
 funcBody
-    : body (RETURN (expresion)? SEMICOLON)?
+    : body return?
     ;
 
 statement
     : assignment SEMICOLON
-    | funcCall SEMICOLON
+    | expresion SEMICOLON
     | if
     | loopDo
     | for
-    | expresion SEMICOLON // FIXME: not sure about this
     ;
-
-// cast:
-// typeDef LPAR expresion RPAR;
-
-lvalue
-    : IDENTIFIER
-    | listIndexing
-    ;
-
-append
-    : lvalue (APPEND expresion)+
-    ;
-
-lambdaFuncCall
-    : lambdaFunc funcCallArgs
-    ;
-
 
 lambdaFunc
-    : ARROW funcArgs LBRACE funcBody RBRACE
-    // ? funcArgs takes default arguments do lambda functions have default arguments? they should but not sure
+    : ARROW funcArgs LBRACE funcBody RBRACE {System.out.println("Structure: LAMBDA");}
+    ;
+
+method
+    : METHOD LPAR COLON IDENTIFIER RPAR
     ;
 
 funcptr
-    : METHOD LPAR COLON IDENTIFIER RPAR
+    : method
+    | lambdaFunc
+    | funcCall
     ;
 
 list
     : (LBRACKET ((expresion COMMA)* expresion)? RBRACKET)
     ;
 
-pattern // FIXME: kinda sure that these don't have dafault arguments
-    : PATTERN IDENTIFIER funcArgs patternBody SEMICOLON
+pattern
+    : PATTERN (name = IDENTIFIER) funcArgs patternBody SEMICOLON {System.out.println("PatternDec: " + $name.text);}
     ;
 
 patternBody
-    : (PATTERNIND condition ASSIGN expresion)+ // FIXME: not checked
+    : (PATTERNIND condition ASSIGN expresion)+
     ;
 
 paternMatch
     : IDENTIFIER DOT MATCH funcCallArgs
     ;
 
-assignment
-    : (IDENTIFIER assigner expresion) | (IDENTIFIER (INC | DEC))
-    ;
 
 condition
-    : singleCondition (logicalOperator singleCondition)* // FIXME: not checked
-    ;
-
-logicalOperator
-    : AND
-    | OR
-    ;
-
-singleCondition
-    : LPAR condition RPAR // for when we need to group conditions
-    | LPAR expresion RPAR // not sure about this but if we have conversion from expresion to boolean then it should work
-                          // things like if (a) but if not then it should change
-                          // ? what about lambdaFunc without call?
-    ;
-
-expresion
     : LPAR expresion RPAR
-    | expresion numericOperator expresion
-    | value
-    | IDENTIFIER
-    | funcCall
-    | expresion booleanOperator expresion
-    | paternMatch
-    | listIndexing 
-    | lambdaFuncCall // probably need something like this to show it's been called immediately
-    | lambdaFunc
-    | append
     ;
+
+//expresion
+//    : expresion APPEND logicalOr
+//    | logicalOr
+//    ;
+expresion
+    : logicalOr expresion_
+    ;
+
+expresion_
+    : APPEND logicalOr expresion_
+    | epsilon
+    ;
+
+
+value:
+    funcCall
+    | primitive
+    | IDENTIFIER
+    | par_exp
+    ;
+
+// priority: 1
+par_exp
+    : LPAR expresion RPAR
+    ;
+
+// priority: 2
+listIndexing
+    : (IDENTIFIER | funcCall) (LBRACKET expresion RBRACKET)+
+    | value
+    ;
+
+// priority: 3
+inPlaceAssignment
+    : listIndexing (INC | DEC)
+    | listIndexing
+    ;
+
+// priority: 4
+not
+    : (NOT | MINUS) inPlaceAssignment
+    | inPlaceAssignment
+    ;
+
+// priority: 5
+//multdiv
+//    : multdiv (MULT | DIV) not
+//    | not
+//    ;
+multdiv
+    : not multdiv_
+    ;
+multdiv_
+    : (MULT | DIV) not multdiv_
+    | epsilon
+    ;
+
+// priority: 6
+// addsub
+//     : addsub (PLUS | MINUS) multdiv
+//     | multdiv
+//     ;
+addsub
+    : multdiv addsub_
+    ;
+addsub_
+    : (PLUS | MINUS) multdiv addsub_
+    | epsilon
+    ;
+
+// priority: 7
+// compare
+//     : compare (GTR | GEQ | LES | LEQ) addsub
+//     | addsub
+//     ;
+compare
+    : addsub compare_
+    ;
+compare_
+    : (GTR | GEQ | LES | LEQ) addsub compare_
+    | epsilon
+    ;
+
+// priority: 8
+// eqcompare
+//     : eqcompare (EQ | NEQ) compare
+//     | compare
+//     ;
+eqcompare
+    : compare eqcompare_
+    ;
+eqcompare_
+    : (EQ | NEQ) compare eqcompare_
+    | epsilon
+    ;
+
+// priority: 9
+// logialAnd
+//     : logialAnd AND eqcompare
+//     | eqcompare
+//     ;
+logialAnd
+    : eqcompare logialAnd_
+    ;
+logialAnd_
+    : AND eqcompare logialAnd_
+    | epsilon
+    ;
+
+// priority: 10
+// logicalOr
+//     : logicalOr OR logialAnd
+//     | logialAnd
+//     ;
+logicalOr
+    : logialAnd logicalOr_
+    ;
+logicalOr_
+    : OR logialAnd logicalOr_
+    | epsilon
+    ;
+
+// priority: 11
+assignment
+    : (name = IDENTIFIER) assigner expresion {System.out.println("Assignment: " + $name.text);}
+    ;
+
+// append
 
 if
-    : IF condition body (ELSEIF condition body)* (ELSE body)? END
+    : IF {System.out.println("Decision: IF");} condition body elif else END
     ;
 
-for 
-    : FOR IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+elif
+    : (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)*
+    ;
+
+else
+    :
+    (ELSE {System.out.println("Decision: ELSE");} body)?
     ;
 
 rangeGenerator
@@ -143,28 +251,32 @@ rangeGenerator
     ;
 
 loopCondition
-    : (NEXT | BREAK) (IF condition)? SEMICOLON
+    : (NEXT {System.out.println("Control: NEXT");} | BREAK {System.out.println("Control: NEXT");}) (IF condition)? SEMICOLON
     ;
 
 loopBody
     : (statement | loopCondition)*
     ;
 
+for
+    : FOR {System.out.println("Loop: FOR");} IDENTIFIER IN LPAR rangeGenerator RPAR loopBody END
+    ;
+
 loopDo
-    : LOOP DO loopBody END
+    : LOOP {System.out.println("Loop: DO");} DO loopBody END
     ;
 
 builtInFunc
-    : puts
-    | len
-    | chop
-    | chomp
-    | push
+    : {System.out.println("Built-In: PUTS");} puts
+    | {System.out.println("Built-In: LEN");} len
+    | {System.out.println("Built-In: CHOP");} chop
+    | {System.out.println("Built-In: CHOMP");} chomp
+    | {System.out.println("Built-In: PUSH");} push
+    | {System.out.println("Built-In: MATCH");} paternMatch
     ;
 
 puts
-    : PUTS LPAR expresion RPAR // I know you did this to only pass one parameter but i don't think that lexical should be responsible for this
-                               // the better way i thinkg would be to use funcCallArgs, for this and other build-in functions
+    : PUTS LPAR expresion RPAR
     ;
 
 len
@@ -183,8 +295,7 @@ push
     : PUSH LPAR expresion COMMA expresion RPAR
     ;
 
-assigner // convert this to token?
-        // assigner: [ADDASSIGN | DECASSIGN | MULTASSIGN | DIVASSIGN | MODASSIGN]
+assigner
     : ASSIGN
     | ADDASSIGN
     | DECASSIGN
@@ -193,48 +304,23 @@ assigner // convert this to token?
     | MODASSIGN
     ;
 
-listIndexing
-    : IDENTIFIER (LBRACKET expresion RBRACKET)+
+primitive
+    : INT_VAL
+    | FLOAT_VAL
+    | STRING_VAL
+    | TRUE
+    | FALSE
+    | list
     ;
 
-value
-    : INT_VAL 
-    | FLOAT_VAL 
-    | string 
-    | TRUE 
-    | FALSE 
-    | list 
-    | funcptr
-    ;
-
-numericOperator
-    : PLUS 
-    | MINUS 
-    | DIV 
-    | MULT 
-    | MOD
-    ;
-
-booleanOperator
-    : AND
-    | OR
-    | NOT
-    | EQ
-    | NEQ
-    | GTR
-    | GEQ
-    | LES
-    | LEQ
-    ;
-
-string
-    : (IDENTIFIER | STRING_VAL) (APPEND (IDENTIFIER | STRING_VAL))* // FIXME: this line should change 
-                                                        // since expressions and other things could generate string as well
+epsilon
+    :
     ;
 
 eof
-    : // epsilon
+    : epsilon
     ;
+
 
 ////////////////////////////////////////////////////////////
 // built-in functions
@@ -278,7 +364,7 @@ TRUE:         'true';
 FALSE:        'false';
 INT_VAL:      [0-9]+;
 FLOAT_VAL:    INT_VAL '.' INT_VAL;
-STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ; 
+STRING_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"' ;
 ////////////////////////////////////////////////////////////
 // statement keywords
 
@@ -320,7 +406,7 @@ LEQ:          '<=';
 // others
 
 IDENTIFIER:   [a-zA-Z_][a-zA-Z0-9_]*;
-PATTERNIND:   '\t|' | '    |'; // it's important that this line is above WS cause it's necessary to match it first
+PATTERNIND:   ('\n' | '\r')('\t|' | '    |'); // it's important that this line is above WS cause it's necessary to match it first
 COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
 WS:           [ \t\r\n] -> skip;
