@@ -1,0 +1,18 @@
+-> ( )  {   }
+method ( : eSf5QKmf )
+-> ( hqzf , Iz0GMe )  { loop do break ;   end      } 
+-> ( hqzf , Iz0GMe )  { loop do break ;  if (sth) end  end }
+(a)
+a(b, -> (x, y) { "HI"; })
+a(b, -> (x, y) { "HI"; }, a == b, a << 1)
+a(b, -> (x, y) { "HI"; }, a == b, a << 1, a + (b++))
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++))
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++) + !(5))
+a----
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++) + !(5), sth.match(1))
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++) + !(5), sth.match(1), puts(bluh), -> (x, y) { "HI"; } (a, b))
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++) + !(5), sth.match(1), puts(bluh << "meow"), -> (x, y) { "HI"; } (a, b), method(:eSf5QKmf))
+
+
+# these shouldn't parse
+a(b, -> (x, y) { "HI"; }, a == b, a << (1) || (4), a + (b++) + !(5), sth.match(1), puts(bluh << "meow"), -> (x, y) { "HI"; } (a, b), method(:eSf5QKmf), if(sth) end)

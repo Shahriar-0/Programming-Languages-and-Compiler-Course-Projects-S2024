@@ -6,7 +6,7 @@ antlr4 -o .antlr/
 javac -cp $env:CLASSPATH .antlr/*.java
 Set-Location $current_dir
 
-for ($i = 1; $i -le 10; $i++) {
+for ($i = 1; $i -le 4; $i++) {
     if (!(Test-Path "#$i") -or !(Test-Path "#$i/in.fl")) {
         Write-Host -ForegroundColor Red "Test $i does not exist"
         continue

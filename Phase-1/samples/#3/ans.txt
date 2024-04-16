@@ -1,0 +1,24 @@
+MAIN
+FunctionCall
+Operator: *
+Operator: +
+Operator: *
+Operator: +
+Operator: -
+Operator: /
+Operator: +
+Operator: !
+Operator: +
+Operator: +
+FunctionCall
+Operator: ++
+Operator: ++
+Operator: +
+Operator: ++
+Operator: -
+Operator: -
+Operator: &&
+Assignment: l
+Structure: LAMBDA
+RETURN
+Operator: +

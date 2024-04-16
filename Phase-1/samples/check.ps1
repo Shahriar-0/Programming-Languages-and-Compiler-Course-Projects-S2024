@@ -1,4 +1,4 @@
-for ($i = 1; $i -le 10; $i++) {
+for ($i = 1; $i -le 4; $i++) {
     Set-Location ./"#$i"
 
     if (Test-Path err.txt) {

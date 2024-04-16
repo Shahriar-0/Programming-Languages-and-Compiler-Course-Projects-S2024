@@ -1,0 +1,32 @@
+pattern meow(a, b)
+    | (a == 0) = 1
+    | (a == 1) = b
+    | (a < 0) = b * meow(a - 1, b) #its fucking stupid it doesn't have default
+;
+
+# these shouldn't parse
+pattern meow(a, b)
+    | (a == 0) = 1
+   | (a == 1) = b
+    | (a < 0) = b * meow(a - 1, b) #its fucking stupid it doesn't have default
+;
+
+pattern meow(a, b)
+      | (a == 0) = 1
+      | (a == 1) = b
+      | (a < 0) = b * meow(a - 1, b) #its fucking stupid it doesn't have default
+;
+
+
+pattern meow(a, b)
+    | (a == 0) = 1
+    | a == 1 = b
+    | (a < 0) = b * meow(a - 1, b) #its fucking stupid it doesn't have default
+;
+
+
+pattern meow(a, b)
+    | (a == 0) = 1
+    | (a == 1) = return b
+    | (a < 0) = b * meow(a - 1, b) #its fucking stupid it doesn't have default
+;
