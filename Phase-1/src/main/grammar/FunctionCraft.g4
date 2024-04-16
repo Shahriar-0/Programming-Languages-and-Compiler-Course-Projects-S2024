@@ -49,11 +49,15 @@ body
 	: (statement)*
 	;
 
+nonEmptyBody
+	: (statement)+
+	;
+
 statement
 	: assignment SEMICOLON
 	| expression SEMICOLON
 	| controlFlow
-    | SEMICOLON
+	| SEMICOLON
 	;
 // case1: a (= | += | -= | *= | /= | %=) b
 // case2: all expressions
@@ -61,9 +65,8 @@ statement
 // case4: empty statement (just a semicolon)
 
 
-
 // ---------------------- Assignment ----------------------
-// !priority: 12
+// ! priority: 12
 assignment
 	: (name = IDENTIFIER) assigner expression {System.out.println("Assignment: " + $name.text);}
 	;
@@ -87,15 +90,16 @@ controlFlow
 	;
 
 if
-	: IF {System.out.println("Decision: IF");} condition body elif else END // ? the body is optional
+	: IF {System.out.println("Decision: IF");} condition body elif else END 
+	// NOTE: if the bodies can be empty change the body to nonEmptyBody
 	;
 
 elif
-	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)* // ? like the else, elif is optional
+	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)* 
 	;
 
 else
-	: (ELSE {System.out.println("Decision: ELSE");} body)? // ? the body for else is optional in this case
+	: (ELSE {System.out.println("Decision: ELSE");} body)? 
 	;
 
 loopDo
@@ -111,13 +115,13 @@ for
 	;
 
 forBody
-    : (statement | loopCondition)*
-    ;
+	: (statement | loopCondition)*
+	;
 
 loopCondition
 	: NEXT {System.out.println("Control: NEXT");} (IF condition)? SEMICOLON
-    | BREAK {System.out.println("Control: BREAK");} (IF condition)? SEMICOLON
-    ;
+	| BREAK {System.out.println("Control: BREAK");} (IF condition)? SEMICOLON
+	;
 
 rangeGenerator
 	: expression RANGE expression
@@ -134,103 +138,102 @@ expression
 	: expressionAppend
 	;
 
-// !priority: 11
+// ! priority: 11
 expressionAppend
 	: expressionLogicalOr expressionAppend_
-    ;
+	;
 
 expressionAppend_
-    : APPEND expressionLogicalOr { System.out.println("Operator: " + $APPEND.text); } expressionAppend_
-	// this one is special case it's wrong but it's according the skype msg
-    | epsilon
-    ;
+	: APPEND expressionLogicalOr { System.out.println("Operator: " + $APPEND.text); } expressionAppend_
+	| epsilon
+	;
 
-// !priority: 10
+// ! priority: 10
 expressionLogicalOr
-    : expressionLogicalAnd expressionLogicalOr_
-    ;
+	: expressionLogicalAnd expressionLogicalOr_
+	;
 
 expressionLogicalOr_
-    : OR expressionLogicalAnd { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
-    | epsilon
-    ;
+	: OR expressionLogicalAnd { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
+	| epsilon
+	;
 
-// !priority: 9
+// ! priority: 9
 expressionLogicalAnd
-    : expressionEqNoteq expressionLogicalAnd_
-    ;
+	: expressionEqNoteq expressionLogicalAnd_
+	;
 
 expressionLogicalAnd_
-    : AND expressionEqNoteq { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
-    | epsilon
-    ;
+	: AND expressionEqNoteq { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
+	| epsilon
+	;
 
-// !priority: 8
+// ! priority: 8
 expressionEqNoteq
-    : expressionCompare expressionEqNoteq_
-    ;
+	: expressionCompare expressionEqNoteq_
+	;
 
 expressionEqNoteq_
-    : EQ  expressionCompare { System.out.println("Operator: " + $EQ.text); } expressionEqNoteq_
-    | NEQ expressionCompare { System.out.println("Operator: " + $NEQ.text); } expressionEqNoteq_
-    | epsilon
-    ;
+	: EQ expressionCompare { System.out.println("Operator: " + $EQ.text); } expressionEqNoteq_
+	| NEQ expressionCompare { System.out.println("Operator: " + $NEQ.text); } expressionEqNoteq_
+	| epsilon
+	;
 
-// !priority: 7
+// ! priority: 7
 expressionCompare
-    : expressionAddSub expressionCompare_
-    ;
+	: expressionAddSub expressionCompare_
+	;
 
 expressionCompare_
 	: GTR expressionAddSub { System.out.println("Operator: " + $GTR.text); } expressionCompare_
 	| GEQ expressionAddSub { System.out.println("Operator: " + $GEQ.text); } expressionCompare_
 	| LES expressionAddSub { System.out.println("Operator: " + $LES.text); } expressionCompare_
 	| LEQ expressionAddSub { System.out.println("Operator: " + $LEQ.text); } expressionCompare_
-    | epsilon
-    ;
+	| epsilon
+	;
 
-// !priority: 6
+// ! priority: 6
 expressionAddSub
-    : expressionMultDivMod expressionAddSub_
-    ;
+	: expressionMultDivMod expressionAddSub_
+	;
 
 expressionAddSub_
 	: PLUS expressionMultDivMod { System.out.println("Operator: " + $PLUS.text); } expressionAddSub_
 	| MINUS expressionMultDivMod { System.out.println("Operator: " + $MINUS.text); } expressionAddSub_
-    | epsilon
-    ;
+	| epsilon
+	;
 
-// !priority: 5
+// ! priority: 5
 expressionMultDivMod
-    : expressionNotMinus expressionMultDivMod_
-    ;
+	: expressionNotMinus expressionMultDivMod_
+	;
 
 expressionMultDivMod_
-    : MULT expressionNotMinus { System.out.println("Operator: " + $MULT.text); } expressionMultDivMod_
-    | DIV expressionNotMinus { System.out.println("Operator: " + $DIV.text); }  expressionMultDivMod_
-    | MOD  expressionNotMinus { System.out.println("Operator: " + $MOD.text); } expressionMultDivMod_
-    | epsilon
-    ;
+	: MULT expressionNotMinus { System.out.println("Operator: " + $MULT.text); } expressionMultDivMod_
+	| DIV expressionNotMinus { System.out.println("Operator: " + $DIV.text); } expressionMultDivMod_
+	| MOD expressionNotMinus { System.out.println("Operator: " + $MOD.text); } expressionMultDivMod_
+	| epsilon
+	;
 
-// !priority: 4
+// ! priority: 4
 expressionNotMinus
-    : NOT expressionNotMinus { System.out.println("Operator: " + $NOT.text); }
-    | MINUS expressionNotMinus { System.out.println("Operator: " + $MINUS.text); }
-    | inPlaceAssignment
-    ;
+	: NOT expressionNotMinus { System.out.println("Operator: " + $NOT.text); }
+	| MINUS expressionNotMinus { System.out.println("Operator: " + $MINUS.text); }
+	| inPlaceAssignment
+	;
 
-// !priority: 3
+// ! priority: 3
 inPlaceAssignment
-    : value inPlaceAssignment_
-    ;
+	: value inPlaceAssignment_
+	;
 
 inPlaceAssignment_
-    : INC { System.out.println("Operator: " + $INC.text); }
+	: INC { System.out.println("Operator: " + $INC.text); }
 	| DEC { System.out.println("Operator: " + $DEC.text); }
 	| epsilon
 	;
 
-// !priority: 1, 2
+// ! priority: 1, 2
 value
 	: funcCall
 	| primitive
@@ -242,9 +245,9 @@ value
 	;
 
 funcptr
-    : method
-    | lambdaFunc
-    ;
+	: method
+	| lambdaFunc
+	;
 
 par_exp
 	: LPAR expression RPAR
@@ -257,18 +260,19 @@ listDerefrencing
 funcCall
 	: builtInFunc funcCallArgs_
 	| IDENTIFIER funcCallArgs
-    | lambdaFunc funcCallArgs_
-    // | method funcCallArgs_ // NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment this line
+	| lambdaFunc funcCallArgs_
+	// | method funcCallArgs_ 
+	// NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment above line
 	;
 
 funcCallArgs
-	: {System.out.println("FunctionCall");} funcCallArgs_ // the reason for separating them is that
-                                                          // built-in functions shouldn't use this action code
+	: {System.out.println("FunctionCall");} funcCallArgs_
+	// the reason for separating them is that built-in functions shouldn't use the "Function Call" action code
 	;
 
 funcCallArgs_
-    : LPAR ((expression COMMA)* expression)? RPAR
-    ;
+	: LPAR ((expression COMMA)* expression)? RPAR
+	;
 
 builtInFunc
 	: {System.out.println("Built-In: PUTS");} PUTS
