@@ -1,5 +1,4 @@
 def main()
     l = (a + (x * [1, 2, a()])) + a[0][0] * 25 + (-25) / 45 + !(7) + (45) && (65 - (((a()++) + a++) - a[0]++));
-    # the version you gave was !7 i changed it to !(7) if it's not right please fix it
     -> (a, b) { return a + b; } (1, 2);
 end

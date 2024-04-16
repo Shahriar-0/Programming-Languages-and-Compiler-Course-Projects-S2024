@@ -1,0 +1,61 @@
+def sum(a, b)
+    return a + b;
+end
+
+def sub(a, b)
+    return a - b;
+end
+
+def mul(a, [b = 2])
+    return a * b;
+end
+
+def div(a, [b = 2])
+    =begin
+    meow 
+    this life
+    doesnt worth it
+    does it
+    =end
+    return a / b;
+end
+
+
+pattern catalan(n)
+    | (n < 0) = 0
+    | (n == 0) = 1 # laugh my friend
+    | (n > 1) = div(mul(2 * n, 2 * n - 1), mul(n + 1))
+;
+
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib(n-1) + fib(n-2)
+;
+
+
+def doFunc(arg1, [arg2 = 10, rand = 1, fptr = null])
+    if (fptr == null)
+        if (rand == 1)
+            fptr = method(:sum);
+        else
+            fptr = method(:sub);
+        end
+    puts("Hi there" << arg1 << arg2);
+    return fptr(arg1, arg2);
+end
+
+def main()
+    meow = catalan.match(5);
+    puts(meow);
+    meow = fib.match(5);
+    puts(meow << "meow");
+
+    math = doFunc(10) + doFunc(10, 20, 0) + meow++ + (((meow + 10) * 2) / 3) + ((meow == 1) || !(meow == 1)) - ((a + (x * [1, 2, a()])) + a[0][0] * 25 + (-25) / 45 + !(7) + (45) && (65 - (((a()++) + a++) - a[0]++)));
+    puts(len("meow") + len(math) + chomp("meow"));
+
+    # i'm giving you a night call
+    # to tell you how i feel
+
+    return 0;
+end

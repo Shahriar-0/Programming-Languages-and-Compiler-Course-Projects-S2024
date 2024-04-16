@@ -1,0 +1,27 @@
+FuncDec: sum
+RETURN
+Operator: +
+FuncDec: sub
+RETURN
+Operator: -
+FuncDec: mul
+RETURN
+Operator: *
+FuncDec: div
+RETURN
+Operator: /
+FuncDec: catalan
+line 24:14 mismatched input '\n    |' expecting {'puts', 'len', 'push', 'chop', 'chomp', 'method', ';', '->', '(', '[', '-', 'true', 'false', INT_VAL, FLOAT_VAL, STRING_VAL, 'end', 'return', 'if', 'loop', 'for', '!', IDENTIFIER}
+PatternDec: fib
+Operator: ==
+Operator: ==
+Operator: >
+FunctionCall
+Operator: -
+FunctionCall
+Operator: -
+Operator: +
+FuncDec: doFunc
+RETURN
+FunctionCall
+line 39:3 extraneous input '<EOF>' expecting {'pattern', 'def'}
