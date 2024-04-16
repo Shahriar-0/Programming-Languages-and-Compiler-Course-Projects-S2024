@@ -154,7 +154,7 @@ expressionLogicalOr
 	;
 
 expressionLogicalOr_
-	: OR expressionLogicalAnd { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
+	: OR LPAR expressionLogicalAnd RPAR { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
 	| epsilon
 	;
 
@@ -164,7 +164,7 @@ expressionLogicalAnd
 	;
 
 expressionLogicalAnd_
-	: AND expressionEqNoteq { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
+	: AND LPAR expressionEqNoteq RPAR { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
 	| epsilon
 	;
 
@@ -217,7 +217,7 @@ expressionMultDivMod_
 
 // ! priority: 4
 expressionNotMinus
-	: NOT expressionNotMinus { System.out.println("Operator: " + $NOT.text); }
+	: NOT LPAR expressionNotMinus RPAR { System.out.println("Operator: " + $NOT.text); }
 	| MINUS expressionNotMinus { System.out.println("Operator: " + $MINUS.text); }
 	| inPlaceAssignment
 	;
