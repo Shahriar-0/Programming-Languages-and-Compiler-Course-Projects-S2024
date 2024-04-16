@@ -13,8 +13,8 @@ Decision: IF
 Operator: !=
 FunctionCall
 Operator: <<
-Operator: <<
 Operator: *
+Operator: <<
 Operator: +
 Operator: +
 Decision: ELSE

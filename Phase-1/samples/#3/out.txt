@@ -3,11 +3,11 @@ FunctionCall
 Operator: *
 Operator: +
 Operator: *
+Operator: +
 Operator: -
 Operator: /
+Operator: +
 Operator: !
-Operator: +
-Operator: +
 Operator: +
 Operator: +
 FunctionCall
