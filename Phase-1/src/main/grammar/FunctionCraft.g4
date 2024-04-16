@@ -14,7 +14,7 @@ funcDef
 	;
 
 pattern
-	: PATTERN (patterName = IDENTIFIER) {System.out.println("PatternDec: " + $patterName.text);} funcArgs patternBody SEMICOLON 
+	: PATTERN (patterName = IDENTIFIER) {System.out.println("PatternDec: " + $patterName.text);} funcArgs patternBody SEMICOLON
 	;
 
 main
@@ -53,7 +53,7 @@ statement
 	: assignment SEMICOLON
 	| expression SEMICOLON
 	| controlFlow
-    | SEMICOLON 
+    | SEMICOLON
 	;
 // case1: a (= | += | -= | *= | /= | %=) b
 // case2: all expressions
@@ -118,7 +118,7 @@ loopCondition
 	: NEXT {System.out.println("Control: NEXT");} (IF condition)? SEMICOLON
     | BREAK {System.out.println("Control: BREAK");} (IF condition)? SEMICOLON
     ;
-    
+
 rangeGenerator
 	: expression RANGE expression
 	;
@@ -140,7 +140,7 @@ expressionAppend
     ;
 
 expressionAppend_
-    : APPEND { System.out.println("Operator: " + $APPEND.text); } expressionLogicalOr expressionAppend_ 
+    : APPEND expressionLogicalOr { System.out.println("Operator: " + $APPEND.text); } expressionAppend_
 	// this one is special case it's wrong but it's according the skype msg
     | epsilon
     ;
@@ -151,7 +151,7 @@ expressionLogicalOr
     ;
 
 expressionLogicalOr_
-    : OR expressionLogicalAnd expressionLogicalOr_ { System.out.println("Operator: " + $OR.text); }
+    : OR expressionLogicalAnd { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
     | epsilon
     ;
 
@@ -161,7 +161,7 @@ expressionLogicalAnd
     ;
 
 expressionLogicalAnd_
-    : AND expressionEqNoteq expressionLogicalAnd_ { System.out.println("Operator: " + $AND.text); }
+    : AND expressionEqNoteq { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
     | epsilon
     ;
 
@@ -171,8 +171,8 @@ expressionEqNoteq
     ;
 
 expressionEqNoteq_
-    : EQ  expressionCompare expressionEqNoteq_ { System.out.println("Operator: " + $EQ.text); }
-    | NEQ expressionCompare expressionEqNoteq_ { System.out.println("Operator: " + $NEQ.text); }
+    : EQ  expressionCompare { System.out.println("Operator: " + $EQ.text); } expressionEqNoteq_
+    | NEQ expressionCompare { System.out.println("Operator: " + $NEQ.text); } expressionEqNoteq_
     | epsilon
     ;
 
@@ -182,10 +182,10 @@ expressionCompare
     ;
 
 expressionCompare_
-	: GTR expressionAddSub expressionCompare_ { System.out.println("Operator: " + $GTR.text); }
-	| GEQ expressionAddSub expressionCompare_ { System.out.println("Operator: " + $GEQ.text); }
-	| LES expressionAddSub expressionCompare_ { System.out.println("Operator: " + $LES.text); }
-	| LEQ expressionAddSub expressionCompare_ { System.out.println("Operator: " + $LEQ.text); }
+	: GTR expressionAddSub { System.out.println("Operator: " + $GTR.text); } expressionCompare_
+	| GEQ expressionAddSub { System.out.println("Operator: " + $GEQ.text); } expressionCompare_
+	| LES expressionAddSub { System.out.println("Operator: " + $LES.text); } expressionCompare_
+	| LEQ expressionAddSub { System.out.println("Operator: " + $LEQ.text); } expressionCompare_
     | epsilon
     ;
 
@@ -195,8 +195,8 @@ expressionAddSub
     ;
 
 expressionAddSub_
-	: PLUS expressionMultDivMod expressionAddSub_ { System.out.println("Operator: " + $PLUS.text); }
-	| MINUS expressionMultDivMod expressionAddSub_ { System.out.println("Operator: " + $MINUS.text); }
+	: PLUS expressionMultDivMod { System.out.println("Operator: " + $PLUS.text); } expressionAddSub_
+	| MINUS expressionMultDivMod { System.out.println("Operator: " + $MINUS.text); } expressionAddSub_
     | epsilon
     ;
 
@@ -206,9 +206,9 @@ expressionMultDivMod
     ;
 
 expressionMultDivMod_
-    : MULT expressionNotMinus expressionMultDivMod_ { System.out.println("Operator: " + $MULT.text); }
-    | DIV  expressionNotMinus expressionMultDivMod_ { System.out.println("Operator: " + $DIV.text); }
-    | MOD  expressionNotMinus expressionMultDivMod_ { System.out.println("Operator: " + $MOD.text); }
+    : MULT expressionNotMinus { System.out.println("Operator: " + $MULT.text); } expressionMultDivMod_
+    | DIV expressionNotMinus { System.out.println("Operator: " + $DIV.text); }  expressionMultDivMod_
+    | MOD  expressionNotMinus { System.out.println("Operator: " + $MOD.text); } expressionMultDivMod_
     | epsilon
     ;
 
@@ -225,13 +225,9 @@ inPlaceAssignment
     ;
 
 inPlaceAssignment_
-    : INC { System.out.println("Operator: " + $INC.text); } 
-	| DEC { System.out.println("Operator: " + $DEC.text); } 
+    : INC { System.out.println("Operator: " + $INC.text); }
+	| DEC { System.out.println("Operator: " + $DEC.text); }
 	| epsilon
-	;
-
-listDerefrencing
-	: (IDENTIFIER | funcCall) (LBRACKET expressionAddSub RBRACKET)+ // no logical
 	;
 
 // !priority: 1, 2
@@ -254,15 +250,19 @@ par_exp
 	: LPAR expression RPAR
 	;
 
+listDerefrencing
+	: (IDENTIFIER | funcCall) (LBRACKET expressionAddSub RBRACKET)+ // no logical
+	;
+
 funcCall
-	: builtInFunc funcCallArgs_ 
-	| IDENTIFIER funcCallArgs 
-    | lambdaFunc funcCallArgs_ 
+	: builtInFunc funcCallArgs_
+	| IDENTIFIER funcCallArgs
+    | lambdaFunc funcCallArgs_
     // | method funcCallArgs_ // NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment this line
 	;
 
 funcCallArgs
-	: {System.out.println("FunctionCall");} funcCallArgs_ // the reason for separating them is that 
+	: {System.out.println("FunctionCall");} funcCallArgs_ // the reason for separating them is that
                                                           // built-in functions shouldn't use this action code
 	;
 
@@ -280,7 +280,7 @@ builtInFunc
 	;
 
 lambdaFunc
-	: ARROW {System.out.println("Structure: LAMBDA");} funcArgs LBRACE funcBody RBRACE 
+	: ARROW {System.out.println("Structure: LAMBDA");} funcArgs LBRACE funcBody RBRACE
 	;
 
 method
@@ -288,7 +288,7 @@ method
 	;
 
 patternMatch
-	: IDENTIFIER DOT MATCH 
+	: IDENTIFIER DOT MATCH
 	;
 
 primitive
@@ -402,7 +402,7 @@ AND:          '&&';
 OR:           '||';
 NOT:          '!';
 APPEND:       '<<';
-EQ:           '==' ; 
+EQ:           '==' ;
 NEQ:          '!=';
 GTR:          '>';
 GEQ:          '>=';
