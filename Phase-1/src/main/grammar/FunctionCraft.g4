@@ -128,7 +128,7 @@ rangeGenerator
 	;
 
 condition
-	: par_exp
+	: paranthesisExpression
 	;
 // ---------------------- End Control Flows ----------------------
 
@@ -150,21 +150,23 @@ expressionAppend_
 
 // ! priority: 10
 expressionLogicalOr
-	: expressionLogicalAnd expressionLogicalOr_
+	: paranthesisExpression expressionLogicalOr_
+	| expressionLogicalAnd
 	;
 
 expressionLogicalOr_
-	: OR LPAR expressionLogicalAnd RPAR { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
+	: OR paranthesisExpression { System.out.println("Operator: " + $OR.text); } expressionLogicalOr_
 	| epsilon
 	;
 
 // ! priority: 9
 expressionLogicalAnd
-	: expressionEqNoteq expressionLogicalAnd_
+	: paranthesisExpression expressionLogicalAnd_
+	| expressionEqNoteq
 	;
 
 expressionLogicalAnd_
-	: AND LPAR expressionEqNoteq RPAR { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
+	: AND paranthesisExpression { System.out.println("Operator: " + $AND.text); } expressionLogicalAnd_
 	| epsilon
 	;
 
@@ -217,7 +219,7 @@ expressionMultDivMod_
 
 // ! priority: 4
 expressionNotMinus
-	: NOT LPAR expressionNotMinus RPAR { System.out.println("Operator: " + $NOT.text); }
+	: NOT paranthesisExpression { System.out.println("Operator: " + $NOT.text); }
 	| MINUS expressionNotMinus { System.out.println("Operator: " + $MINUS.text); }
 	| inPlaceAssignment
 	;
@@ -240,7 +242,7 @@ value
 	| IDENTIFIER
 	| listDerefrencing
 	| method
-	| par_exp
+	| paranthesisExpression
 	| funcptr
 	;
 
@@ -249,7 +251,7 @@ funcptr
 	| lambdaFunc
 	;
 
-par_exp
+paranthesisExpression
 	: LPAR expression RPAR
 	;
 
