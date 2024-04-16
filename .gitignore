@@ -17,6 +17,7 @@ target/
 
 # Package Files #
 *.jar
+!Phase-1/utilities/antlr-4.13.1-complete.jar
 *.war
 *.nar
 *.ear
@@ -30,12 +31,17 @@ replay_pid*
 
 # vscode
 .vscode/
+!Phase-1/.vscode
 
 # Intellij
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .idea/
+!Phase-1/.idea
+Phase-1/.idea/codeStyles
+Phase-1/.idea/sonarlint
+Phase-1/.idea/checkstyle-idea.xml
 *.iws
 *.iml
 *.ipr

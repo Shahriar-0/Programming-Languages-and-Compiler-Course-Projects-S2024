@@ -1,15 +1,21 @@
 def list_printer(l, i)
 end
 
+#helljlfdjlekjlvjmed;
+
 def printList(l, i)
     puts(l[i][0]);
     puts(l[i][1]);
-    printList(l, i - 1);
+    printList(l, i - 1); # helllllo
 end
 
 def f2 (a, [b = 10, c = 20])
     return a + b + c;
 end
+
+=begin
+i don't know what is wrong with me
+=end
 
 def create2dList(l, i, j)
     if(i != 10)
