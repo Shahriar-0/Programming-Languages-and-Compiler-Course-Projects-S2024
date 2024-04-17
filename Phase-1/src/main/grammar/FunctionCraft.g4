@@ -90,16 +90,16 @@ controlFlow
 	;
 
 if
-	: IF {System.out.println("Decision: IF");} condition body elif else END 
-	// NOTE: if the bodies can be empty change the body to nonEmptyBody
+	: IF {System.out.println("Decision: IF");} condition body elif else END
+	// NOTE: if the bodies can not be empty change the body to nonEmptyBody
 	;
 
 elif
-	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)* 
+	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)*
 	;
 
 else
-	: (ELSE {System.out.println("Decision: ELSE");} body)? 
+	: (ELSE {System.out.println("Decision: ELSE");} body)?
 	;
 
 loopDo
@@ -241,7 +241,6 @@ value
 	| primitive
 	| IDENTIFIER
 	| listDerefrencing
-	| method
 	| paranthesisExpression
 	| funcptr
 	;
@@ -260,11 +259,17 @@ listDerefrencing
 	;
 
 funcCall
-	: builtInFunc funcCallArgs_
-	| IDENTIFIER funcCallArgs
-	| lambdaFunc funcCallArgs_
-	// | method funcCallArgs_ 
-	// NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment above line
+	: builtInFunc funcCallArgs_ funcCall_
+	| IDENTIFIER (LBRACKET expressionAddSub RBRACKET)* funcCallArgs funcCall_
+	| lambdaFunc funcCallArgs_ funcCall_
+	| method funcCallArgs funcCall_
+	;
+
+
+funcCall_
+	: funcCallArgs funcCall_
+	| (LBRACKET expressionAddSub RBRACKET)+ funcCallArgs funcCall_
+	| epsilon
 	;
 
 funcCallArgs
@@ -424,4 +429,3 @@ COMMENT:      '#' ~[\r\n]* -> skip;
 MLCOMMENT:    '=begin' .*? '=end' -> skip;
 WS:           [ \t\r\n] -> skip;
 // ---------------------- end identifiers ----------------------
-

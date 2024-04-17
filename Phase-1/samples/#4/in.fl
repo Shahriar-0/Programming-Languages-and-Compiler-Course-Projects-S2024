@@ -41,6 +41,7 @@ def doFunc(arg1, [arg2 = 10, rand = 1, fptr = null])
         else
             fptr = method(:sub);
         end
+    end
     puts("Hi there" << arg1 << arg2);
     return fptr(arg1, arg2);
 end
@@ -51,7 +52,8 @@ def main()
     meow = fib.match(5);
     puts(meow << "meow");
 
-    math = doFunc(10) + doFunc(10, 20, 0) + meow++ + (((meow + 10) * 2) / 3) + ((meow == 1) || !(meow == 1)) - ((a + (x * [1, 2, a()])) + a[0][0] * 25 + (-25) / 45 + !(7) + (45) && (65 - (((a()++) + a++) - a[0]++)));
+    math = doFunc(10) + doFunc(10, 20, 0) + meow++ + 
+           (((meow + 10) * 2) / 3) + ((meow == 1) || (!(x == 1)))
     puts(len("meow") + len(math) + chomp("meow"));
 
     # i'm giving you a night call
