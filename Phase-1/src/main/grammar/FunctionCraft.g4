@@ -91,7 +91,7 @@ controlFlow
 
 if
 	: IF {System.out.println("Decision: IF");} condition body elif else END
-	// NOTE: if the bodies can not be empty change the body to nonEmptyBody
+	// NOTE: if the bodies can be empty change the body to nonEmptyBody
 	;
 
 elif
@@ -241,6 +241,7 @@ value
 	| primitive
 	| IDENTIFIER
 	| listDerefrencing
+	| method
 	| paranthesisExpression
 	| funcptr
 	;
@@ -259,17 +260,11 @@ listDerefrencing
 	;
 
 funcCall
-	: builtInFunc funcCallArgs_ funcCall_
-	| IDENTIFIER (LBRACKET expressionAddSub RBRACKET)* funcCallArgs funcCall_
-	| lambdaFunc funcCallArgs_ funcCall_
-	| method funcCallArgs funcCall_
-	;
-
-
-funcCall_
-	: funcCallArgs funcCall_
-	| (LBRACKET expressionAddSub RBRACKET)+ funcCallArgs funcCall_
-	| epsilon
+	: builtInFunc funcCallArgs_
+	| IDENTIFIER funcCallArgs
+	| lambdaFunc funcCallArgs_
+	// | method funcCallArgs_
+	// NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment above line
 	;
 
 funcCallArgs
