@@ -259,12 +259,18 @@ listDerefrencing
 	;
 
 funcCall
-	: builtInFunc funcCallArgs_
-	| IDENTIFIER funcCallArgs
-	| lambdaFunc funcCallArgs_
-	// | method funcCallArgs_
-	// NOTE: if you want to be able to stream a method (i.e. method(:name)(args)) you should uncomment above line
+	: builtInFunc funcCallArgs_ funcCall_
+	| IDENTIFIER (LBRACKET expressionAddSub RBRACKET)* funcCallArgs funcCall_
+	| lambdaFunc funcCallArgs_ funcCall_
+    | method funcCallArgs funcCall_
 	;
+
+funcCall_
+    :
+    funcCallArgs funcCall_
+    | (LBRACKET expressionAddSub RBRACKET)+ funcCallArgs funcCall_
+    | epsilon
+    ;
 
 funcCallArgs
 	: {System.out.println("FunctionCall");} funcCallArgs_
