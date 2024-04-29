@@ -10,7 +10,7 @@ program
 	;
 
 funcDef
-	: DEF (funcName = IDENTIFIER) {System.out.println("FuncDec: " + $funcName.text);} funcArgs funcBody END
+	: DEF (funcName = IDENTIFIER) {System.out.println("FuncDec: " + $funcName.text);} funcArgs scope END
 	;
 
 pattern
@@ -18,7 +18,7 @@ pattern
 	;
 
 main
-	: DEF MAIN {System.out.println("MAIN");} LPAR RPAR funcBody END
+	: DEF MAIN {System.out.println("MAIN");} LPAR RPAR scope END
 	;
 
 funcArgs
@@ -37,7 +37,7 @@ patternBody
 	: (PATTERNIND condition ASSIGN expression)+
 	;
 
-funcBody
+scope
 	: body return? // body! return for your own sake, the world is not functioning as you wish
 	;
 
@@ -90,16 +90,15 @@ controlFlow
 	;
 
 if
-	: IF {System.out.println("Decision: IF");} condition body elif else END
-	// NOTE: if the bodies can be empty change the body to nonEmptyBody
+	: IF {System.out.println("Decision: IF");} condition scope elif else END
 	;
 
 elif
-	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition body)*
+	: (ELSEIF {System.out.println("Decision: ELSEIF");} condition scope)*
 	;
 
 else
-	: (ELSE {System.out.println("Decision: ELSE");} body)?
+	: (ELSE {System.out.println("Decision: ELSE");} scope)?
 	;
 
 loopDo
@@ -107,7 +106,7 @@ loopDo
 	;
 
 loopBody
-	: (statement | loopCondition)*
+	: (statement | loopCondition)* return?
 	;
 
 for
@@ -286,7 +285,7 @@ builtInFunc
 	;
 
 lambdaFunc
-	: ARROW {System.out.println("Structure: LAMBDA");} funcArgs LBRACE funcBody RBRACE
+	: ARROW {System.out.println("Structure: LAMBDA");} funcArgs LBRACE scope RBRACE
 	;
 
 method
