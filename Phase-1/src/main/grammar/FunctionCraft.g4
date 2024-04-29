@@ -102,10 +102,10 @@ else
 	;
 
 loopDo
-	: LOOP {System.out.println("Loop: DO");} DO loopBody END
+	: LOOP {System.out.println("Loop: DO");} DO loopScope END
 	;
 
-loopBody
+loopScope
 	: (statement | loopCondition)* return?
 	;
 
