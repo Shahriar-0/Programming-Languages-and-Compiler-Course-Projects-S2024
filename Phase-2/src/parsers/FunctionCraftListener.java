@@ -1,14 +1,13 @@
 // Generated from D:/DEATH/Programming-Languages-and-Compiler-Course-Projects/Phase-2/src/main/grammar/FunctionCraft.g4 by ANTLR 4.13.1
 package parsers;
 
-    import main.ast.nodes.*;
-    import main.ast.nodes.declaration.*;
-    import main.ast.nodes.statement.*;
-    import main.ast.nodes.expression.*;
-    import main.ast.nodes.expression.operators.*;
-    import main.ast.nodes.expression.value.*;
-    import main.ast.nodes.expression.value.primitive.*;
-
+import main.ast.nodes.*;
+import main.ast.nodes.declaration.*;
+import main.ast.nodes.expression.*;
+import main.ast.nodes.expression.operators.*;
+import main.ast.nodes.expression.value.*;
+import main.ast.nodes.expression.value.primitive.*;
+import main.ast.nodes.statement.*;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -30,22 +29,30 @@ public interface FunctionCraftListener extends ParseTreeListener {
 	 * Enter a parse tree produced by {@link FunctionCraftParser#functionDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunctionDeclaration(FunctionCraftParser.FunctionDeclarationContext ctx);
+	void enterFunctionDeclaration(
+		FunctionCraftParser.FunctionDeclarationContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#functionDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunctionDeclaration(FunctionCraftParser.FunctionDeclarationContext ctx);
+	void exitFunctionDeclaration(
+		FunctionCraftParser.FunctionDeclarationContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#functionArgumentsDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunctionArgumentsDeclaration(FunctionCraftParser.FunctionArgumentsDeclarationContext ctx);
+	void enterFunctionArgumentsDeclaration(
+		FunctionCraftParser.FunctionArgumentsDeclarationContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#functionArgumentsDeclaration}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunctionArgumentsDeclaration(FunctionCraftParser.FunctionArgumentsDeclarationContext ctx);
+	void exitFunctionArgumentsDeclaration(
+		FunctionCraftParser.FunctionArgumentsDeclarationContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#patternMatching}.
 	 * @param ctx the parse tree
@@ -70,12 +77,16 @@ public interface FunctionCraftListener extends ParseTreeListener {
 	 * Enter a parse tree produced by {@link FunctionCraftParser#functionArguments}.
 	 * @param ctx the parse tree
 	 */
-	void enterFunctionArguments(FunctionCraftParser.FunctionArgumentsContext ctx);
+	void enterFunctionArguments(
+		FunctionCraftParser.FunctionArgumentsContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#functionArguments}.
 	 * @param ctx the parse tree
 	 */
-	void exitFunctionArguments(FunctionCraftParser.FunctionArgumentsContext ctx);
+	void exitFunctionArguments(
+		FunctionCraftParser.FunctionArgumentsContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#returnStatement}.
 	 * @param ctx the parse tree
@@ -180,12 +191,16 @@ public interface FunctionCraftListener extends ParseTreeListener {
 	 * Enter a parse tree produced by {@link FunctionCraftParser#matchPatternStatement}.
 	 * @param ctx the parse tree
 	 */
-	void enterMatchPatternStatement(FunctionCraftParser.MatchPatternStatementContext ctx);
+	void enterMatchPatternStatement(
+		FunctionCraftParser.MatchPatternStatementContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#matchPatternStatement}.
 	 * @param ctx the parse tree
 	 */
-	void exitMatchPatternStatement(FunctionCraftParser.MatchPatternStatementContext ctx);
+	void exitMatchPatternStatement(
+		FunctionCraftParser.MatchPatternStatementContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#chopStatement}.
 	 * @param ctx the parse tree
@@ -260,52 +275,72 @@ public interface FunctionCraftListener extends ParseTreeListener {
 	 * Enter a parse tree produced by {@link FunctionCraftParser#eqaulityExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterEqaulityExpression(FunctionCraftParser.EqaulityExpressionContext ctx);
+	void enterEqaulityExpression(
+		FunctionCraftParser.EqaulityExpressionContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#eqaulityExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitEqaulityExpression(FunctionCraftParser.EqaulityExpressionContext ctx);
+	void exitEqaulityExpression(
+		FunctionCraftParser.EqaulityExpressionContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterRelationalExpression(FunctionCraftParser.RelationalExpressionContext ctx);
+	void enterRelationalExpression(
+		FunctionCraftParser.RelationalExpressionContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitRelationalExpression(FunctionCraftParser.RelationalExpressionContext ctx);
+	void exitRelationalExpression(
+		FunctionCraftParser.RelationalExpressionContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#additiveExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterAdditiveExpression(FunctionCraftParser.AdditiveExpressionContext ctx);
+	void enterAdditiveExpression(
+		FunctionCraftParser.AdditiveExpressionContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#additiveExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitAdditiveExpression(FunctionCraftParser.AdditiveExpressionContext ctx);
+	void exitAdditiveExpression(
+		FunctionCraftParser.AdditiveExpressionContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#multiplicativeExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterMultiplicativeExpression(FunctionCraftParser.MultiplicativeExpressionContext ctx);
+	void enterMultiplicativeExpression(
+		FunctionCraftParser.MultiplicativeExpressionContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#multiplicativeExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitMultiplicativeExpression(FunctionCraftParser.MultiplicativeExpressionContext ctx);
+	void exitMultiplicativeExpression(
+		FunctionCraftParser.MultiplicativeExpressionContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#preUnaryExpression}.
 	 * @param ctx the parse tree
 	 */
-	void enterPreUnaryExpression(FunctionCraftParser.PreUnaryExpressionContext ctx);
+	void enterPreUnaryExpression(
+		FunctionCraftParser.PreUnaryExpressionContext ctx
+	);
 	/**
 	 * Exit a parse tree produced by {@link FunctionCraftParser#preUnaryExpression}.
 	 * @param ctx the parse tree
 	 */
-	void exitPreUnaryExpression(FunctionCraftParser.PreUnaryExpressionContext ctx);
+	void exitPreUnaryExpression(
+		FunctionCraftParser.PreUnaryExpressionContext ctx
+	);
 	/**
 	 * Enter a parse tree produced by {@link FunctionCraftParser#accessExpression}.
 	 * @param ctx the parse tree

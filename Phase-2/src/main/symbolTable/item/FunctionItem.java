@@ -3,32 +3,37 @@ package main.symbolTable.item;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.symbolTable.SymbolTable;
 
-public class FunctionItem extends SymbolTableItem{
-    public static final String START_KEY = "Function:";
-    private SymbolTable functionSymbolTable;
-    private FunctionDeclaration functionDeclaration;
+public class FunctionItem extends SymbolTableItem {
 
-    public FunctionItem(FunctionDeclaration functionDeclaration){
-        this.functionDeclaration = functionDeclaration;
-        this.name = this.functionDeclaration.getFunctionName().getName();
-    }
+	public static final String START_KEY = "Function:";
+	private SymbolTable functionSymbolTable;
+	private FunctionDeclaration functionDeclaration;
 
-    public SymbolTable getFunctionSymbolTable() {
-        return functionSymbolTable;
-    }
+	public FunctionItem(FunctionDeclaration functionDeclaration) {
+		this.functionDeclaration = functionDeclaration;
+		this.name = this.functionDeclaration.getFunctionName().getName();
+	}
 
-    public void setFunctionSymbolTable(SymbolTable functionSymbolTable) {
-        this.functionSymbolTable = functionSymbolTable;
-    }
+	public SymbolTable getFunctionSymbolTable() {
+		return functionSymbolTable;
+	}
 
-    public FunctionDeclaration getFunctionDeclaration() {
-        return functionDeclaration;
-    }
+	public void setFunctionSymbolTable(SymbolTable functionSymbolTable) {
+		this.functionSymbolTable = functionSymbolTable;
+	}
 
-    public void setFunctionDeclaration(FunctionDeclaration functionDeclaration) {
-        this.functionDeclaration = functionDeclaration;
-    }
-    @Override
-    public String getKey() {return START_KEY + this.name;}
+	public FunctionDeclaration getFunctionDeclaration() {
+		return functionDeclaration;
+	}
 
+	public void setFunctionDeclaration(
+		FunctionDeclaration functionDeclaration
+	) {
+		this.functionDeclaration = functionDeclaration;
+	}
+
+	@Override
+	public String getKey() {
+		return START_KEY + this.name;
+	}
 }

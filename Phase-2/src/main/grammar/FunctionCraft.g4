@@ -1,5 +1,5 @@
 grammar FunctionCraft;
-
+// $antlr-format off
 @header{
     import main.ast.nodes.*;
     import main.ast.nodes.declaration.*;
