@@ -1,7 +1,6 @@
 package main.visitor.nameAnalyzer;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
@@ -10,10 +9,6 @@ import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
-import main.ast.nodes.expression.value.primitive.BoolValue;
-import main.ast.nodes.expression.value.primitive.FloatValue;
-import main.ast.nodes.expression.value.primitive.IntValue;
-import main.ast.nodes.expression.value.primitive.StringValue;
 import main.ast.nodes.statement.*;
 import main.compileError.CompileError;
 import main.compileError.nameErrors.*;
@@ -24,7 +19,6 @@ import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
 import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
-import main.visitor.nameAnalyzer.Utility;
 
 public class NameAnalyzer extends Visitor<Void> {
 

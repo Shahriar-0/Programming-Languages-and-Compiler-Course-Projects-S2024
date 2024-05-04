@@ -40,18 +40,12 @@ public class Graph {
 		visited.add(vertex);
 		beingVisited.add(vertex);
 
-		for (String neighbor : adjacencyList.getOrDefault(
-			vertex,
-			Collections.emptyList()
-		)) {
+		for (String neighbor : adjacencyList.getOrDefault(vertex, Collections.emptyList())) {
 			if (beingVisited.contains(neighbor)) {
 				result.add(neighbor);
 				return true;
 			}
-			if (
-				!visited.contains(neighbor) &&
-				hasCycle(neighbor, visited, beingVisited, result)
-			) {
+			if (!visited.contains(neighbor) && hasCycle(neighbor, visited, beingVisited, result)) {
 				result.add(neighbor);
 				return true;
 			}

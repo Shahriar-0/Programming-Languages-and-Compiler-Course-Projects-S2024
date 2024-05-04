@@ -2,7 +2,6 @@ package main.symbolTable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
