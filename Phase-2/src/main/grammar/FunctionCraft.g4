@@ -21,7 +21,7 @@ program returns [Program flProgram]:
 		{
 			$flProgram.addFunctionDeclaration($f.functionDeclarationRet);
 		}
-		| p = patternMatching
+		|	p = patternMatching
 			{
 				$flProgram.addPatternDeclaration($p.patternRet);
 			}
@@ -151,6 +151,7 @@ patternMatching returns [PatternDeclaration patternRet]:
 	SEMICOLLON
 	;
 
+
 main returns [MainDeclaration mainRet]:
 	{
 		$mainRet = new MainDeclaration();
@@ -168,6 +169,7 @@ main returns [MainDeclaration mainRet]:
 	}
 	END
 	;
+
 
 functionArguments returns [ArrayList<Expression> funcArgsRet]:
 	{
@@ -205,6 +207,7 @@ returnStatement returns [ReturnStatement returnStmtRet]:
 	SEMICOLLON
 	;
 
+
 ifStatement returns[IfStatement ifRet]:
 	{
 		$ifRet = new IfStatement();
@@ -215,43 +218,64 @@ ifStatement returns[IfStatement ifRet]:
 	{
 		$ifRet.setLine($i.line);
 	}
-	(c1 = condition {$ifRet.addCondition($c1.conditionRet);} | LPAR c2 = condition RPAR {$ifRet.addCondition($c2.conditionRet);})
+	(
+		c1 = condition 
+		{
+			$ifRet.addCondition($c1.conditionRet);
+		} 
+		|	LPAR 
+			c2 = condition 
+			RPAR 
+			{
+				$ifRet.addCondition($c2.conditionRet);
+			}
+	)
 
 	b = loopBody
 	{
 		tempThenStmts.addAll($b.loopStmts);
 		$ifRet.addCondition($b.loopExps);
-		if($b.loopRetStmt != null){
+		if($b.loopRetStmt != null) {
 			tempThenStmts.add($b.loopRetStmt);
 		}
 	}
-	(ELSEIF (LPAR c2 = condition RPAR | c2 = condition)
-	 {
-		$ifRet.addCondition($c2.conditionRet);
-	 }
-	 b1 = loopBody
-	 {
-		tempElseStmts.addAll($b1.loopStmts);
-		$ifRet.addCondition($b1.loopExps);
-		if($b1.loopRetStmt != null){
-			tempThenStmts.add($b1.loopRetStmt);
+	(
+		ELSEIF 
+		(
+			LPAR 
+			c2 = condition 
+			RPAR 
+			| c2 = condition
+		)
+		{
+			$ifRet.addCondition($c2.conditionRet);
 		}
-	 }
-	 )*
-	(ELSE b2 = loopBody
-	 {
-		tempElseStmts.addAll($b2.loopStmts);
-		$ifRet.addCondition($b2.loopExps);
-		if($b2.loopRetStmt != null){
-			tempThenStmts.add($b2.loopRetStmt);
+		b1 = loopBody
+		{
+			tempElseStmts.addAll($b1.loopStmts);
+			$ifRet.addCondition($b1.loopExps);
+			if($b1.loopRetStmt != null) {
+				tempThenStmts.add($b1.loopRetStmt);
+			}
 		}
-	 }
+	)*
+	(
+		ELSE 
+		b2 = loopBody
+		{
+			tempElseStmts.addAll($b2.loopStmts);
+			$ifRet.addCondition($b2.loopExps);
+			if($b2.loopRetStmt != null) {
+				tempThenStmts.add($b2.loopRetStmt);
+			}
+		}
 	)?
-	 {
+	{
 		$ifRet.setThenBody(tempThenStmts);
 		$ifRet.setElseBody(tempElseStmts);
-	 }
-	 END;
+	}
+	END
+	;
 
 condition returns [ArrayList<Expression> conditionRet]:
 	{
@@ -357,7 +381,7 @@ assignment returns [AssignStatement assignRet]:
 		  Identifier id_ = new Identifier($id.text);
 		  id_.setLine($id.line);
 		  $assignRet = new AssignStatement(access, id_, $e.expRet, op);
-		  if(access){
+		  if(access) {
 			$assignRet.setAccessListExpression($a.accessListExp);
 		  }
 		  $assignRet.setLine(line);
@@ -486,13 +510,13 @@ accessExpression returns [Expression expRet]:
 	}
 	)*
 	{
-		if(!isAccessExpression){
+		if(!isAccessExpression) {
 			$expRet = $o.expRet;
 		}
 		else{
 			AccessExpression accessExp = new AccessExpression($o.expRet, args);
 			accessExp.setIsFunctionCall(isAccessExpression);
-			if(isMultiDimentional){
+			if(isMultiDimentional) {
 
 				accessExp.setDimentionalAccess(dimentions);
 			}
