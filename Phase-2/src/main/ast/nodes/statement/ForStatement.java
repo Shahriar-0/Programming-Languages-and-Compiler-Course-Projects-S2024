@@ -10,7 +10,6 @@ public class ForStatement extends Statement {
 	private Identifier iteratorId;
 	private ArrayList<Expression> rangeExpressions = new ArrayList<>();
 	private ArrayList<Expression> loopBodyExpressions = new ArrayList<>();
-	//expressions that satisfy break or continue conditions
 	private ArrayList<Statement> loopBody = new ArrayList<>();
 	private ReturnStatement returnStatement;
 
@@ -32,16 +31,32 @@ public class ForStatement extends Statement {
 		return loopBodyExpressions;
 	}
 
+	public void setLoopBodyExpressions(ArrayList<Expression> loopBodyExpressions) {
+		this.loopBodyExpressions = loopBodyExpressions;
+	}
+
 	public ReturnStatement getReturnStatement() {
 		return returnStatement;
+	}
+
+	public void setReturnStatement(ReturnStatement returnStatement) {
+		this.returnStatement = returnStatement;
 	}
 
 	public ArrayList<Expression> getRangeExpressions() {
 		return rangeExpressions;
 	}
 
+	public void setRangeExpressions(ArrayList<Expression> rangeExpressions) {
+		this.rangeExpressions = rangeExpressions;
+	}
+
 	public ArrayList<Statement> getLoopBody() {
 		return loopBody;
+	}
+
+	public void setLoopBody(ArrayList<Statement> loopBody) {
+		this.loopBody = loopBody;
 	}
 
 	public Identifier getIteratorId() {
@@ -50,24 +65,6 @@ public class ForStatement extends Statement {
 
 	public void setIteratorId(Identifier iteratorId) {
 		this.iteratorId = iteratorId;
-	}
-
-	public void setLoopBody(ArrayList<Statement> loopBody) {
-		this.loopBody = loopBody;
-	}
-
-	public void setLoopBodyExpressions(
-		ArrayList<Expression> loopBodyExpressions
-	) {
-		this.loopBodyExpressions = loopBodyExpressions;
-	}
-
-	public void setRangeExpressions(ArrayList<Expression> rangeExpressions) {
-		this.rangeExpressions = rangeExpressions;
-	}
-
-	public void setReturnStatement(ReturnStatement returnStatement) {
-		this.returnStatement = returnStatement;
 	}
 
 	@Override

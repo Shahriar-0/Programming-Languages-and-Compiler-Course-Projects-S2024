@@ -384,7 +384,9 @@ loopDoStatement returns [LoopDoStatement loopDoRet]:
 		$loopDoRet = new LoopDoStatement($l2.loopStmts, $l2.loopExps, $l2.loopRetStmt);
 		$loopDoRet.setLine($l1.line);
 	}
-	END;
+	END
+	;
+
 
 loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps, ReturnStatement loopRetStmt]:
 	{
@@ -392,21 +394,60 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
 		$loopExps = new ArrayList<Expression>();
 		$loopRetStmt = null;
 	}
-	(s = statement {$loopStmts.add($s.stmtRet);}
-	| BREAK (IF c1 = condition{$loopExps.addAll($c1.conditionRet);})? SEMICOLLON
-	| NEXT (IF c2 = condition{$loopExps.addAll($c2.conditionRet);})? SEMICOLLON
+	(
+		s = statement 
+		{
+			$loopStmts.add($s.stmtRet);
+		}
+		|	BREAK 
+			(
+				IF 
+				c1 = condition
+				{
+					$loopExps.addAll($c1.conditionRet);
+				}
+			)? 
+			SEMICOLLON
+		|	NEXT 
+			(
+				IF 
+				c2 = condition
+				{
+					$loopExps.addAll($c2.conditionRet);
+				}
+			)? 
+			SEMICOLLON
 	)*
 	(
-	r = returnStatement {$loopRetStmt = $r.returnStmtRet;$loopRetStmt.setLine($r.returnStmtRet.getLine());}
-	)?;
+		r = returnStatement 
+		{
+			$loopRetStmt = $r.returnStmtRet;
+			$loopRetStmt.setLine($r.returnStmtRet.getLine());
+		}
+	)?
+	;
 
-forStatement returns [ForStatement forStRet]://TODO:construct forStatement node
-	f = FOR id = IDENTIFIER IN r = range
+forStatement returns [ForStatement forStRet]:
+	//[ ]: construct forStatement node and set its attributes
+	f = FOR 
+	id = IDENTIFIER
+	{
+		Identifier id_ = new Identifier($id.text);
+		id_.setLine($id.line);
+	}
+	IN 
+	r = range
 	l = loopBody
+	{
+		$forStRet = new ForStatement(id_, $r.rangeRet, $l.loopExps, $l.loopStmts, $l.loopRetStmt);
+		$forStRet.setLine($id.line);
+	}
 	END
 	;
 
-range returns [ArrayList<Expression> rangeRet]://TODO:store all expressions that a range can have in rangeRet array
+
+range returns [ArrayList<Expression> rangeRet]:
+	// [ ]: construct range node and set its attributes
 	(LPAR e1 = expression
 	DOUBLEDOT e2 = expression
 	RPAR)
