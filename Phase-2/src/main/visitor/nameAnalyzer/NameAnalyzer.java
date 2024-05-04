@@ -1,6 +1,8 @@
 package main.visitor.nameAnalyzer;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
@@ -44,7 +46,62 @@ public class NameAnalyzer extends Visitor<Void> {
 
 		return null;
 	}
-	//TODO:visit all other AST nodes and find name errors
-
 	
+	@Override
+	public Void visit(Identifier identifier) {
+		try {
+			SymbolTable.top.getItem(identifier.getName());
+		} catch (ItemNotFound e) {
+			nameErrors.add(new VariableNotDeclared(identifier.getLine(), identifier.getName()));
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(VarDeclaration varDeclaration) {
+		try {
+			SymbolTable.top.put(new VarItem(varDeclaration.getName()));
+		} catch (ItemAlreadyExists e) {
+			nameErrors.add(new IdenticalArgFunctionName(varDeclaration.getLine(), varDeclaration.getName().getName()));
+		}
+		if (varDeclaration.getDefaultVal() != null) {
+			varDeclaration.getDefaultVal().accept(this);
+		}
+		return null;
+	}
+	
+	@Override
+	public Void visit(FunctionDeclaration functionDeclaration) {
+		// the name of the function and it's parameters shouldn't be the same
+		// so we add the function to the symbol table before visiting the parameters
+		// but we also need to add it as a varItem so that we can check for the parameters
+		// with the same name as the function
+
+		// TODO: alternative solutions:
+		// 1. add the function to the symbol table after visiting the parameters
+		// 2. add the function to the symbol table before visiting the parameters, but don't add it as a varItem, 
+		//    and instead check for the parameters with the same name as the function in the symbol table
+
+		SymbolTable functionSymbolTable = new SymbolTable();
+		SymbolTable.push(functionSymbolTable);
+
+		FunctionItem functionItem = new FunctionItem(functionDeclaration);
+		functionItem.setFunctionSymbolTable(functionSymbolTable);
+
+		VarItem functionNameVarItem = new VarItem(functionDeclaration.getFunctionName());
+		try {
+			SymbolTable.top.put(functionNameVarItem);
+			SymbolTable.top.put(functionItem);
+		} catch (ItemAlreadyExists e) {
+			// we already checked for the function name in the previous visitor, so this exception should never be thrown
+		}
+		for (VarDeclaration varDeclaration : functionDeclaration.getArgs()) {
+			varDeclaration.accept(this);
+		}
+		for (Statement statement : functionDeclaration.getBody()) {
+			statement.accept(this);
+		}
+		SymbolTable.pop();
+		return null;
+	}
 }

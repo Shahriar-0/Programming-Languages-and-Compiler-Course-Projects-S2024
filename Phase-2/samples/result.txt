@@ -1,1 +1,2 @@
-Line:33-> Redefinition of function myfunc2
+Line:1-> argument re has same name with function
+Line:36-> Redefinition of function myfunc2

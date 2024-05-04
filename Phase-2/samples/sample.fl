@@ -1,3 +1,6 @@
+def re(re)
+    return;
+end
 
 def y()
     return z();

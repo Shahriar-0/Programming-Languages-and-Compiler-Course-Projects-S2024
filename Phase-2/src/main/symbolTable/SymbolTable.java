@@ -39,4 +39,9 @@ public class SymbolTable {
 		}
 		throw new ItemNotFound();
 	}
+
+	@Override
+	public String toString() {
+		return items.keySet().toString();
+	}
 }
