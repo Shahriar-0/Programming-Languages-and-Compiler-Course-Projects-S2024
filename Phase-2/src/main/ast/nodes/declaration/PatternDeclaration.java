@@ -10,29 +10,27 @@ public class PatternDeclaration extends Declaration {
 	private Identifier patternName;
 	private Identifier targetVariable;
 	private ArrayList<Expression> conditions = new ArrayList<>();
-	//Stores different condition cases
 	private ArrayList<Expression> returnExp = new ArrayList<>();
 
-	//Stores different returnExpressions associated with each condition
 	public PatternDeclaration(Identifier name, Identifier targetVariable) {
 		this.patternName = name;
 		this.targetVariable = targetVariable;
+	}
+	
+	public Identifier getPatternName() {
+		return this.patternName;
 	}
 
 	public void setPatternName(Identifier name) {
 		this.patternName = name;
 	}
-
-	public Identifier getPatternName() {
-		return this.patternName;
+	
+	public Identifier getTargetVariable() {
+		return this.targetVariable;
 	}
 
 	public void setTargetVariable(Identifier targetVariable) {
 		this.targetVariable = targetVariable;
-	}
-
-	public Identifier getTargetVariable() {
-		return this.targetVariable;
 	}
 
 	public ArrayList<Expression> getConditions() {
@@ -45,6 +43,10 @@ public class PatternDeclaration extends Declaration {
 
 	public void addCondition(Expression condition) {
 		this.conditions.add(condition);
+	}
+
+	public void addConditions(ArrayList<Expression> conditions) {
+		this.conditions.addAll(conditions);
 	}
 
 	public ArrayList<Expression> getReturnExp() {

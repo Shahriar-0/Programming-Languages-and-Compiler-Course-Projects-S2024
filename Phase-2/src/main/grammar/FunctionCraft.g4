@@ -113,15 +113,35 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
 	;
 
 
-patternMatching returns [PatternDeclaration patternRet]://TODO:cunstruct patterDeclaration node
+patternMatching returns [PatternDeclaration patternRet]:
+	//[ ]: cunstruct patterDeclaration node and set its attributes
 	pat = PATTERN
 	patternName = IDENTIFIER
-	LPAR targetVar = IDENTIFIER
+	LPAR 
+	targetVar = IDENTIFIER
+	{
+		Identifier patternName_ = new Identifier($patternName.text);
+		patternName_.setLine($patternName.line);
+		Identifier targetVar_ = new Identifier($targetVar.text);
+		targetVar_.setLine($targetVar.line);
+		$patternRet = new PatternDeclaration(patternName_, targetVar_);
+	}
 	RPAR
-	(PATTERN_MATCHING_SEPARATOR c = condition
-	 ASSIGN e = expression
-	 )*
-	SEMICOLLON;
+	(
+		PATTERN_MATCHING_SEPARATOR 
+		c = condition // This is kinda buggy since we just add all the conditions but it doesn't 
+					  // matter since we are only doing name analysis in this phase 
+		{
+			$patternRet.addConditions($c.conditionRet); 
+		}
+	 	ASSIGN
+		e = expression
+		{
+			$patternRet.addReturnExp($e.expRet);
+		}
+	)*
+	SEMICOLLON
+	;
 
 main returns [MainDeclaration mainRet]:
 	{

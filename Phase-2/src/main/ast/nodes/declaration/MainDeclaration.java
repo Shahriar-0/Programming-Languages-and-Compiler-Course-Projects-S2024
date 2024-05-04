@@ -16,7 +16,7 @@ public class MainDeclaration extends Declaration {
 		this.body = body;
 	}
 
-	public void addBody(Statement stmt) {
+	public void addStmt(Statement stmt) {
 		this.body.add(stmt);
 	}
 
