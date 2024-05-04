@@ -520,41 +520,115 @@ assignment returns [AssignStatement assignRet]:
 		int line;
 		AssignOperator op;
 	}
-	id = IDENTIFIER (a = accessList {access = true;})?
-	(as = ASSIGN {op = AssignOperator.ASSIGN;line = $as.line;}
-	| pl = PLUS_ASSIGN {op = AssignOperator.PLUS_ASSIGN;line = $pl.line;}
-	| mi = MINUS_ASSIGN {op = AssignOperator.MINUS_ASSIGN;line = $mi.line;}
-	| di = DIVIDE_ASSIGN {op = AssignOperator.DIVIDE_ASSIGN;line = $di.line;}
-	| mu = MULT_ASSIGN {op = AssignOperator.MULT_ASSIGN;line = $mu.line;}
-	| mo = MOD_ASSIGN {op = AssignOperator.MOD_ASSIGN;line = $mo.line;})
-	 e = expression SEMICOLLON
-	 {
-		  Identifier id_ = new Identifier($id.text);
-		  id_.setLine($id.line);
-		  $assignRet = new AssignStatement(access, id_, $e.expRet, op);
-		  if(access) {
+	id = IDENTIFIER 
+	{
+		Identifier id_ = new Identifier($id.text);
+		id_.setLine($id.line);
+	}
+	(
+		a = accessList 
+		{
+			access = true;
+		}
+	)?
+	(
+		as = ASSIGN 
+		{
+			op = AssignOperator.ASSIGN;
+			line = $as.line;
+		}
+
+		|	pl = PLUS_ASSIGN 
+			{
+				op = AssignOperator.PLUS_ASSIGN;
+				line = $pl.line;
+			}
+
+		|	mi = MINUS_ASSIGN 
+			{
+				op = AssignOperator.MINUS_ASSIGN;
+				line = $mi.line;
+			}
+
+		|	di = DIVIDE_ASSIGN 
+			{
+				op = AssignOperator.DIVIDE_ASSIGN;
+				line = $di.line;
+			}
+
+		|	mu = MULT_ASSIGN 
+			{
+				op = AssignOperator.MULT_ASSIGN;
+				line = $mu.line;
+			}
+
+		|	mo = MOD_ASSIGN 
+			{
+				op = AssignOperator.MOD_ASSIGN;
+				line = $mo.line;
+			}
+
+	)
+	e = expression 
+	{
+		$assignRet = new AssignStatement(access, id_, $e.expRet, op);
+		if(access) {
 			$assignRet.setAccessListExpression($a.accessListExp);
-		  }
-		  $assignRet.setLine(line);
-	 };
+		}
+		$assignRet.setLine(line);
+	}
+	SEMICOLLON
+	;
+
 
 accessList returns [Expression accessListExp]:
-	LBRACK e = expression {$accessListExp = $e.expRet;} RBRACK;
+	LBRACK 
+	e = expression 
+	{
+		$accessListExp = $e.expRet;
+	}
+	RBRACK;
+
 
 statement returns [Statement stmtRet]:
-	i = ifStatement {$stmtRet = $i.ifRet;}
-	| loop = loopDoStatement {$stmtRet = $loop.loopDoRet;}
-	| f = forStatement {$stmtRet = $f.forStRet;}
-	| puts = putsStatement {$stmtRet = $puts.putRet;}
-	| push = pushStatement {$stmtRet = $push.pushRet;}
-	| e = expression {$stmtRet = new ExpressionStatement($e.expRet);}
-	 {
-		ExpressionStatement expStmt = new ExpressionStatement($e.expRet);
-		$stmtRet = expStmt;
-		$stmtRet.setLine($e.expRet.getLine());
-	 }
-	 SEMICOLLON
-	| as = assignment {$stmtRet = $as.assignRet;}
+	i = ifStatement 
+	{
+		$stmtRet = $i.ifRet;
+	}
+	
+	|	loop = loopDoStatement 
+		{
+			$stmtRet = $loop.loopDoRet;
+		}
+	
+	|	f = forStatement 
+		{
+			$stmtRet = $f.forStRet;
+		}
+	
+	|	puts = putsStatement 
+		{
+			$stmtRet = $puts.putRet;
+		}
+	
+	|	push = pushStatement 
+		{
+			$stmtRet = $push.pushRet;
+		}
+	
+	|	(
+			e = expression 
+			{
+				$stmtRet = new ExpressionStatement($e.expRet);
+				$stmtRet.setLine($e.expRet.getLine());
+			}
+			SEMICOLLON
+		)
+
+	|	as = assignment 
+		{
+			$stmtRet = $as.assignRet;
+		}
 	;
 
 

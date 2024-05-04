@@ -9,9 +9,7 @@ public class AssignStatement extends Statement {
 	private boolean accessList;
 	private Identifier assignedId;
 	private Expression assignExpression;
-	private Expression accessListExpression;
-	//assignment can be done on an element of a list.the expression inside [] is the above attribute
-	//this case is determined by the attribute accessList
+	private Expression accessListExpression; // for accessing a specific index of an array
 	private AssignOperator assignOperator;
 
 	public AssignStatement(
@@ -30,40 +28,40 @@ public class AssignStatement extends Statement {
 		this.accessList = accessList;
 	}
 
+	public Identifier getAssignedId() {
+		return assignedId;
+	}
+
 	public void setAssignedId(Identifier assignedId) {
 		this.assignedId = assignedId;
-	}
-
-	public void setAccessListExpression(Expression accessListExpression) {
-		this.accessListExpression = accessListExpression;
-	}
-
-	public void setAssignExpression(Expression assignExpression) {
-		this.assignExpression = assignExpression;
-	}
-
-	public void setAssignOperator(AssignOperator assignOperator) {
-		this.assignOperator = assignOperator;
-	}
-
-	public AssignOperator getAssignOperator() {
-		return assignOperator;
-	}
-
-	public boolean isAccessList() {
-		return accessList;
 	}
 
 	public Expression getAccessListExpression() {
 		return accessListExpression;
 	}
 
-	public Identifier getAssignedId() {
-		return assignedId;
+	public void setAccessListExpression(Expression accessListExpression) {
+		this.accessListExpression = accessListExpression;
 	}
 
 	public Expression getAssignExpression() {
 		return assignExpression;
+	}
+
+	public void setAssignExpression(Expression assignExpression) {
+		this.assignExpression = assignExpression;
+	}
+
+	public AssignOperator getAssignOperator() {
+		return assignOperator;
+	}
+
+	public void setAssignOperator(AssignOperator assignOperator) {
+		this.assignOperator = assignOperator;
+	}
+
+	public boolean isAccessList() {
+		return accessList;
 	}
 
 	@Override
