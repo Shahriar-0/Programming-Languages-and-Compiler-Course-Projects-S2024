@@ -20,65 +20,98 @@ program returns [Program flProgram]:
 		f = functionDeclaration{$flProgram.addFunctionDeclaration($f.functionDeclarationRet);}
 		| p = patternMatching{$flProgram.addPatternDeclaration($p.patternRet);}
 	)*
-	m = main{$flProgram.setMain($m.mainRet);};
+	m = main{$flProgram.setMain($m.mainRet);}
+	;
 
-functionDeclaration returns [FunctionDeclaration functionDeclarationRet]: //TODO:construct functionDeclaration node
-	def = DEF  id = IDENTIFIER
+
+functionDeclaration returns [FunctionDeclaration functionDeclarationRet]: 
+	//[ ]: construct functionDeclaration node and set its attributes
+	{
+		$functionDeclarationRet = new FunctionDeclaration();
+	}
+	def = DEF  
+	id = IDENTIFIER 
+	{
+		Identifier id_ = new Identifier($id.text);
+		id_.setLine($id.line);
+		$functionDeclarationRet.setFunctionName(id_);
+		$functionDeclarationRet.setLine($def.line);
+	}
 	f = functionArgumentsDeclaration
+	{
+		$functionDeclarationRet.setArgs($f.argRet);
+	}
 	b = body
+	{
+		$functionDeclarationRet.setBody($b.bodyRet);
+	}
 	END
 	;
+
 
 functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
 	{
 		$argRet = new ArrayList<VarDeclaration>();
 	}
 	LPAR
-	(id1 = IDENTIFIER
-	{
-		Identifier id_ = new Identifier($id1.text);
-		id_.setLine($id1.line);
-		VarDeclaration newVarDec = new VarDeclaration(id_);
-		newVarDec.setLine($id1.line);
-		$argRet.add(newVarDec);
-	}
-	(COMMA id2 = IDENTIFIER
-		{
-			Identifier id_2 = new Identifier($id2.text);
-			id_2.setLine($id2.line);
-			VarDeclaration newVarDec2 = new VarDeclaration(id_2);
-			newVarDec2.setLine($id2.line);
-			$argRet.add(newVarDec2);
-		}
-	)*
 	(
-	COMMA LBRACK id3 = IDENTIFIER
-	 {
-		Identifier id_3 = new Identifier($id3.text);
-		id_.setLine($id3.line);
-		VarDeclaration newVarDec3 = new VarDeclaration(id_3);
-		newVarDec3.setLine($id3.line);
-	 }
-	 ASSIGN e1 = expression
-	  {
-		newVarDec3.setDefaultVal($e1.expRet);
-		$argRet.add(newVarDec3);
-	  }
-	  (COMMA id4 = IDENTIFIER
-	   {
-			Identifier id_4 = new Identifier($id4.text);
-			id_4.setLine($id4.line);
-			VarDeclaration newVarDec4 = new VarDeclaration(id_);
-			newVarDec4.setLine($id4.line);
-	   }
-	   ASSIGN e2 = expression
-	   {
-			newVarDec4.setDefaultVal($e2.expRet);
-			$argRet.add(newVarDec4);
-	   }
-	   )* RBRACK
-	)?
-	)? RPAR;
+		id1 = IDENTIFIER
+		{
+			Identifier id_ = new Identifier($id1.text);
+			id_.setLine($id1.line);
+			VarDeclaration newVarDec = new VarDeclaration(id_);
+			newVarDec.setLine($id1.line);
+			$argRet.add(newVarDec);
+		}
+		(
+			COMMA 
+			id2 = IDENTIFIER
+			{
+				Identifier id_2 = new Identifier($id2.text);
+				id_2.setLine($id2.line);
+				VarDeclaration newVarDec2 = new VarDeclaration(id_2);
+				newVarDec2.setLine($id2.line);
+				$argRet.add(newVarDec2);
+			}
+		)*
+		(
+			COMMA 
+			LBRACK 
+			id3 = IDENTIFIER
+			{
+				Identifier id_3 = new Identifier($id3.text);
+				id_.setLine($id3.line);
+				VarDeclaration newVarDec3 = new VarDeclaration(id_3);
+				newVarDec3.setLine($id3.line);
+			}
+			ASSIGN 
+			e1 = expression
+			{
+				newVarDec3.setDefaultVal($e1.expRet);
+				$argRet.add(newVarDec3);
+			}
+			(
+				COMMA 
+				id4 = IDENTIFIER
+				{
+					Identifier id_4 = new Identifier($id4.text);
+					id_4.setLine($id4.line);
+					VarDeclaration newVarDec4 = new VarDeclaration(id_);
+					newVarDec4.setLine($id4.line);
+				}
+				ASSIGN 
+				e2 = expression
+				{
+					newVarDec4.setDefaultVal($e2.expRet);
+					$argRet.add(newVarDec4);
+				}
+			)* 
+			RBRACK
+		)?
+	)? 
+	RPAR
+	;
+
 
 patternMatching returns [PatternDeclaration patternRet]://TODO:cunstruct patterDeclaration node
 	pat = PATTERN
