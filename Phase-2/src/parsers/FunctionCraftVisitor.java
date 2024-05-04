@@ -1,13 +1,14 @@
 // Generated from D:/DEATH/Programming-Languages-and-Compiler-Course-Projects/Phase-2/src/main/grammar/FunctionCraft.g4 by ANTLR 4.13.1
 package parsers;
 
-import main.ast.nodes.*;
-import main.ast.nodes.declaration.*;
-import main.ast.nodes.expression.*;
-import main.ast.nodes.expression.operators.*;
-import main.ast.nodes.expression.value.*;
-import main.ast.nodes.expression.value.primitive.*;
-import main.ast.nodes.statement.*;
+	import main.ast.nodes.*;
+	import main.ast.nodes.declaration.*;
+	import main.ast.nodes.statement.*;
+	import main.ast.nodes.expression.*;
+	import main.ast.nodes.expression.operators.*;
+	import main.ast.nodes.expression.value.*;
+	import main.ast.nodes.expression.value.primitive.*;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -29,17 +30,13 @@ public interface FunctionCraftVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunctionDeclaration(
-		FunctionCraftParser.FunctionDeclarationContext ctx
-	);
+	T visitFunctionDeclaration(FunctionCraftParser.FunctionDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#functionArgumentsDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitFunctionArgumentsDeclaration(
-		FunctionCraftParser.FunctionArgumentsDeclarationContext ctx
-	);
+	T visitFunctionArgumentsDeclaration(FunctionCraftParser.FunctionArgumentsDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#patternMatching}.
 	 * @param ctx the parse tree
@@ -95,6 +92,18 @@ public interface FunctionCraftVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPushStatement(FunctionCraftParser.PushStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#chopStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitChopStatement(FunctionCraftParser.ChopStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunctionCraftParser#chompStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitChompStatement(FunctionCraftParser.ChompStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#loopDoStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -123,21 +132,7 @@ public interface FunctionCraftVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMatchPatternStatement(
-		FunctionCraftParser.MatchPatternStatementContext ctx
-	);
-	/**
-	 * Visit a parse tree produced by {@link FunctionCraftParser#chopStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitChopStatement(FunctionCraftParser.ChopStatementContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link FunctionCraftParser#chompStatement}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitChompStatement(FunctionCraftParser.ChompStatementContext ctx);
+	T visitMatchPatternStatement(FunctionCraftParser.MatchPatternStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#assignment}.
 	 * @param ctx the parse tree
@@ -173,41 +168,31 @@ public interface FunctionCraftVisitor<T> extends ParseTreeVisitor<T> {
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitEqaulityExpression(
-		FunctionCraftParser.EqaulityExpressionContext ctx
-	);
+	T visitEqaulityExpression(FunctionCraftParser.EqaulityExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#relationalExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRelationalExpression(
-		FunctionCraftParser.RelationalExpressionContext ctx
-	);
+	T visitRelationalExpression(FunctionCraftParser.RelationalExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#additiveExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAdditiveExpression(
-		FunctionCraftParser.AdditiveExpressionContext ctx
-	);
+	T visitAdditiveExpression(FunctionCraftParser.AdditiveExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#multiplicativeExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMultiplicativeExpression(
-		FunctionCraftParser.MultiplicativeExpressionContext ctx
-	);
+	T visitMultiplicativeExpression(FunctionCraftParser.MultiplicativeExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#preUnaryExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitPreUnaryExpression(
-		FunctionCraftParser.PreUnaryExpressionContext ctx
-	);
+	T visitPreUnaryExpression(FunctionCraftParser.PreUnaryExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunctionCraftParser#accessExpression}.
 	 * @param ctx the parse tree
