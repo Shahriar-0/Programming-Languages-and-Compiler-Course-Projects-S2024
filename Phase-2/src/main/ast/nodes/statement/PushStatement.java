@@ -17,12 +17,12 @@ public class PushStatement extends Statement {
 		return this.initial;
 	}
 
-	public Expression getToBeAdded() {
-		return this.toBeAdded;
-	}
-
 	public void setInitial(Expression initial) {
 		this.initial = initial;
+	}
+
+	public Expression getToBeAdded() {
+		return this.toBeAdded;
 	}
 
 	public void setToBeAdded(Expression toBeAdded) {

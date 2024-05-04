@@ -10,12 +10,12 @@ public class ChopStatement extends Expression {
 		this.chopExpression = chopExpression;
 	}
 
-	public void setChopExpression(Expression chopExpression) {
-		this.chopExpression = chopExpression;
-	}
-
 	public Expression getChopExpression() {
 		return this.chopExpression;
+	}
+
+	public void setChopExpression(Expression chopExpression) {
+		this.chopExpression = chopExpression;
 	}
 
 	@Override

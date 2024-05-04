@@ -277,32 +277,108 @@ ifStatement returns[IfStatement ifRet]:
 	END
 	;
 
+
 condition returns [ArrayList<Expression> conditionRet]:
 	{
 		$conditionRet = new ArrayList<Expression>();
 	}
-	(LPAR e = expression
-	 {$conditionRet.add($e.expRet);}
-	 RPAR ((AND | OR) (LPAR)? c = condition
-	 {
-		$conditionRet.addAll($c.conditionRet);
-	 }
-	 (RPAR)?)*)*;
-
-putsStatement returns [PutStatement putRet]://TODO:construct putStatement node
-	p = PUTS LPAR e = expression
-	RPAR SEMICOLLON;
-
-lenStatement returns [LenStatement lenRet]: //TODO:construct lenStatement node
-	l = LEN LPAR e = expression
-	RPAR;
-
-pushStatement returns [PushStatement pushRet]://TODO:construct pushStatement node
-	p = PUSH LPAR e1 = expression COMMA e2 = expression RPAR SEMICOLLON
+	(
+		LPAR 
+		e = expression
+	 	{
+			$conditionRet.add($e.expRet);
+		}
+	 	RPAR 
+		(
+			(
+				AND 
+				|	OR
+			)
+			(
+				LPAR
+			)? 
+			c = condition
+			{
+				$conditionRet.addAll($c.conditionRet);
+			}
+			(
+				RPAR
+			)?
+		)*
+	)*
 	;
 
+
+putsStatement returns [PutStatement putRet]:
+	// [ ]: construct putStatement node and set its attributes
+	p = PUTS
+	LPAR 
+	e = expression
+	{
+		$putRet = new PutStatement($e.expRet);
+		$putRet.setLine($p.line);
+	}
+	RPAR 
+	SEMICOLLON
+	;
+
+
+lenStatement returns [LenStatement lenRet]:
+	// [ ]: construct lenStatement node and set its attributes
+	l = LEN 
+	LPAR 
+	e = expression
+	{
+		$lenRet = new LenStatement($e.expRet);
+		$lenRet.setLine($l.line);
+	}
+	RPAR
+	;
+
+
+pushStatement returns [PushStatement pushRet]:
+	// [ ]: construct pushStatement node and set its attributes
+	p = PUSH 
+	LPAR 
+	e1 = expression 
+	COMMA 
+	e2 = expression 
+	{
+		$pushRet = new PushStatement($e1.expRet, $e2.expRet);
+		$pushRet.setLine($p.line);
+	}
+	RPAR 
+	SEMICOLLON
+	;
+
+
+chopStatement returns [ChopStatement chopRet]:
+	c = CHOP 
+	LPAR 
+	e = expression 
+	{
+		$chopRet = new ChopStatement($e.expRet);
+		$chopRet.setLine($c.line);
+	}
+	RPAR
+	;
+
+
+chompStatement returns [ChompStatement chompRet]:
+	c = CHOMP 
+	LPAR 
+	e = expression 
+	{
+		$chompRet = new ChompStatement($e.expRet);
+		$chompRet.setLine($c.line);
+	}
+	RPAR
+	;
+
+
 loopDoStatement returns [LoopDoStatement loopDoRet]:
-	l1 = LOOP DO
+	l1 = LOOP 
+	DO
 	l2 = loopBody
 	{
 		$loopDoRet = new LoopDoStatement($l2.loopStmts, $l2.loopExps, $l2.loopRetStmt);
@@ -347,21 +423,6 @@ matchPatternStatement returns [MatchPatternStatement matchPatRet]://TODO:constru
 	id = IDENTIFIER DOT m = MATCH LPAR e = expression RPAR
 	;
 
-chopStatement returns [ChopStatement chopRet]:
-
-	c = CHOP LPAR e = expression RPAR
-	{
-		$chopRet = new ChopStatement($e.expRet);
-		$chopRet.setLine($c.line);
-	}
-	;
-chompStatement returns [ChompStatement chompRet]:
-	c = CHOMP LPAR e = expression RPAR
-	{
-		$chompRet = new ChompStatement($e.expRet);
-		$chompRet.setLine($c.line);
-	}
-	;
 
 assignment returns [AssignStatement assignRet]:
 	{
