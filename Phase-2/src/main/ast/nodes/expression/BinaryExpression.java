@@ -9,11 +9,7 @@ public class BinaryExpression extends Expression {
 	private Expression secondOperand;
 	private BinaryOperator binaryOperator;
 
-	public BinaryExpression(
-		Expression firstOperand,
-		Expression secondOperand,
-		BinaryOperator binaryOperator
-	) {
+	public BinaryExpression(Expression firstOperand,Expression secondOperand,BinaryOperator binaryOperator) {
 		this.firstOperand = firstOperand;
 		this.secondOperand = secondOperand;
 		this.binaryOperator = binaryOperator;
@@ -23,22 +19,22 @@ public class BinaryExpression extends Expression {
 		return binaryOperator;
 	}
 
-	public Expression getFirstOperand() {
-		return firstOperand;
-	}
-
-	public Expression getSecondOperand() {
-		return secondOperand;
-	}
-
 	public void setBinaryOperator(BinaryOperator binaryOperator) {
 		this.binaryOperator = binaryOperator;
+	}
+
+	public Expression getFirstOperand() {
+		return firstOperand;
 	}
 
 	public void setFirstOperand(Expression firstOperand) {
 		this.firstOperand = firstOperand;
 	}
 
+	public Expression getSecondOperand() {
+		return secondOperand;
+	}
+	
 	public void setSecondOperand(Expression secondOperand) {
 		this.secondOperand = secondOperand;
 	}

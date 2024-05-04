@@ -246,7 +246,7 @@ ifStatement returns[IfStatement ifRet]:
 			LPAR 
 			c2 = condition 
 			RPAR 
-			| c2 = condition
+			|	c2 = condition
 		)
 		{
 			$ifRet.addCondition($c2.conditionRet);
@@ -587,7 +587,8 @@ accessList returns [Expression accessListExp]:
 	{
 		$accessListExp = $e.expRet;
 	}
-	RBRACK;
+	RBRACK
+	;
 
 
 statement returns [Statement stmtRet]:
@@ -636,16 +637,38 @@ body returns [ArrayList<Statement> bodyRet]:
 	{
 		$bodyRet = new ArrayList<Statement>();
 	}
-	(s = statement {$bodyRet.add($s.stmtRet);})*
 	(
-	r = returnStatement {$bodyRet.add($r.returnStmtRet);}
-	)?;
+		s = statement 
+		{
+			$bodyRet.add($s.stmtRet);
+		}
+	)*
+	(
+		r = returnStatement 
+		{
+			$bodyRet.add($r.returnStmtRet);
+		}
+	)?
+	;
 
 
 expression returns [Expression expRet]:
-	e1 = expression a = APPEND e2 = eqaulityExpression
-	//TODO:construct append expression node.the left most expression is appendee and others are appended.
-	| e3 = eqaulityExpression {$expRet = $e3.expRet;};
+	// [ ]: construct append expression node. the left most expression is appendee and others are appended.
+	e1 = expression 
+	{
+		$expRet = $e1.expRet;
+	}
+	a = APPEND 
+	e2 = eqaulityExpression
+	{
+		$expRet.addAppendedExpression($e2.expRet);
+	}
+	
+	|	e3 = eqaulityExpression 
+		{
+			$expRet = $e3.expRet;
+		}
+	;
 
 
 eqaulityExpression returns[Expression expRet]:
@@ -654,10 +677,31 @@ eqaulityExpression returns[Expression expRet]:
 		BinaryOperator op;
 		int line;
 	}
-	(op1 = EQUAL {op = BinaryOperator.EQUAL;line = $op1.line;}
-	| op2 = NOT_EQUAL {op = BinaryOperator.NOT_EQUAL;line = $op2.line;}
-	) r1 = relationalExpression {$expRet = new BinaryExpression($e1.expRet, $r1.expRet, op);$expRet.setLine(line);}
-	| r2 = relationalExpression {$expRet = $r2.expRet;};
+	(
+		op1 = EQUAL 
+		{
+			op = BinaryOperator.EQUAL;
+			line = $op1.line;
+		}
+
+		|	op2 = NOT_EQUAL 
+			{
+				op = BinaryOperator.NOT_EQUAL;
+				line = $op2.line;
+			}
+	)
+	r1 = relationalExpression 
+	{
+		$expRet = new BinaryExpression($e1.expRet, $r1.expRet, op);
+		$expRet.setLine(line);
+	}
+
+	|	r2 = relationalExpression 
+		{
+			$expRet = $r2.expRet;
+		}
+	;
+
 
 relationalExpression returns [Expression expRet]:
 	r1 = relationalExpression
@@ -665,24 +709,69 @@ relationalExpression returns [Expression expRet]:
 		BinaryOperator op;
 		int line;
 	}
-	(gt = GREATER_THAN {op = BinaryOperator.GREATER_THAN;line = $gt.line;}
-	| lt = LESS_THAN {op = BinaryOperator.LESS_THAN;line = $lt.line;}
-	| let = LESS_EQUAL_THAN {op = BinaryOperator.LESS_EQUAL_THAN;line = $let.line;}
-	| get = GREATER_EQUAL_THAN {op = BinaryOperator.GREATER_EQUAL_THAN;line = $get.line;}
-	) a1 = additiveExpression {$expRet = new BinaryExpression($r1.expRet, $a1.expRet, op);$expRet.setLine(line);}
-	| a2 = additiveExpression {$expRet = $a2.expRet;};
+	(
+		gt = GREATER_THAN 
+		{
+			op = BinaryOperator.GREATER_THAN;
+			line = $gt.line;
+		}
+
+		|	lt = LESS_THAN 
+			{
+				op = BinaryOperator.LESS_THAN;
+				line = $lt.line;
+			}
+
+		|	let = LESS_EQUAL_THAN 
+			{
+				op = BinaryOperator.LESS_EQUAL_THAN;
+				line = $let.line;
+			}
+
+		|	get = GREATER_EQUAL_THAN 
+			{
+				op = BinaryOperator.GREATER_EQUAL_THAN;
+				line = $get.line;
+			}
+
+	) 
+	a1 = additiveExpression 
+	{
+		$expRet = new BinaryExpression($r1.expRet, $a1.expRet, op);$expRet.setLine(line);
+	}
+
+
+	|	a2 = additiveExpression 
+		{
+			$expRet = $a2.expRet;
+		};
 
 
 additiveExpression returns [Expression expRet]:
 	a1 = additiveExpression
 	{
-			BinaryOperator op;
-			int line;
+		BinaryOperator op;
+		int line;
 	}
-	(p = PLUS {op = BinaryOperator.PLUS;line = $p.line;}
-	| m = MINUS {op = BinaryOperator.MINUS;line = $m.line;}
-	) m1 = multiplicativeExpression {$expRet = new BinaryExpression($a1.expRet, $m1.expRet, op);$expRet.setLine(line);}
-	| m2 = multiplicativeExpression
+	(
+		p = PLUS 
+		{
+			op = BinaryOperator.PLUS;
+			line = $p.line;
+		}
+		|	m = MINUS 
+		{
+			op = BinaryOperator.MINUS;
+			line = $m.line;
+		}
+	) 
+	m1 = multiplicativeExpression 
+	{
+		$expRet = new BinaryExpression($a1.expRet, $m1.expRet, op);
+		$expRet.setLine(line);
+	}
+	
+	|	m2 = multiplicativeExpression
 	{
 		$expRet = $m2.expRet;
 	}
@@ -692,13 +781,33 @@ additiveExpression returns [Expression expRet]:
 multiplicativeExpression returns [Expression expRet]:
 	m1 = multiplicativeExpression
 	{
-			BinaryOperator op;
-			int line;
+		BinaryOperator op;
+		int line;
 	}
-	(m = MULT {op = BinaryOperator.MULT;line = $m.line;}
-	|d = DIVIDE {op = BinaryOperator.DIVIDE;line = $d.line;}
-	) p1 = preUnaryExpression {$expRet = new BinaryExpression($m1.expRet, $p1.expRet, op);$expRet.setLine(line);}
-	| p2 = preUnaryExpression {$expRet = $p2.expRet;};
+	(
+		m = MULT 
+		{
+			op = BinaryOperator.MULT;
+			line = $m.line;
+		}
+
+		|	d = DIVIDE 
+			{ 
+				op = BinaryOperator.DIVIDE;
+				line = $d.line;
+			}
+	) 
+	p1 = preUnaryExpression 
+	{
+		$expRet = new BinaryExpression($m1.expRet, $p1.expRet, op);
+		$expRet.setLine(line);
+	}
+
+	|	p2 = preUnaryExpression 
+		{
+			$expRet = $p2.expRet;
+		}
+	;
 
 
 preUnaryExpression returns [Expression expRet]:
@@ -706,12 +815,43 @@ preUnaryExpression returns [Expression expRet]:
 		UnaryOperator op;
 		int line;
 	}
-	(n = NOT {op = UnaryOperator.NOT;line = $n.line;}
-	|m = MINUS {op = UnaryOperator.MINUS;line = $m.line;}
-	|i = INCREMENT {op = UnaryOperator.INC;line = $i.line;}
-	|d = DECREMENT {op = UnaryOperator.DEC;line = $d.line;}
-	) a1 = accessExpression {$expRet = new UnaryExpression($a1.expRet, op);$expRet.setLine(line);}
-	| a2 = accessExpression {$expRet = $a2.expRet;};
+	(
+		n = NOT 
+		{
+			op = UnaryOperator.NOT;
+			line = $n.line;
+		}
+
+		| m = MINUS 
+			{
+				op = UnaryOperator.MINUS;
+				line = $m.line;
+			}
+
+		| i = INCREMENT 
+			{
+				op = UnaryOperator.INC;
+				line = $i.line;
+			}
+
+		| d = DECREMENT 
+			{
+				op = UnaryOperator.DEC;
+				line = $d.line;
+			}
+
+	) 
+	a1 = accessExpression 
+	{
+		$expRet = new UnaryExpression($a1.expRet, op);
+		$expRet.setLine(line);
+	}
+
+	|	a2 = accessExpression 
+	{
+		$expRet = $a2.expRet;
+	}
+	;
 
 
 accessExpression returns [Expression expRet]:
@@ -753,61 +893,135 @@ accessExpression returns [Expression expRet]:
 	;
 
 otherExpression returns [Expression expRet]:
-	v = values {$expRet = $v.valRet;}
-	| id = IDENTIFIER
+	v = values 
+	{
+		$expRet = $v.valRet;
+	}
+
+	|	id = IDENTIFIER
 	{
 		$expRet = new Identifier($id.text);
 		$expRet.setLine($id.line);
 	}
-	| lambda = lambdaFunction {$expRet = $lambda.lambdaRet;}
-	| chop = chopStatement {$expRet = $chop.chopRet;}
-	| chomp = chompStatement {$expRet = $chomp.chompRet;}
-	| match = matchPatternStatement {$expRet = $match.matchPatRet;}
-	| len_ = lenStatement {$expRet = $len_.lenRet;}
-	| LPAR (e = expression {$expRet = $e.expRet;})? RPAR;
 
+	|	lambda = lambdaFunction 
+		{
+			$expRet = $lambda.lambdaRet;
+		}
 
+	|	chop = chopStatement 
+		{
+			$expRet = $chop.chopRet;
+		}
+
+	|	chomp = chompStatement 
+		{
+			$expRet = $chomp.chompRet;
+		}
+
+	|	match = matchPatternStatement 
+		{
+			$expRet = $match.matchPatRet;
+		}
+
+	|	len_ = lenStatement 
+		{
+			$expRet = $len_.lenRet;
+		}
+
+	|	LPAR 
+		(
+			e = expression 
+			{
+				$expRet = $e.expRet;
+			}
+		)? 
+		RPAR
+	;
 
 
 lambdaFunction returns [Expression lambdaRet]:
-	a = ARROW  fd = functionArgumentsDeclaration
-	 LBRACE b = body RBRACE
-	 {
+	a = ARROW
+	fd = functionArgumentsDeclaration
+	LBRACE 
+	{
 		$lambdaRet = new LambdaExpression($fd.argRet, $b.bodyRet);
 		$lambdaRet.setLine($a.line);
-	 }
+	}
+	b = body RBRACE
 	;
 
 values returns [Value valRet]:
-	b = boolValue {$valRet = $b.boolValRet;}
-	| s = STRING_VALUE {$valRet = new StringValue($s.text); $valRet.setLine($s.line);}
-	| i = INT_VALUE {$valRet = new IntValue($i.int);$valRet.setLine($i.line);}
-	| float_ = FLOAT_VALUE {$valRet = new FloatValue(Float.parseFloat($float_.text));$valRet.setLine($float_.line);}
-	| l = listValue {$valRet = $l.listValRet;}
-	| f = functionPointer {$valRet = $f.fpRet;};
+	b = boolValue 
+		{
+			$valRet = $b.boolValRet;
+		}
+
+	|	s = STRING_VALUE 
+		{
+			$valRet = new StringValue($s.text);
+			$valRet.setLine($s.line);
+		}
+
+	|	i = INT_VALUE 
+		{
+			$valRet = new IntValue($i.int);
+			$valRet.setLine($i.line);
+		}
+
+	|	float_ = FLOAT_VALUE 
+		{
+			$valRet = new FloatValue(Float.parseFloat($float_.text));
+			$valRet.setLine($float_.line);
+		}
+
+	|	l = listValue 
+		{
+			$valRet = $l.listValRet;
+		}
+
+	|	f = functionPointer 
+		{
+			$valRet = $f.fpRet;
+		}
+	;
 
 listValue returns [ListValue listValRet]:
-	l = LBRACK f = functionArguments
-	RBRACK
+	l = LBRACK
+	f = functionArguments
 	{
 		$listValRet = new ListValue($f.funcArgsRet);
 		$listValRet.setLine($l.line);
 	}
+	RBRACK
 	;
 
 boolValue returns [BoolValue boolValRet]:
-	t = TRUE {$boolValRet = new BoolValue(true); $boolValRet.setLine($t.line);}
-	| f = FALSE {$boolValRet = new BoolValue(false); $boolValRet.setLine($f.line);}
+	t = TRUE 
+	{
+		$boolValRet = new BoolValue(true); 
+		$boolValRet.setLine($t.line);
+	}
+
+	|	f = FALSE 
+		{
+			$boolValRet = new BoolValue(false); 
+			$boolValRet.setLine($f.line);
+		}
 	;
 
 functionPointer returns [FunctionPointer fpRet]:
-	m = METHOD LPAR COLON id = IDENTIFIER RPAR
+	m = METHOD 
+	LPAR 
+	COLON 
+	id = IDENTIFIER 
 	{
 		Identifier id_ = new Identifier($id.text);
 		id_.setLine($id.line);
 		$fpRet = new FunctionPointer(id_);
 		$fpRet.setLine($m.line);
 	}
+	RPAR
 	;
 
 
@@ -886,9 +1100,9 @@ DOUBLEDOT: '..';
 COLON: ':';
 SEMICOLLON: ';';
 
-INT_VALUE: '0' | [1-9][0-9]*;
+INT_VALUE: '0' |	[1-9][0-9]*;
 FLOAT_VALUE: [0-9]* '.' [0-9]+;
 IDENTIFIER: [a-zA-Z_][A-Za-z0-9_]*;
 STRING_VALUE: '"'~["]*'"';
-COMMENT: ('#' ~( '\r' | '\n')* | ('=begin' .*? '=end')) -> skip;
+COMMENT: ('#' ~( '\r' |	'\n')* |	('=begin' .*? '=end')) -> skip;
 WS: ([ \t\n\r]) -> skip;

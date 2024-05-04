@@ -10,10 +10,7 @@ public class LambdaExpression extends Expression {
 	ArrayList<VarDeclaration> declarationArgs = new ArrayList<>();
 	ArrayList<Statement> body = new ArrayList<>();
 
-	public LambdaExpression(
-		ArrayList<VarDeclaration> declarationArgs,
-		ArrayList<Statement> body
-	) {
+	public LambdaExpression(ArrayList<VarDeclaration> declarationArgs,ArrayList<Statement> body) {
 		this.declarationArgs = declarationArgs;
 		this.body = body;
 	}
