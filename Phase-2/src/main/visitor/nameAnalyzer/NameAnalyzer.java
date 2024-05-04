@@ -23,104 +23,28 @@ import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
 import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
+import main.visitor.nameAnalyzer.Utility;
 
 public class NameAnalyzer extends Visitor<Void> {
 
 	public ArrayList<CompileError> nameErrors = new ArrayList<>();
+	private Utility utility = new Utility();
 
 	@Override
 	public Void visit(Program program) {
 		SymbolTable.root = new SymbolTable();
 		SymbolTable.top = new SymbolTable();
 
-		//TODO: addFunctions,
-		//Code handles duplicate function declarations by renaming and adding them to the symbol table.
-		ArrayList<FunctionItem> functionItems = getFunctionItems(program);
+		ArrayList<FunctionItem> functionItems = utility.getFunctionItems(program, this);
+		ArrayList<PatternItem> patternItems = utility.getPatternItems(program, this);
 
-		ArrayList<PatternItem> patternItems = getPatternItems(program);
-		//TODO:visitFunctions
-		//Iterates over function declarations, assigns symbol tables, visits declarations, and manages symbol table stack.
+		utility.visitFunctions(program, functionItems, this);
+		utility.visitPatterns(program, patternItems, this);
+		utility.visitMain(program, this);
 
-		//visitPatterns
-		int visitingPatternIndex = 0;
-		for (PatternDeclaration patternDeclaration : program.getPatternDeclarations()) {
-			PatternItem patternItem = patternItems.get(visitingPatternIndex);
-			SymbolTable patternSymbolTable = new SymbolTable();
-			patternItem.setPatternSymbolTable(patternSymbolTable);
-			SymbolTable.push(patternSymbolTable);
-			patternDeclaration.accept(this);
-			SymbolTable.pop();
-			visitingPatternIndex += 1;
-		}
-		//visitMain
-		program.getMain().accept(this);
 		return null;
 	}
 	//TODO:visit all other AST nodes and find name errors
 
-	private ArrayList<PatternItem> getPatternItems(Program program) {
-		int duplicatePatternId = 0;
-		ArrayList<PatternItem> patternItems = new ArrayList<>();
-		for (PatternDeclaration patternDeclaration : program.getPatternDeclarations()) {
-			PatternItem patternItem = new PatternItem(patternDeclaration);
-			try {
-				SymbolTable.root.put(patternItem);
-				patternItems.add(patternItem);
-			} catch (ItemAlreadyExists e) {
-				nameErrors.add(
-					new RedefinitionOfPattern(
-						patternDeclaration.getLine(),
-						patternDeclaration.getPatternName().getName()
-					)
-				);
-				duplicatePatternId += 1;
-				String freshName =
-					patternItem.getName() +
-					"#" +
-					String.valueOf(duplicatePatternId);
-				Identifier newId = patternDeclaration.getPatternName();
-				newId.setName(freshName);
-				patternDeclaration.setPatternName(newId);
-				PatternItem newItem = new PatternItem(patternDeclaration);
-				patternItems.add(newItem);
-				try {
-					SymbolTable.root.put(newItem);
-				} catch (ItemAlreadyExists ignored) {}
-			}
-		}
-		return patternItems;
-	}
-
-	private ArrayList<FunctionItem> getFunctionItems(Program program) {
-		int duplicateFunctionId = 0;
-		ArrayList<FunctionItem> functionItems = new ArrayList<>();
-		for (FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()) {
-			FunctionItem functionItem = new FunctionItem(functionDeclaration);
-			try {
-				SymbolTable.root.put(functionItem);
-				functionItems.add(functionItem);
-			} catch (ItemAlreadyExists e) {
-				nameErrors.add(
-					new RedefinitionOfFunction(
-						functionDeclaration.getLine(),
-						functionDeclaration.getFunctionName().getName()
-					)
-				);
-				duplicateFunctionId += 1;
-				String freshName =
-					functionItem.getName() +
-					"#" +
-					String.valueOf(duplicateFunctionId);
-				Identifier newId = functionDeclaration.getFunctionName();
-				newId.setName(freshName);
-				functionDeclaration.setFunctionName(newId);
-				FunctionItem newItem = new FunctionItem(functionDeclaration);
-				functionItems.add(newItem);
-				try {
-					SymbolTable.root.put(newItem);
-				} catch (ItemAlreadyExists ignored) {}
-			}
-		}
-		return functionItems;
-	}
+	
 }
