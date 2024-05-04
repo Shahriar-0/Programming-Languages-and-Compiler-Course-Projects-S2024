@@ -110,7 +110,7 @@ loopScope
 	;
 
 for
-	: FOR {System.out.println("Loop: FOR");} IDENTIFIER IN LPAR rangeGenerator RPAR forBody END
+	: FOR {System.out.println("Loop: FOR");} IDENTIFIER IN LPAR (rangeGenerator | IDENTIFIER) RPAR forBody END
 	;
 
 forBody
