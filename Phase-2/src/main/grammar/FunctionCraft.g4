@@ -131,6 +131,7 @@ patternMatching returns [PatternDeclaration patternRet]:
 		Identifier targetVar_ = new Identifier($targetVar.text);
 		targetVar_.setLine($targetVar.line);
 		$patternRet = new PatternDeclaration(patternName_, targetVar_);
+		$patternRet.setLine($pat.line);
 	}
 	RPAR
 	(

@@ -577,6 +577,7 @@ public class FunctionCraftParser extends Parser {
 					Identifier targetVar_ = new Identifier((((PatternMatchingContext)_localctx).targetVar!=null?((PatternMatchingContext)_localctx).targetVar.getText():null));
 					targetVar_.setLine((((PatternMatchingContext)_localctx).targetVar!=null?((PatternMatchingContext)_localctx).targetVar.getLine():0));
 					((PatternMatchingContext)_localctx).patternRet =  new PatternDeclaration(patternName_, targetVar_);
+					_localctx.patternRet.setLine((((PatternMatchingContext)_localctx).pat!=null?((PatternMatchingContext)_localctx).pat.getLine():0));
 				
 			setState(141);
 			match(RPAR);

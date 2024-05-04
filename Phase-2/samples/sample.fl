@@ -2,6 +2,16 @@ def re(re)
     return;
 end
 
+pattern fib(fib)
+	| (fib == 0) = 0
+	| (fib > 1) = fib(n-1) + fib(n-2)
+;
+
+#pattern fib(fib)
+#	| (n == 0) = 0
+#	| (n > 1) = fib(n-1) + fib(n-2)
+#;
+
 def y()
     return z();
 end
