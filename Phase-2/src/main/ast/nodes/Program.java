@@ -17,15 +17,11 @@ public class Program extends Node {
 		return this.functionDeclarations;
 	}
 
-	public void setFunctionDeclarations(
-		ArrayList<FunctionDeclaration> functionDeclarations
-	) {
+	public void setFunctionDeclarations(ArrayList<FunctionDeclaration> functionDeclarations) {
 		this.functionDeclarations = functionDeclarations;
 	}
 
-	public void addFunctionDeclaration(
-		FunctionDeclaration functionDeclaration
-	) {
+	public void addFunctionDeclaration(FunctionDeclaration functionDeclaration) {
 		this.functionDeclarations.add(functionDeclaration);
 	}
 
@@ -33,9 +29,7 @@ public class Program extends Node {
 		return this.patternDeclarations;
 	}
 
-	public void setPatternDeclarations(
-		ArrayList<PatternDeclaration> patternDeclarations
-	) {
+	public void setPatternDeclarations(ArrayList<PatternDeclaration> patternDeclarations) {
 		this.patternDeclarations = patternDeclarations;
 	}
 
