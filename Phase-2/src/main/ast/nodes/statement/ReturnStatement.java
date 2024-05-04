@@ -8,7 +8,7 @@ public class ReturnStatement extends Statement {
 	private Expression returnExp;
 	private boolean hasRetExp;
 
-	//a function can return nothing
+	// a function can return nothing
 	public ReturnStatement() {
 		this.hasRetExp = false;
 	}

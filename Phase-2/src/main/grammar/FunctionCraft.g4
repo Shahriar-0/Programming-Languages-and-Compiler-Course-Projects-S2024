@@ -17,8 +17,14 @@ program returns [Program flProgram]:
 		$flProgram.setLine(1);
 	}
 	(
-		f = functionDeclaration{$flProgram.addFunctionDeclaration($f.functionDeclarationRet);}
-		| p = patternMatching{$flProgram.addPatternDeclaration($p.patternRet);}
+		f = functionDeclaration
+		{
+			$flProgram.addFunctionDeclaration($f.functionDeclarationRet);
+		}
+		| p = patternMatching
+			{
+				$flProgram.addPatternDeclaration($p.patternRet);
+			}
 	)*
 	m = main{$flProgram.setMain($m.mainRet);}
 	;
@@ -35,7 +41,7 @@ functionDeclaration returns [FunctionDeclaration functionDeclarationRet]:
 		Identifier id_ = new Identifier($id.text);
 		id_.setLine($id.line);
 		$functionDeclarationRet.setFunctionName(id_);
-		$functionDeclarationRet.setLine($def.line);
+		$functionDeclarationRet.setLine($id.line);
 	}
 	f = functionArgumentsDeclaration
 	{
@@ -131,6 +137,8 @@ patternMatching returns [PatternDeclaration patternRet]:
 		PATTERN_MATCHING_SEPARATOR 
 		c = condition // This is kinda buggy since we just add all the conditions but it doesn't 
 					  // matter since we are only doing name analysis in this phase 
+					  // the correct way to do this would be to change the structure of
+					  // conditions in PatternDeclaration to a ArrayList<ArrayList<Expression>>
 		{
 			$patternRet.addConditions($c.conditionRet); 
 		}
@@ -147,37 +155,55 @@ main returns [MainDeclaration mainRet]:
 	{
 		$mainRet = new MainDeclaration();
 	}
-	DEF m = MAIN
+	DEF 
+	m = MAIN
 	{
 		$mainRet.setLine($m.line);
 	}
-	LPAR RPAR
+	LPAR 
+	RPAR
 	b = body
-	{$mainRet.setBody($b.bodyRet);}
-	END;
+	{
+		$mainRet.setBody($b.bodyRet);
+	}
+	END
+	;
 
 functionArguments returns [ArrayList<Expression> funcArgsRet]:
 	{
 		$funcArgsRet = new ArrayList<Expression>();
 	}
-	(e1 = expression
-	{
-	   $funcArgsRet.add($e1.expRet);
-	}
-	(COMMA e2 = expression
-	{
-	   $funcArgsRet.add($e2.expRet);
-	}
-	)* )?;
+	(
+		e1 = expression
+		{
+			$funcArgsRet.add($e1.expRet);
+		}
+		(
+			COMMA 
+			e2 = expression
+			{
+				$funcArgsRet.add($e2.expRet);
+			}
+		)* 
+	)?
+	;
 
 
 returnStatement returns [ReturnStatement returnStmtRet]:
 	{
 		$returnStmtRet = new ReturnStatement();
 	}
-	r = RETURN (e = expression{
-		$returnStmtRet.setReturnExp($e.expRet);
-	})? {$returnStmtRet.setLine($r.line);} SEMICOLLON;
+	r = RETURN 
+	{
+		$returnStmtRet.setLine($r.line);
+	}
+	(
+		e = expression{
+			$returnStmtRet.setReturnExp($e.expRet);
+		}
+	)?  
+	SEMICOLLON
+	;
 
 ifStatement returns[IfStatement ifRet]:
 	{
