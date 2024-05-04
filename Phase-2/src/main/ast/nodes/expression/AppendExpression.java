@@ -8,6 +8,16 @@ public class AppendExpression extends Expression {
 	private Expression appendee;
 	private ArrayList<Expression> appendeds = new ArrayList<>();
 
+	public AppendExpression(Expression appendee, ArrayList<Expression> appendeds) {
+		this.appendee = appendee;
+		this.appendeds = appendeds;
+	}
+
+	public AppendExpression(Expression appendee, Expression appended) {
+		this.appendee = appendee;
+		this.appendeds.add(appended);
+	}
+
 	public AppendExpression(Expression appendee) {
 		this.appendee = appendee;
 	}

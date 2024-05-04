@@ -654,14 +654,11 @@ body returns [ArrayList<Statement> bodyRet]:
 
 expression returns [Expression expRet]:
 	// [ ]: construct append expression node. the left most expression is appendee and others are appended.
-	e1 = expression 
-	{
-		$expRet = $e1.expRet;
-	}
+	e1 = expression
 	a = APPEND 
 	e2 = eqaulityExpression
 	{
-		$expRet.addAppendedExpression($e2.expRet);
+		$expRet = new AppendExpression($e1.expRet, $e2.expRet);
 	}
 	
 	|	e3 = eqaulityExpression 
