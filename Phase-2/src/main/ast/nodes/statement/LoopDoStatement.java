@@ -19,29 +19,29 @@ public class LoopDoStatement extends Statement {
 		this.loopConditions = loopConditions;
 		this.loopRetStmt = loopRetStmt;
 	}
-
-	public void setLoopBodyStmts(ArrayList<Statement> loopBodyStmts) {
-		this.loopBodyStmts = loopBodyStmts;
-	}
-
+	
 	public void setLoopConditions(ArrayList<Expression> loopConditions) {
 		this.loopConditions = loopConditions;
-	}
-
-	public void setLoopRetStmt(ReturnStatement loopRetStmt) {
-		this.loopRetStmt = loopRetStmt;
-	}
-
-	public ArrayList<Statement> getLoopBodyStmts() {
-		return this.loopBodyStmts;
 	}
 
 	public ArrayList<Expression> getLoopConditions() {
 		return this.loopConditions;
 	}
-
+	
+	public ArrayList<Statement> getLoopBodyStmts() {
+		return this.loopBodyStmts;
+	}
+	
+	public void setLoopBodyStmts(ArrayList<Statement> loopBodyStmts) {
+		this.loopBodyStmts = loopBodyStmts;
+	}
+	
 	public ReturnStatement getLoopRetStmt() {
 		return this.loopRetStmt;
+	}
+	
+	public void setLoopRetStmt(ReturnStatement loopRetStmt) {
+		this.loopRetStmt = loopRetStmt;
 	}
 
 	@Override

@@ -243,7 +243,7 @@ public class AstPrinter extends Visitor<Void> {
 		for (Expression expression : accessExpression.getArguments()) {
 			expression.accept(this);
 		}
-		for (Expression expression : accessExpression.getDimentionalAccess()) {
+		for (Expression expression : accessExpression.getDimensionalAccess()) {
 			expression.accept(this);
 		}
 		return null;

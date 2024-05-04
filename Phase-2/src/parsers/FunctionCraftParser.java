@@ -3337,9 +3337,9 @@ public class FunctionCraftParser extends Parser {
 					setState(555);
 					((AccessExpressionContext)_localctx).f = functionArguments();
 
-							isAccessExpression = true;
-							args.addAll(((AccessExpressionContext)_localctx).f.funcArgsRet);
-						
+								isAccessExpression = true;
+								args.addAll(((AccessExpressionContext)_localctx).f.funcArgsRet);
+							
 					setState(557);
 					match(RPAR);
 					}
@@ -3359,9 +3359,9 @@ public class FunctionCraftParser extends Parser {
 					setState(564);
 					((AccessExpressionContext)_localctx).a = accessList();
 
-							isMultiDimentional = true;
-							dimentions.add(((AccessExpressionContext)_localctx).a.accessListExp);
-						
+								isMultiDimentional = true;
+								dimentions.add(((AccessExpressionContext)_localctx).a.accessListExp);
+							
 					}
 					} 
 				}
@@ -3373,12 +3373,12 @@ public class FunctionCraftParser extends Parser {
 					if(!isAccessExpression) {
 						((AccessExpressionContext)_localctx).expRet =  ((AccessExpressionContext)_localctx).o.expRet;
 					}
-					else{
+					else {
 						AccessExpression accessExp = new AccessExpression(((AccessExpressionContext)_localctx).o.expRet, args);
-						accessExp.setIsFunctionCall(isAccessExpression);
+						accessExp.setIsFunctionCall(true);
+						accessExp.setFunctionName((((AccessExpressionContext)_localctx).o!=null?_input.getText(((AccessExpressionContext)_localctx).o.start,((AccessExpressionContext)_localctx).o.stop):null));
 						if(isMultiDimentional) {
-
-							accessExp.setDimentionalAccess(dimentions);
+							accessExp.setDimensionalAccess(dimentions);
 						}
 						((AccessExpressionContext)_localctx).expRet =  accessExp;
 						_localctx.expRet.setLine(((AccessExpressionContext)_localctx).o.expRet.getLine());

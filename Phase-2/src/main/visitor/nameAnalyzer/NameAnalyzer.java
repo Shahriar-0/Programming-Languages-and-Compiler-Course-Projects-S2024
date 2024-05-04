@@ -55,7 +55,8 @@ public class NameAnalyzer extends Visitor<Void> {
 	@Override
 	public Void visit(Identifier identifier) {
 		try {
-			SymbolTable.top.getItem(identifier.getName());
+			String varName = "VAR:" + identifier.getName(); // FIXME: temp solution since weirdly it doesn't work
+			SymbolTable.top.getItem(varName);
 		} catch (ItemNotFound e) {
 			nameErrors.add(
 				new VariableNotDeclared(
@@ -83,40 +84,26 @@ public class NameAnalyzer extends Visitor<Void> {
 
 	@Override
 	public Void visit(FunctionDeclaration functionDeclaration) {
-		// the name of the function and it's parameters shouldn't be the same
-		// so we add the function to the symbol table before visiting the parameters
-		// but we also need to add it as a varItem so that we can check for the parameters
-		// with the same name as the function
-
-		// TODO: alternative solutions:
-		// 1. add the function to the symbol table after visiting the parameters
-		// 2. add the function to the symbol table before visiting the parameters, but don't add it as a varItem,
-		//    and instead check for the parameters with the same name as the function in the symbol table
-
-		SymbolTable functionSymbolTable = new SymbolTable();
+		SymbolTable functionSymbolTable = new SymbolTable(SymbolTable.root); // no global variables 
 		SymbolTable.push(functionSymbolTable);
 
 		FunctionItem functionItem = new FunctionItem(functionDeclaration);
 		functionItem.setFunctionSymbolTable(functionSymbolTable);
-
-		VarItem functionNameVarItem = new VarItem(functionDeclaration.getFunctionName());
-		try {
-			SymbolTable.top.put(functionItem);
-		} catch (ItemAlreadyExists e) {
-			// we already checked for the function name in the previous visitor, so this exception should never be thrown
+		
+		String functionName = functionDeclaration.getFunctionName().getName();
+		for (String argNames : functionDeclaration.getArgNames()) {
+			if (argNames.equals(functionName)) {
+				nameErrors.add(
+					new IdenticalArgFunctionName(
+						functionDeclaration.getLine(),
+						functionName
+					)
+				);
+			}
 		}
+
 		for (VarDeclaration varDeclaration : functionDeclaration.getArgs()) {
 			varDeclaration.accept(this);
-		}
-		try {
-			SymbolTable.top.put(functionNameVarItem);
-		} catch (ItemAlreadyExists e) {
-			nameErrors.add(
-				new IdenticalArgFunctionName(
-					functionDeclaration.getLine(),
-					functionDeclaration.getFunctionName().getName()
-				)
-			);
 		}
 		for (Statement statement : functionDeclaration.getBody()) {
 			statement.accept(this);
@@ -127,31 +114,26 @@ public class NameAnalyzer extends Visitor<Void> {
 
 	@Override
 	public Void visit(PatternDeclaration patternDeclaration) {
-		// same as the function declaration
-		SymbolTable patternSymbolTable = new SymbolTable();
+		SymbolTable patternSymbolTable = new SymbolTable(SymbolTable.root); // no global variables
 		SymbolTable.push(patternSymbolTable);
 
 		PatternItem patternItem = new PatternItem(patternDeclaration);
 		patternItem.setPatternSymbolTable(patternSymbolTable);
 
-		VarItem patternNameVarItem = new VarItem(patternDeclaration.getPatternName());
-		try {
-			SymbolTable.top.put(patternItem);
-			SymbolTable.top.put(patternNameVarItem);
-		} catch (ItemAlreadyExists e) {
-			// we already checked for the pattern name in the previous visitor, so this exception should never be thrown
-		}
-
-		VarItem targetVarItem = new VarItem(patternDeclaration.getTargetVariable());
-		try {
-			SymbolTable.top.put(targetVarItem);
-		} catch (ItemAlreadyExists e) {
+		if (patternDeclaration.getPatternName().getName().equals(patternDeclaration.getTargetVariable().getName())) {
 			nameErrors.add(
 				new IdenticalArgPatternName(
 					patternDeclaration.getLine(),
 					patternDeclaration.getPatternName().getName()
 				)
 			);
+		}
+
+		VarItem targetVarItem = new VarItem(patternDeclaration.getTargetVariable());
+		try {
+			SymbolTable.top.put(targetVarItem);
+		} catch (ItemAlreadyExists e) {
+			// nothing to do here, we just add id to symbol table, if it already exists, it's not a problem
 		}
 
 		for (Expression expression : patternDeclaration.getConditions()) {
@@ -163,4 +145,276 @@ public class NameAnalyzer extends Visitor<Void> {
 		SymbolTable.pop();
 		return null;
 	}
+
+	@Override
+	public Void visit(MainDeclaration mainDeclaration) {
+		SymbolTable mainSymbolTable = new SymbolTable(SymbolTable.root); // no global variables
+		SymbolTable.push(mainSymbolTable);
+		for (Statement statement : mainDeclaration.getBody()) {
+			statement.accept(this);
+		}
+		SymbolTable.pop();
+		return null;
+	}
+
+	@Override
+	public Void visit(ReturnStatement returnStatement) {
+		if (returnStatement.hasRetExpression()) {
+			returnStatement.getReturnExp().accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(IfStatement ifStatement) {
+		for (Expression expression : ifStatement.getConditions()) {
+			expression.accept(this);
+		}
+		for (Statement statement : ifStatement.getThenBody()) {
+			statement.accept(this);
+		}
+		for (Statement statement : ifStatement.getElseBody()) {
+			statement.accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(PutStatement putStatement) {
+		// technically, we should check for not enough or too many arguments in the put statement
+		// but it's stupidly handled in the parser, so we don't need to check for it here
+		putStatement.getExpression().accept(this); 
+		return null;
+	}
+
+	@Override
+	public Void visit(LenStatement lenStatement) {
+		lenStatement.getExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(PushStatement pushStatement) {
+		pushStatement.getInitial().accept(this);
+		pushStatement.getToBeAdded().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(LoopDoStatement loopDoStatement) {
+		ArrayList<Statement> loopBodyStmts = loopDoStatement.getLoopBodyStmts();
+		ArrayList<Expression> loopConditions = loopDoStatement.getLoopConditions();
+		ReturnStatement loopRetStmt = loopDoStatement.getLoopRetStmt();
+
+		SymbolTable loopSymbolTable = new SymbolTable(SymbolTable.top);
+		SymbolTable.push(loopSymbolTable);
+		for (Statement statement : loopBodyStmts) {
+			statement.accept(this);
+		}
+		for (Expression expression : loopConditions) {
+			expression.accept(this);
+		}
+		if (loopRetStmt != null) {
+			loopRetStmt.accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(ForStatement forStatement) {
+		Identifier iteratorId = forStatement.getIteratorId();
+		ArrayList<Expression> rangeExpressions = forStatement.getRangeExpressions();
+		ArrayList<Expression> loopBodyExpressions = forStatement.getLoopBodyExpressions();
+		ArrayList<Statement> loopBody = forStatement.getLoopBody();
+		ReturnStatement returnStatement = forStatement.getReturnStatement();
+
+		SymbolTable forSymbolTable = new SymbolTable(SymbolTable.top);
+		SymbolTable.push(forSymbolTable);
+		try {
+			SymbolTable.top.put(new VarItem(iteratorId));
+		} catch (ItemAlreadyExists e) {
+			// nameErrors.add(
+			// 	new Redeclaration(
+			// 		iteratorId.getLine(),
+			// 		iteratorId.getName()
+			// 	)
+			// );
+			// uncomment the above line if you want to check for redeclaration of variables
+		}
+		for (Expression expression : rangeExpressions) {
+			expression.accept(this);
+		}
+		for (Statement statement : loopBody) {
+			statement.accept(this);
+		}
+		for (Expression expression : loopBodyExpressions) {
+			expression.accept(this);
+		}
+		if (returnStatement != null) {
+			returnStatement.accept(this);
+		}
+		SymbolTable.pop();
+		return null;
+	}
+
+	@Override
+	public Void visit(MatchPatternStatement matchPatternStatement) {
+		try {
+			SymbolTable.root.getItem(matchPatternStatement.getPatternId().getName());
+		} catch (ItemNotFound e) {
+			nameErrors.add(
+				new PatternNotDeclared(
+					matchPatternStatement.getLine(),
+					matchPatternStatement.getPatternId().getName()
+				)
+			);
+		}
+		matchPatternStatement.getMatchArgument().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ChopStatement chopStatement) {
+		chopStatement.getChopExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ChompStatement chompStatement) {
+		chompStatement.getChompExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(AssignStatement assignStatement) {
+		boolean isAccessList = assignStatement.isAccessList();
+		if (isAccessList) {
+			assignStatement.getAccessListExpression().accept(this);
+		}
+		assignStatement.getAssignExpression().accept(this);
+		
+		Identifier assignedId = assignStatement.getAssignedId();
+		AssignOperator assignOperator = assignStatement.getAssignOperator();
+
+		if (assignOperator != AssignOperator.ASSIGN) {
+			try {
+				SymbolTable.top.getItem(assignedId.getName());
+			} catch (ItemNotFound e) {
+				nameErrors.add(
+					new VariableNotDeclared(
+						assignedId.getLine(),
+						assignedId.getName()
+					)
+				);
+			}
+		} else {
+			try {
+				SymbolTable.top.put(new VarItem(assignedId));
+			} catch (ItemAlreadyExists e) {
+				// nothing to do here, we just add id to list, if it already exists, it's not a problem
+			}
+		}
+
+		return null;
+	}
+
+	@Override
+	public Void visit(ExpressionStatement expressionStatement) {
+		expressionStatement.getExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(AppendExpression appendExpression) {
+		appendExpression.getAppendee().accept(this);
+		for (Expression expression : appendExpression.getAppendeds()) {
+			expression.accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(BinaryExpression binaryExpression) {
+		binaryExpression.getFirstOperand().accept(this);
+		binaryExpression.getSecondOperand().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(UnaryExpression unaryExpression) {
+		unaryExpression.getExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(AccessExpression accessExpression) {
+		boolean isFunctionCall = accessExpression.isFunctionCall();
+		if (isFunctionCall) {
+			try {
+				Expression accessedExpression = accessExpression.getAccessedExpression();
+				if (accessedExpression instanceof Identifier) {
+					Identifier accessedId = (Identifier) accessedExpression;
+					String name = "Function:" + accessedId.getName(); // FIXME: temp solution since weirdly it doesn't work
+					FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(name);
+					if (!functionItem.getFunctionDeclaration().isArgCountValid(accessExpression.getArguments().size())) {
+						nameErrors.add(
+							new ArgMisMatch(
+								accessExpression.getLine(),
+								accessedId.getName()
+							)
+						);
+					}
+				} else {
+					throw new ItemNotFound();
+				}
+			} catch (ItemNotFound e) {
+				nameErrors.add(
+					new FunctionNotDeclared(
+						accessExpression.getLine(),
+						accessExpression.getFunctionName()
+					)
+				);
+			}
+		} else {
+			accessExpression.getAccessedExpression().accept(this);
+		}
+
+		for (Expression expression : accessExpression.getDimensionalAccess()) {
+			expression.accept(this);
+		}
+		for (Expression expression : accessExpression.getArguments()) {
+			expression.accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(LambdaExpression lambdaExpression) {
+		SymbolTable lambdaSymbolTable = new SymbolTable(SymbolTable.top);
+		SymbolTable.push(lambdaSymbolTable);
+		for (VarDeclaration varDeclaration : lambdaExpression.getDeclarationArgs()) {
+			varDeclaration.accept(this);
+		}
+		for (Statement statement : lambdaExpression.getBody()) {
+			statement.accept(this);
+		}
+		SymbolTable.pop();
+		return null;
+	}
+
+	@Override
+	public Void visit(ListValue listValue) {
+		for (Expression expression : listValue.getElements()) {
+			expression.accept(this);
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(FunctionPointer functionPointer) {
+		functionPointer.getId().accept(this);
+		return null;
+	}
+
+	// boolValue, intValue, stringValue, floatValue -> no need to visit them
 }

@@ -1,3 +1,13 @@
 Line:1-> argument re has same name with function
 Line:5-> target variable fib has same name with pattern
+Line:6-> variable a is not declared
+Line:7-> variable a is not declared
+Line:7-> function a is not declared
+Line:7-> variable n is not declared
+Line:7-> function a is not declared
+Line:7-> variable n is not declared
 Line:46-> Redefinition of function myfunc2
+Line:59-> function myFunc is not declared
+Line:59-> variable c is not declared
+Line:61-> function ali is not declared
+Line:62-> number of arguments provided for function aa does not match with its declaration

@@ -14,21 +14,21 @@ public class LambdaExpression extends Expression {
 		this.declarationArgs = declarationArgs;
 		this.body = body;
 	}
-
-	public void setBody(ArrayList<Statement> body) {
-		this.body = body;
+	
+	public ArrayList<VarDeclaration> getDeclarationArgs() {
+		return declarationArgs;
 	}
 
 	public void setDeclarationArgs(ArrayList<VarDeclaration> declarationArgs) {
 		this.declarationArgs = declarationArgs;
 	}
-
+	
 	public ArrayList<Statement> getBody() {
 		return body;
 	}
 
-	public ArrayList<VarDeclaration> getDeclarationArgs() {
-		return declarationArgs;
+	public void setBody(ArrayList<Statement> body) {
+		this.body = body;
 	}
 
 	@Override

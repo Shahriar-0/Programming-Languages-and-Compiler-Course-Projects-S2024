@@ -1,7 +1,5 @@
 package main.ast.nodes;
 
-import java.util.ArrayList;
-import main.compileError.CompileError;
 import main.visitor.IVisitor;
 
 public abstract class Node {

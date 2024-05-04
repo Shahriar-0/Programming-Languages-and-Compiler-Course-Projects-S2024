@@ -2,6 +2,8 @@ package main.symbolTable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+
 import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.SymbolTableItem;
@@ -27,15 +29,27 @@ public class SymbolTable {
 		this.items = new HashMap<>();
 	}
 
+	public SymbolTable(SymbolTable pre) {
+		this.items = new HashMap<>(pre.items);
+	}
+
+	public void merge(SymbolTable symbolTable) {
+		this.items.putAll(symbolTable.items);
+	}
+
 	public void put(SymbolTableItem item) throws ItemAlreadyExists {
 		if (items.containsKey(item.getKey())) throw new ItemAlreadyExists();
 		items.put(item.getKey(), item);
 	}
 
 	public SymbolTableItem getItem(String key) throws ItemNotFound {
-		SymbolTableItem symbolTableItem = this.items.get(key);
-		if (symbolTableItem != null) {
-			return symbolTableItem;
+		// SymbolTableItem symbolTableItem = this.items.get(key);
+		// if (symbolTableItem != null) {
+		// 	return symbolTableItem;
+		// } //FIXME: this fucking piece of shit is not working so it's commented
+
+		if (this.items.containsKey(key)) {
+			return this.items.get(key);
 		}
 		throw new ItemNotFound();
 	}

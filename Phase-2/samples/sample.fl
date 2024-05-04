@@ -3,8 +3,8 @@ def re(re)
 end
 
 pattern fib(fib)
-	| (fib == 0) = 0
-	| (fib > 1) = fib(n-1) + fib(n-2)
+	| (a == 0) = 0
+	| (a > 1) = a(n-1) + a(n-2)
 ;
 
 #pattern fib(fib)
