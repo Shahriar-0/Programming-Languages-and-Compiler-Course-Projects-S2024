@@ -1,3 +1,1 @@
-Exception in thread "main" java.lang.NullPointerException: Cannot invoke "main.ast.nodes.declaration.FunctionDeclaration.accept(main.visitor.IVisitor)" because "functionDeclaration" is null
-	at main.visitor.nameAnalyzer.DependencyDetector.visit(DependencyDetector.java:26)
-	at main.FunctionCraft.main(FunctionCraft.java:36)
+Line:33-> Redefinition of function myfunc2
