@@ -223,6 +223,7 @@ ifStatement returns[IfStatement ifRet]:
 		{
 			$ifRet.addCondition($c1.conditionRet);
 		} 
+		
 		|	LPAR 
 			c2 = condition 
 			RPAR 
@@ -399,6 +400,7 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
 		{
 			$loopStmts.add($s.stmtRet);
 		}
+		
 		|	BREAK 
 			(
 				IF 
@@ -408,6 +410,7 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
 				}
 			)? 
 			SEMICOLLON
+
 		|	NEXT 
 			(
 				IF 
@@ -448,15 +451,47 @@ forStatement returns [ForStatement forStRet]:
 
 range returns [ArrayList<Expression> rangeRet]:
 	// [ ]: construct range node and set its attributes
-	(LPAR e1 = expression
-	DOUBLEDOT e2 = expression
-	RPAR)
-	|
-	 (LBRACK (e3 = expression
-	(COMMA e4 = expression
-	)*) RBRACK)
-	|
-	 id = IDENTIFIER
+	{
+		$rangeRet = new ArrayList<Expression>();
+	}
+	(
+		LPAR 
+		e1 = expression
+		{
+			$rangeRet.add($e1.expRet);
+		}
+		DOUBLEDOT 
+		e2 = expression
+		{
+			$rangeRet.add($e2.expRet);
+		}
+		RPAR
+	)
+
+	|	(
+			LBRACK 
+			(
+				e3 = expression
+				{
+					$rangeRet.add($e3.expRet);
+				}
+				(
+					COMMA 
+					e4 = expression
+					{
+						$rangeRet.add($e4.expRet);
+					}
+				)*
+			) 
+			RBRACK
+		)
+
+	|	id = IDENTIFIER
+		{
+			Identifier id_ = new Identifier($id.text);
+			id_.setLine($id.line);
+			$rangeRet.add(id_);
+		}
 	;
 
 
