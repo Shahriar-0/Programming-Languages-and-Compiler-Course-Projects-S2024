@@ -7,28 +7,25 @@ public class MatchPatternStatement extends Expression {
 	private Identifier patternId;
 	Expression matchArgument;
 
-	public MatchPatternStatement(
-		Identifier patternId,
-		Expression matchArgument
-	) {
+	public MatchPatternStatement(Identifier patternId, Expression matchArgument) {
 		this.matchArgument = matchArgument;
 		this.patternId = patternId;
-	}
-
-	public void setPatternId(Identifier patternId) {
-		this.patternId = patternId;
-	}
-
-	public void setMatchArgument(Expression matchArgument) {
-		this.matchArgument = matchArgument;
 	}
 
 	public Identifier getPatternId() {
 		return patternId;
 	}
 
+	public void setPatternId(Identifier patternId) {
+		this.patternId = patternId;
+	}
+
 	public Expression getMatchArgument() {
 		return matchArgument;
+	}
+
+	public void setMatchArgument(Expression matchArgument) {
+		this.matchArgument = matchArgument;
 	}
 
 	@Override

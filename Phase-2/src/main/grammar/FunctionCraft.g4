@@ -223,7 +223,7 @@ ifStatement returns[IfStatement ifRet]:
 		{
 			$ifRet.addCondition($c1.conditionRet);
 		} 
-		
+
 		|	LPAR 
 			c2 = condition 
 			RPAR 
@@ -495,8 +495,22 @@ range returns [ArrayList<Expression> rangeRet]:
 	;
 
 
-matchPatternStatement returns [MatchPatternStatement matchPatRet]://TODO:construct match pattern node
-	id = IDENTIFIER DOT m = MATCH LPAR e = expression RPAR
+matchPatternStatement returns [MatchPatternStatement matchPatRet]:
+	//[ ]: construct matchPatternStatement node and set its attributes
+	id = IDENTIFIER 
+	{
+		Identifier id_ = new Identifier($id.text);
+		id_.setLine($id.line);
+	}
+	DOT 
+	m = MATCH 
+	LPAR 
+	e = expression 
+	{
+		$matchPatRet = new MatchPatternStatement(id_, $e.expRet);
+		$matchPatRet.setLine($m.line);
+	}
+	RPAR
 	;
 
 
