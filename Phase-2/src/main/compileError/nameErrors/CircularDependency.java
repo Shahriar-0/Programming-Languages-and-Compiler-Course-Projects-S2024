@@ -12,8 +12,8 @@ public class CircularDependency extends CompileError {
 		this.nodes = nodes;
 		String s = "";
 		int nodeIndex = 0;
-		int finalIndex = nodes.size() - 1;
-		for (String x : nodes) {
+		int finalIndex = this.nodes.size() - 1;
+		for (String x : this.nodes) {
 			if (nodeIndex != finalIndex) {
 				s = s.concat(x + ", ");
 			} else {

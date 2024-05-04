@@ -1,7 +1,6 @@
 package main.compileError.nameErrors;
 
 import main.compileError.CompileError;
-import main.symbolTable.item.PatternItem;
 
 public class PatternNotDeclared extends CompileError {
 
