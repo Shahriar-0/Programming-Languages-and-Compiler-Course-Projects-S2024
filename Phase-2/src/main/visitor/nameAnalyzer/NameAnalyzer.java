@@ -345,31 +345,7 @@ public class NameAnalyzer extends Visitor<Void> {
 	public Void visit(AccessExpression accessExpression) {
 		boolean isFunctionCall = accessExpression.isFunctionCall();
 		if (isFunctionCall) {
-			try {
-				Expression accessedExpression = accessExpression.getAccessedExpression();
-				if (accessedExpression instanceof Identifier) {
-					Identifier accessedId = (Identifier) accessedExpression;
-					String name = "Function:" + accessedId.getName(); // FIXME: temp solution since weirdly it doesn't work
-					FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(name);
-					if (!functionItem.getFunctionDeclaration().isArgCountValid(accessExpression.getArguments().size())) {
-						nameErrors.add(
-							new ArgMisMatch(
-								accessExpression.getLine(),
-								accessedId.getName()
-							)
-						);
-					}
-				} else {
-					throw new ItemNotFound();
-				}
-			} catch (ItemNotFound e) {
-				nameErrors.add(
-					new FunctionNotDeclared(
-						accessExpression.getLine(),
-						accessExpression.getFunctionName()
-					)
-				);
-			}
+			handleFunctionCall(accessExpression);
 		} else {
 			accessExpression.getAccessedExpression().accept(this);
 		}
@@ -381,6 +357,34 @@ public class NameAnalyzer extends Visitor<Void> {
 			expression.accept(this);
 		}
 		return null;
+	}
+
+	private void handleFunctionCall(AccessExpression accessExpression) {
+		try {
+			Expression accessedExpression = accessExpression.getAccessedExpression();
+			if (accessedExpression instanceof Identifier) {
+				Identifier accessedId = (Identifier) accessedExpression;
+				String name = "Function:" + accessedId.getName(); // FIXME: temp solution since weirdly it doesn't work
+				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(name);
+				if (!functionItem.getFunctionDeclaration().isArgCountValid(accessExpression.getArguments().size())) {
+					nameErrors.add(
+						new ArgMisMatch(
+							accessExpression.getLine(),
+							accessedId.getName()
+						)
+					);
+				}
+			} else {
+				throw new ItemNotFound(); // this shouldn't happen but just in case
+			}
+		} catch (ItemNotFound e) {
+			nameErrors.add(
+				new FunctionNotDeclared(
+					accessExpression.getLine(),
+					accessExpression.getFunctionName()
+				)
+			);
+		}
 	}
 
 	@Override
