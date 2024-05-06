@@ -86,7 +86,7 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
 			id3 = IDENTIFIER
 			{
 				Identifier id_3 = new Identifier($id3.text);
-				id_.setLine($id3.line);
+				id_3.setLine($id3.line);
 				VarDeclaration newVarDec3 = new VarDeclaration(id_3);
 				newVarDec3.setLine($id3.line);
 			}
@@ -102,7 +102,7 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
 				{
 					Identifier id_4 = new Identifier($id4.text);
 					id_4.setLine($id4.line);
-					VarDeclaration newVarDec4 = new VarDeclaration(id_);
+					VarDeclaration newVarDec4 = new VarDeclaration(id_4);
 					newVarDec4.setLine($id4.line);
 				}
 				ASSIGN 

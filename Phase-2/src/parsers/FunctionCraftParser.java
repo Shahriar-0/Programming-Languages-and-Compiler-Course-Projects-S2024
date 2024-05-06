@@ -436,7 +436,7 @@ public class FunctionCraftParser extends Parser {
 					((FunctionArgumentsDeclarationContext)_localctx).id3 = match(IDENTIFIER);
 
 									Identifier id_3 = new Identifier((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getText():null));
-									id_.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
+									id_3.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
 									VarDeclaration newVarDec3 = new VarDeclaration(id_3);
 									newVarDec3.setLine((((FunctionArgumentsDeclarationContext)_localctx).id3!=null?((FunctionArgumentsDeclarationContext)_localctx).id3.getLine():0));
 								
@@ -461,7 +461,7 @@ public class FunctionCraftParser extends Parser {
 
 											Identifier id_4 = new Identifier((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getText():null));
 											id_4.setLine((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getLine():0));
-											VarDeclaration newVarDec4 = new VarDeclaration(id_);
+											VarDeclaration newVarDec4 = new VarDeclaration(id_4);
 											newVarDec4.setLine((((FunctionArgumentsDeclarationContext)_localctx).id4!=null?((FunctionArgumentsDeclarationContext)_localctx).id4.getLine():0));
 										
 						setState(119);

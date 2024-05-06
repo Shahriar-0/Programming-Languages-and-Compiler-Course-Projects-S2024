@@ -254,7 +254,8 @@ public class NameAnalyzer extends Visitor<Void> {
 	@Override
 	public Void visit(MatchPatternStatement matchPatternStatement) {
 		try {
-			SymbolTable.root.getItem(matchPatternStatement.getPatternId().getName());
+			String name = "Pattern:" + matchPatternStatement.getPatternId().getName(); // FIXME: temp solution since weirdly it doesn't work
+			SymbolTable.root.getItem(name);
 		} catch (ItemNotFound e) {
 			nameErrors.add(
 				new PatternNotDeclared(
