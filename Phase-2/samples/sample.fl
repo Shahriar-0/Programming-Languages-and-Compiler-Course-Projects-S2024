@@ -8,8 +8,9 @@ pattern fib(fib)
 ;
 
 pattern help(x)
-    | (x == 0) = 0
-    | (x > 1) = 1
+	| (x == 0) = 0
+	| (x > 1) = 1
+;
 
 pattern fib(n)
 	| (n == 0) = 0
