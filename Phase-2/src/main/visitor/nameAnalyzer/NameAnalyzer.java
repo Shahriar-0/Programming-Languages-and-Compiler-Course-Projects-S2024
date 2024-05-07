@@ -19,6 +19,7 @@ import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
 import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
+import java.util.logging.Logger;
 
 public class NameAnalyzer extends Visitor<Void> {
 
@@ -79,7 +80,11 @@ public class NameAnalyzer extends Visitor<Void> {
 		functionItem.setFunctionSymbolTable(functionSymbolTable);
 		
 		String functionName = functionDeclaration.getFunctionName().getName();
+		if (functionName.contains("#")) { // this is because we add # to the end of pattern names with same name
+			functionName = functionName.substring(0, functionName.indexOf("#"));
+		}
 		for (String argNames : functionDeclaration.getArgNames()) {
+			
 			if (argNames.equals(functionName)) {
 				nameErrors.add(
 					new IdenticalArgFunctionName(
@@ -108,11 +113,16 @@ public class NameAnalyzer extends Visitor<Void> {
 		PatternItem patternItem = new PatternItem(patternDeclaration);
 		patternItem.setPatternSymbolTable(patternSymbolTable);
 
-		if (patternDeclaration.getPatternName().getName().equals(patternDeclaration.getTargetVariable().getName())) {
+		String patternName = patternDeclaration.getPatternName().getName();
+		if (patternName.contains("#")) { // this is because we add # to the end of pattern names with same name
+			patternName = patternName.substring(0, patternName.indexOf("#"));
+		}
+
+		if (patternName.equals(patternDeclaration.getTargetVariable().getName())) {
 			nameErrors.add(
 				new IdenticalArgPatternName(
 					patternDeclaration.getLine(),
-					patternDeclaration.getPatternName().getName()
+					patternName
 				)
 			);
 		}

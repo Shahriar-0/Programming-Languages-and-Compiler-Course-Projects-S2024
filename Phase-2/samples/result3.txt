@@ -1,0 +1,4 @@
+Line:4-> Redefinition of function f
+Line:4-> argument f has same name with function
+Line:10-> Redefinition of pattern p
+Line:10-> target variable p has same name with pattern

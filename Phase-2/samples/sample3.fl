@@ -1,0 +1,15 @@
+def f()
+end
+
+def f(f)
+end
+
+pattern p(k)
+;
+
+pattern p(p)
+;
+
+def main()
+    a = 10;
+end
