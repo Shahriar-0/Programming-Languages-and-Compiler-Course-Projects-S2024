@@ -1,0 +1,11 @@
+Value 0: 7.0
+Value 1: 9.0
+Value 2: 3.125
+Value 3: 0.375
+Value 4: 0.875
+Value 5: 1.125
+Value 6: 1.25
+Value 7: 26.0
+Value 8: 47.0
+Value 9: 13.625
+Value 10: 5.625

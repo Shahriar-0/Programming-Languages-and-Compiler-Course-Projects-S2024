@@ -1,0 +1,2 @@
+max for day 0 is 5.0
+max for day 1 is 24.0
