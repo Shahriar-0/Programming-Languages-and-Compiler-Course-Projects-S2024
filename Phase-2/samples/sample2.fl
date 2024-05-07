@@ -1,0 +1,11 @@
+def a()
+
+end
+
+def a()
+    x += 10;
+end
+
+def main()
+
+end

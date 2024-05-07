@@ -14,29 +14,15 @@ import main.symbolTable.item.FunctionItem;
 import main.symbolTable.item.PatternItem;
 
 public class Utility {
-    public void visitFunctions(Program program, ArrayList<FunctionItem> functionItems, NameAnalyzer nameAnalyzer) {
-		int visitingFunctionIndex = 0;
+    public void visitFunctions(Program program, NameAnalyzer nameAnalyzer) {
 		for (FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()) {
-			FunctionItem functionItem = functionItems.get(visitingFunctionIndex);
-			SymbolTable functionSymbolTable = new SymbolTable();
-			functionItem.setFunctionSymbolTable(functionSymbolTable);
-			SymbolTable.push(functionSymbolTable);
 			functionDeclaration.accept(nameAnalyzer);
-			SymbolTable.pop();
-			visitingFunctionIndex += 1;
 		}
 	}
 
-	public void visitPatterns(Program program, ArrayList<PatternItem> patternItems, NameAnalyzer nameAnalyzer) {
-		int visitingPatternIndex = 0;
+	public void visitPatterns(Program program, NameAnalyzer nameAnalyzer) {
 		for (PatternDeclaration patternDeclaration : program.getPatternDeclarations()) {
-			PatternItem patternItem = patternItems.get(visitingPatternIndex);
-			SymbolTable patternSymbolTable = new SymbolTable();
-			patternItem.setPatternSymbolTable(patternSymbolTable);
-			SymbolTable.push(patternSymbolTable);
 			patternDeclaration.accept(nameAnalyzer);
-			SymbolTable.pop();
-			visitingPatternIndex += 1;
 		}
 	}
 
@@ -44,14 +30,13 @@ public class Utility {
         program.getMain().accept(nameAnalyzer);
     }
 
-	public ArrayList<PatternItem> getPatternItems(Program program, NameAnalyzer nameAnalyzer) {
+	public void checkPatternNames(Program program, NameAnalyzer nameAnalyzer) {
 		int duplicatePatternId = 0;
-		ArrayList<PatternItem> patternItems = new ArrayList<>();
+
 		for (PatternDeclaration patternDeclaration : program.getPatternDeclarations()) {
 			PatternItem patternItem = new PatternItem(patternDeclaration);
 			try {
 				SymbolTable.root.put(patternItem);
-				patternItems.add(patternItem);
 			} catch (ItemAlreadyExists e) {
                 nameAnalyzer.nameErrors.add(
                     new RedefinitionOfPattern(
@@ -68,23 +53,22 @@ public class Utility {
 				newId.setName(freshName);
 				patternDeclaration.setPatternName(newId);
 				PatternItem newItem = new PatternItem(patternDeclaration);
-				patternItems.add(newItem);
+
 				try {
 					SymbolTable.root.put(newItem);
 				} catch (ItemAlreadyExists ignored) {}
 			}
 		}
-		return patternItems;
+		return;
 	}
 
-	public ArrayList<FunctionItem> getFunctionItems(Program program, NameAnalyzer nameAnalyzer) {
+	public void checkFunctionNames(Program program, NameAnalyzer nameAnalyzer) {
 		int duplicateFunctionId = 0;
-		ArrayList<FunctionItem> functionItems = new ArrayList<>();
 		for (FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()) {
 			FunctionItem functionItem = new FunctionItem(functionDeclaration);
 			try {
 				SymbolTable.root.put(functionItem);
-				functionItems.add(functionItem);
+
 			} catch (ItemAlreadyExists e) {
 				nameAnalyzer.nameErrors.add(
 					new RedefinitionOfFunction(
@@ -101,12 +85,13 @@ public class Utility {
 				newId.setName(freshName);
 				functionDeclaration.setFunctionName(newId);
 				FunctionItem newItem = new FunctionItem(functionDeclaration);
-				functionItems.add(newItem);
+
 				try {
 					SymbolTable.root.put(newItem);
 				} catch (ItemAlreadyExists ignored) {}
 			}
 		}
-		return functionItems;
+
+		return;
 	}
 }

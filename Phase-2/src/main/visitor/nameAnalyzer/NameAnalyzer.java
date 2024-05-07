@@ -23,24 +23,18 @@ import main.visitor.Visitor;
 public class NameAnalyzer extends Visitor<Void> {
 
 	public ArrayList<CompileError> nameErrors = new ArrayList<>();
-	private Utility utility = new Utility();
+	private final Utility utility = new Utility();
 
 	@Override
 	public Void visit(Program program) {
 		SymbolTable.root = new SymbolTable();
 		SymbolTable.top = new SymbolTable();
 
-		ArrayList<FunctionItem> functionItems = utility.getFunctionItems(
-			program,
-			this
-		);
-		ArrayList<PatternItem> patternItems = utility.getPatternItems(
-			program,
-			this
-		);
+		utility.checkFunctionNames(program, this);
+		utility.checkPatternNames(program, this);
 
-		utility.visitFunctions(program, functionItems, this);
-		utility.visitPatterns(program, patternItems, this);
+		utility.visitFunctions(program, this);
+		utility.visitPatterns(program, this);
 		utility.visitMain(program, this);
 
 		return null;
