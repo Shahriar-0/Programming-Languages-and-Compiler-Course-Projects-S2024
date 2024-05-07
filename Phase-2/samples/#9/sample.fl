@@ -1,0 +1,8 @@
+def kir()
+end
+
+def main()
+    a = 5;
+    boobs = method(:kir);
+    boobs2 = method(:a);
+end

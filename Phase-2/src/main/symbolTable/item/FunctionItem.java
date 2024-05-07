@@ -1,6 +1,7 @@
 package main.symbolTable.item;
 
 import main.ast.nodes.declaration.FunctionDeclaration;
+import main.ast.nodes.expression.Identifier;
 import main.symbolTable.SymbolTable;
 
 public class FunctionItem extends SymbolTableItem {
@@ -12,6 +13,11 @@ public class FunctionItem extends SymbolTableItem {
 	public FunctionItem(FunctionDeclaration functionDeclaration) {
 		this.functionDeclaration = functionDeclaration;
 		this.name = this.functionDeclaration.getFunctionName().getName();
+	}
+
+	public FunctionItem(Identifier functionName) {
+		this.name = functionName.getName();
+		this.functionDeclaration = null;
 	}
 
 	public SymbolTable getFunctionSymbolTable() {
@@ -26,9 +32,7 @@ public class FunctionItem extends SymbolTableItem {
 		return functionDeclaration;
 	}
 
-	public void setFunctionDeclaration(
-		FunctionDeclaration functionDeclaration
-	) {
+	public void setFunctionDeclaration(FunctionDeclaration functionDeclaration) {
 		this.functionDeclaration = functionDeclaration;
 	}
 

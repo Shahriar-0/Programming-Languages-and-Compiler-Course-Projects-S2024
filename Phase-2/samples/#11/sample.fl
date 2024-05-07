@@ -1,0 +1,6 @@
+def main()
+    a = 4;
+    b = 3;
+    -> () { return a + b; };
+    -> (a, c, d, [b = 5]) { return a + b + d + c + r; } (3, 4);
+end

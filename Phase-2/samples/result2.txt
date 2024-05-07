@@ -1,2 +1,0 @@
-Line:5-> Redefinition of function a
-Line:6-> variable x is not declared

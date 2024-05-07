@@ -1,0 +1,9 @@
+def g(a, [b = 10, d = 20])
+    return a + b + d;
+end
+
+def main()
+    list << a << b << c;
+    puts("Hello" << " " << "World!");
+    g(" ", 3);
+end

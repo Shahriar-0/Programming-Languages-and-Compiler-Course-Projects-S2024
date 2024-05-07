@@ -1,0 +1,14 @@
+def a()
+    return b();
+end
+
+def b()
+    a();
+end
+
+def c()
+    c();
+end
+
+def main()
+end

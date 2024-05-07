@@ -1,0 +1,2 @@
+Line:5-> variable r is not declared
+Line:5-> number of arguments provided for function lambda does not match with its declaration

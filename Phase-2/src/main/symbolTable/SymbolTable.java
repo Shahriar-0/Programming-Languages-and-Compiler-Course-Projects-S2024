@@ -41,6 +41,10 @@ public class SymbolTable {
 		items.put(item.getKey(), item);
 	}
 
+	public void removeItem(String key) {
+		items.remove(key);
+	}
+
 	public SymbolTableItem getItem(String key) throws ItemNotFound {
 		// SymbolTableItem symbolTableItem = this.items.get(key);
 		// if (symbolTableItem != null) {

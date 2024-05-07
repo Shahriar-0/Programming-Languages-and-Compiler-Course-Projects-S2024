@@ -1,0 +1,15 @@
+def g(x)
+    return x + 1;
+end
+
+def a()
+    var = g(b());
+    return var;
+end
+
+def b()
+    return a();
+end
+
+def main()
+end

@@ -1,0 +1,19 @@
+def a()
+end
+
+def a1(a)
+end
+
+def a2(a, b)
+end
+
+def b(a)
+    return 0;
+end
+
+def main()
+    a(b(3));
+    a1(b(3));
+    a2(b(3), b(3));
+    a2(b(3));
+end

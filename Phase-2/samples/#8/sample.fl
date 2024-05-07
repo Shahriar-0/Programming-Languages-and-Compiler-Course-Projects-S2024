@@ -1,0 +1,10 @@
+def main()
+    a = 4;
+    b = 3;
+    r = a;
+    -> (a, c, d, [b = 5]) { g = 0; return a + b + r; } (3, 4, 2);
+    -> (a, c, d, [b = 5]) { g = 0; return a + b + r; } (3, 4);
+    -> (a, c, d, [b = 5]) { g = 0; return a + b + r; } (3, 4, 2, 7);
+    -> (a, c, d, [b = 5]) { g = 0; return a + b + r; } (3, 4, 2, 7, 8);
+    puts(g);
+end

@@ -1,0 +1,17 @@
+Line:1-> argument re has same name with function
+Line:5-> target variable fib has same name with pattern
+Line:6-> variable a is not declared
+Line:7-> variable a is not declared
+Line:7-> function a is not declared
+Line:7-> variable n is not declared
+Line:7-> function a is not declared
+Line:7-> variable n is not declared
+Line:15-> Redefinition of pattern fib
+Line:17-> pattern no is not declared
+Line:51-> Redefinition of function myfunc2
+Line:64-> function myFunc is not declared
+Line:64-> variable c is not declared
+Line:66-> function ali is not declared
+Line:67-> number of arguments provided for function aa does not match with its declaration
+*-> defenition of functions hh, z, y contains circular dependency
+*-> defenition of functions f, g contains circular dependency

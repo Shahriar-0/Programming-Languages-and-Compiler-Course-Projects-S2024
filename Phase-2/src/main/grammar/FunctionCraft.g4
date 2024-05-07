@@ -31,7 +31,6 @@ program returns [Program flProgram]:
 
 
 functionDeclaration returns [FunctionDeclaration functionDeclarationRet]: 
-	//[ ]: construct functionDeclaration node and set its attributes
 	{
 		$functionDeclarationRet = new FunctionDeclaration();
 	}
@@ -120,7 +119,6 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
 
 
 patternMatching returns [PatternDeclaration patternRet]:
-	//[ ]: cunstruct patterDeclaration node and set its attributes
 	pat = PATTERN
 	patternName = IDENTIFIER
 	LPAR 
@@ -312,7 +310,6 @@ condition returns [ArrayList<Expression> conditionRet]:
 
 
 putsStatement returns [PutStatement putRet]:
-	// [ ]: construct putStatement node and set its attributes
 	p = PUTS
 	LPAR 
 	e = expression
@@ -326,7 +323,6 @@ putsStatement returns [PutStatement putRet]:
 
 
 lenStatement returns [LenStatement lenRet]:
-	// [ ]: construct lenStatement node and set its attributes
 	l = LEN 
 	LPAR 
 	e = expression
@@ -339,7 +335,6 @@ lenStatement returns [LenStatement lenRet]:
 
 
 pushStatement returns [PushStatement pushRet]:
-	// [ ]: construct pushStatement node and set its attributes
 	p = PUSH 
 	LPAR 
 	e1 = expression 
@@ -451,7 +446,6 @@ forStatement returns [ForStatement forStRet]:
 
 
 range returns [ArrayList<Expression> rangeRet]:
-	// [ ]: construct range node and set its attributes
 	{
 		$rangeRet = new ArrayList<Expression>();
 	}
@@ -497,7 +491,6 @@ range returns [ArrayList<Expression> rangeRet]:
 
 
 matchPatternStatement returns [MatchPatternStatement matchPatRet]:
-	//[ ]: construct matchPatternStatement node and set its attributes
 	id = IDENTIFIER 
 	{
 		Identifier id_ = new Identifier($id.text);
@@ -654,7 +647,6 @@ body returns [ArrayList<Statement> bodyRet]:
 
 
 expression returns [Expression expRet]:
-	// [ ]: construct append expression node. the left most expression is appendee and others are appended.
 	e1 = expression
 	a = APPEND 
 	e2 = eqaulityExpression
@@ -946,11 +938,36 @@ lambdaFunction returns [Expression lambdaRet]:
 	a = ARROW
 	fd = functionArgumentsDeclaration
 	LBRACE 
+	b = body
 	{
 		$lambdaRet = new LambdaExpression($fd.argRet, $b.bodyRet);
 		$lambdaRet.setLine($a.line);
 	}
-	b = body RBRACE
+	RBRACE
+	(
+		LPAR
+		(
+			{
+				ArrayList<Expression> args = new ArrayList<Expression>();
+			}
+			e = expression 
+			{
+				args.add($e.expRet);
+			}
+			(
+				COMMA 
+				e2 = expression 
+				{
+					args.add($e2.expRet);
+				}
+			)*
+			{
+				$lambdaRet = new LambdaExpression($fd.argRet, $b.bodyRet, args);
+				$lambdaRet.setLine($a.line);
+			}
+		)*
+		RPAR
+	)?
 	;
 
 values returns [Value valRet]:

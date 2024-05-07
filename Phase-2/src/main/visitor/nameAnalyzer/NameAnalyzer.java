@@ -215,6 +215,7 @@ public class NameAnalyzer extends Visitor<Void> {
 		if (loopRetStmt != null) {
 			loopRetStmt.accept(this);
 		}
+		SymbolTable.pop();
 		return null;
 	}
 
@@ -259,7 +260,7 @@ public class NameAnalyzer extends Visitor<Void> {
 	public Void visit(MatchPatternStatement matchPatternStatement) {
 		try {
 			String name = "Pattern:" + matchPatternStatement.getPatternId().getName(); // FIXME: temp solution since weirdly it doesn't work
-			SymbolTable.root.getItem(name);
+			SymbolTable.top.getItem(name);
 		} catch (ItemNotFound e) {
 			nameErrors.add(
 				new PatternNotDeclared(
@@ -369,7 +370,7 @@ public class NameAnalyzer extends Visitor<Void> {
 			if (accessedExpression instanceof Identifier) {
 				Identifier accessedId = (Identifier) accessedExpression;
 				String name = "Function:" + accessedId.getName(); // FIXME: temp solution since weirdly it doesn't work
-				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(name);
+				FunctionItem functionItem = (FunctionItem) SymbolTable.top.getItem(name);
 				if (!functionItem.getFunctionDeclaration().isArgCountValid(accessExpression.getArguments().size())) {
 					nameErrors.add(
 						new ArgMisMatch(
@@ -401,6 +402,19 @@ public class NameAnalyzer extends Visitor<Void> {
 		for (Statement statement : lambdaExpression.getBody()) {
 			statement.accept(this);
 		}
+		if (lambdaExpression.isCalledImmediately()) {
+			for (Expression expression : lambdaExpression.getArgs()) {
+				expression.accept(this);
+			}
+			if (!lambdaExpression.hasValidArgs()) {
+				nameErrors.add(
+					new ArgMisMatch(
+						lambdaExpression.getLine(),
+						"lambda"
+					)
+				);
+			}
+		}
 		SymbolTable.pop();
 		return null;
 	}
@@ -415,7 +429,17 @@ public class NameAnalyzer extends Visitor<Void> {
 
 	@Override
 	public Void visit(FunctionPointer functionPointer) {
-		functionPointer.getId().accept(this);
+		try {
+			String functionName = "Function:" + functionPointer.getId().getName(); // FIXME: temp solution since weirdly it doesn't work
+			SymbolTable.top.getItem(functionName);
+		} catch (ItemNotFound e) {
+			nameErrors.add(
+				new FunctionNotDeclared(
+					functionPointer.getLine(),
+					functionPointer.getId().getName()
+				)
+			);
+		}
 		return null;
 	}
 

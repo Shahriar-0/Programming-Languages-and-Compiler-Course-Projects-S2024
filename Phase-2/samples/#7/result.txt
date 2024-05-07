@@ -1,0 +1,4 @@
+Line:4-> variable t is not declared
+Line:7-> variable a is not declared
+Line:8-> variable i is not declared
+Line:10-> variable z is not declared

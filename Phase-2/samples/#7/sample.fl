@@ -1,0 +1,11 @@
+def main()
+    loop do
+        z = 4;
+        for i in (t .. z)
+            a = 3;
+        end
+        puts(a);
+        a = i;
+    end
+    k = z;
+end

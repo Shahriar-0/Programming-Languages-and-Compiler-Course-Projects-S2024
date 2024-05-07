@@ -1,0 +1,3 @@
+Line:6-> number of arguments provided for function lambda does not match with its declaration
+Line:8-> number of arguments provided for function lambda does not match with its declaration
+Line:9-> variable g is not declared
