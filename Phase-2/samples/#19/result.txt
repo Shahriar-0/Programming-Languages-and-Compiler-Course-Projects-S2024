@@ -1,0 +1,26 @@
+Line:3-> variable d is not declared
+Line:8-> variable d is not declared
+Line:14-> variable m is not declared
+Line:23-> variable k is not declared
+Line:30-> variable j is not declared
+Line:34-> variable a is not declared
+Line:35-> variable a is not declared
+Line:36-> variable a is not declared
+Line:38-> variable a is not declared
+Line:40-> variable a is not declared
+Line:44-> variable k2 is not declared
+Line:46-> variable k3 is not declared
+Line:51-> number of arguments provided for function f does not match with its declaration
+Line:51-> variable k is not declared
+Line:56-> variable d is not declared
+Line:63-> variable n is not declared
+Line:69-> variable o is not declared
+Line:73-> variable v is not declared
+Line:74-> variable v is not declared
+Line:79-> variable a is not declared
+Line:84-> variable a is not declared
+Line:90-> variable a is not declared
+Line:92-> variable s is not declared
+Line:92-> number of arguments provided for function lambda does not match with its declaration
+Line:94-> number of arguments provided for function lambda does not match with its declaration
+Line:95-> variable l is not declared

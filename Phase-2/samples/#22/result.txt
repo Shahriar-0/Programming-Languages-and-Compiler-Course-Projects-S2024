@@ -1,0 +1,8 @@
+*-> defenition of functions l1, l2 contains circular dependency
+*-> defenition of functions f, h, g contains circular dependency
+*-> defenition of functions l2 contains circular dependency
+*-> defenition of functions g1, g3, g2 contains circular dependency
+*-> defenition of functions f1, f3, f2 contains circular dependency
+*-> defenition of functions a1, a4, a3, a2 contains circular dependency
+*-> defenition of functions y1, y3, y2 contains circular dependency
+*-> defenition of functions x1, x3, x2 contains circular dependency

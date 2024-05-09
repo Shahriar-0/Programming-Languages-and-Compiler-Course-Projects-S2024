@@ -1,0 +1,100 @@
+def f(b, c)
+    a = 5;
+    return a+b+c+d;
+end
+
+def g(b, c)
+    a = 5;
+    k = a+b+c+d;
+    d = 10;
+    return k;
+end
+
+pattern fib(n)
+    | (n == 0) = m + 1
+    | (n == 1) = 1
+    | (n > 2) = fib.match(n-1) + fib.match(n-2)
+;
+
+def h(b, c)
+    loop do
+        k = 10;
+    end
+    return k;
+end
+
+def l(b, c)
+    for num in (1..10)
+        j = 10;
+    end
+    return j;
+end
+
+def s(b, c)
+    if ((a == 3) && (b == 1))
+        puts(a+b);
+        if ((a == 3) && ((b == 1 ) || (c == 5)))
+            k2 = 10;
+            if(a)
+                d = k2 + 1;
+                puts(a+b+c);
+            end
+        end
+    else
+        x = k2;
+    end
+    return k3;
+end
+
+def f6(b, c)
+    a = 5;
+    return f(k);
+end
+
+def f7(b, c)
+    a = 5;
+    if (d == 0)
+        return 10;
+    end
+end
+
+def f8(b, c)
+    a = 5;
+    for num in (n..b)
+        return 10;
+    end
+end
+
+def f9(b, c)
+    a = b > o;
+end
+
+def f10(b, c)
+    a = v;
+    c = v + 2;
+end
+
+def f11(b, c)
+    m = g(b ,c);
+    s = a / 8;
+end
+
+def f12(b, c)
+    m = g(b ,c);
+    s = a / 8;
+end
+
+
+
+def main()
+    puts(a);
+    puts(1);
+    -> (arg1, arg2) { return s * arg2;} (1, 2 , 3);
+    ww = 0;
+    -> (arg1, arg2) {
+        if(l == 10)
+            arg1 = 10;
+        end
+        return ww;
+    } (1, 2 , 3);
+end

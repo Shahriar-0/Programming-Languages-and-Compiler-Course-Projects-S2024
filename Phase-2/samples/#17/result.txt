@@ -1,0 +1,100 @@
+Line:4-> argument func2 has same name with function
+Line:7-> argument func3 has same name with function
+Line:7-> variable p is not declared
+Line:8-> variable fdfd is not declared
+Line:16-> variable p is not declared
+Line:19-> number of arguments provided for function func3 does not match with its declaration
+Line:23-> pattern x is not declared
+Line:24-> pattern a is not declared
+Line:25-> pattern b is not declared
+Line:26-> pattern c is not declared
+Line:27-> pattern y is not declared
+Line:28-> function x is not declared
+Line:29-> function p is not declared
+Line:30-> function z is not declared
+Line:31-> function i is not declared
+Line:32-> function a is not declared
+Line:33-> function b is not declared
+Line:34-> function c is not declared
+Line:35-> function y is not declared
+Line:43-> number of arguments provided for function func3 does not match with its declaration
+Line:44-> number of arguments provided for function func3 does not match with its declaration
+Line:45-> number of arguments provided for function func3 does not match with its declaration
+Line:52-> number of arguments provided for function func3 does not match with its declaration
+Line:53-> number of arguments provided for function func3 does not match with its declaration
+Line:56-> number of arguments provided for function lambda does not match with its declaration
+Line:60-> number of arguments provided for function lambda does not match with its declaration
+Line:66-> Redefinition of function func1
+Line:74-> variable c is not declared
+Line:75-> variable c is not declared
+Line:76-> variable b is not declared
+Line:81-> function func12 is not declared
+Line:95-> variable a is not declared
+Line:95-> variable b is not declared
+Line:97-> function func6 is not declared
+Line:98-> variable d is not declared
+Line:99-> function func20 is not declared
+Line:106-> variable y is not declared
+Line:107-> variable y is not declared
+Line:107-> variable d is not declared
+Line:111-> variable func1 is not declared
+Line:114-> variable v is not declared
+Line:115-> variable v is not declared
+Line:117-> variable u is not declared
+Line:118-> variable r is not declared
+Line:122-> variable u is not declared
+Line:128-> variable u is not declared
+Line:136-> variable i is not declared
+Line:137-> function func6 is not declared
+Line:138-> variable d is not declared
+Line:139-> function func20 is not declared
+Line:142-> variable i is not declared
+Line:143-> variable i is not declared
+Line:146-> variable y is not declared
+Line:147-> variable y is not declared
+Line:147-> variable d is not declared
+Line:152-> variable v is not declared
+Line:152-> variable i is not declared
+Line:155-> variable v is not declared
+Line:155-> variable i is not declared
+Line:157-> variable u is not declared
+Line:158-> variable r is not declared
+Line:162-> variable u is not declared
+Line:167-> variable z is not declared
+Line:168-> variable z is not declared
+Line:168-> variable u is not declared
+Line:178-> variable x is not declared
+Line:179-> variable f1 is not declared
+Line:179-> variable f2 is not declared
+Line:179-> variable f3 is not declared
+Line:183-> variable f1 is not declared
+Line:184-> variable f2 is not declared
+Line:184-> variable f3 is not declared
+Line:185-> variable x is not declared
+Line:189-> variable s is not declared
+Line:189-> variable r is not declared
+Line:190-> variable s is not declared
+Line:190-> variable r is not declared
+Line:195-> variable k is not declared
+Line:210-> variable z is not declared
+Line:219-> variable c is not declared
+Line:220-> variable c is not declared
+Line:221-> variable c is not declared
+Line:222-> variable c is not declared
+Line:222-> variable z is not declared
+Line:224-> function fun is not declared
+Line:226-> pattern pat98 is not declared
+Line:227-> variable m is not declared
+Line:231-> target variable pattern1 has same name with pattern
+Line:235-> Redefinition of pattern pattern1
+Line:240-> number of arguments provided for function func5 does not match with its declaration
+Line:244-> function func6 is not declared
+Line:244-> number of arguments provided for function func3 does not match with its declaration
+Line:244-> variable v1 is not declared
+Line:245-> function func6 is not declared
+Line:245-> number of arguments provided for function func5 does not match with its declaration
+Line:245-> number of arguments provided for function func3 does not match with its declaration
+Line:245-> variable v1 is not declared
+Line:249-> function fun is not declared
+Line:249-> number of arguments provided for function func2 does not match with its declaration
+*-> defenition of functions func3, func3 contains circular dependency

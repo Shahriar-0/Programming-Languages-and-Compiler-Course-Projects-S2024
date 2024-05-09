@@ -1,0 +1,111 @@
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib.match(n-1) + fib.match(n-2)
+;
+
+def f()
+    return g();
+end
+
+def g()
+    return h();
+end
+
+def h()
+    return f();
+end
+
+def x2()
+    return x3();
+end
+
+def x1()
+    return x2();
+end
+
+def x3()
+    return x1();
+end
+
+def y1(a)
+    if(a == 1)
+        c = y2(10);
+    end
+end
+
+def y2(a)
+    -> (arg1, arg2) { return y3() * arg2;} (1, 3);
+end
+
+def y3()
+    return 10 + y1(2);
+end
+
+def f1()
+    return fib.match(f2());
+end
+
+def f2()
+    loop do
+        k = f3();
+    end
+    return 10;
+end
+
+def f3()
+    for num in (1..10)
+        if(f1() == 10)
+            j = 10;
+        end
+    end
+    return 10;
+end
+
+def g1()
+    puts(g2() * 3);
+end
+
+def g2()
+    return len(g3());
+end
+
+def g3()
+    return [g1() , 20 , 30];
+end
+
+def l1()
+    for num in (100..200)
+        next if(l2() == 10);
+        break if(l3() == 100);
+    end
+    return 30;
+end
+
+def l2()
+    e = l1();
+end
+
+def l3()
+    s = l2() + true;
+end
+
+def a1()
+    return a2();
+end
+
+def a3()
+    return a4();
+end
+
+def a2()
+    return a3();
+end
+
+def a4()
+    return a1();
+end
+
+def main()
+    puts("Loop!");
+end

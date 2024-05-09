@@ -46,11 +46,6 @@ public class SymbolTable {
 	}
 
 	public SymbolTableItem getItem(String key) throws ItemNotFound {
-		// SymbolTableItem symbolTableItem = this.items.get(key);
-		// if (symbolTableItem != null) {
-		// 	return symbolTableItem;
-		// } //FIXME: this fucking piece of shit is not working so it's commented
-
 		if (this.items.containsKey(key)) {
 			return this.items.get(key);
 		}

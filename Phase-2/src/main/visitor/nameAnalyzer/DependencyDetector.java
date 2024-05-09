@@ -8,12 +8,16 @@ import java.util.regex.Pattern;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.PatternDeclaration;
+import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.AccessExpression;
 import main.ast.nodes.expression.AppendExpression;
 import main.ast.nodes.expression.BinaryExpression;
+import main.ast.nodes.expression.ChompStatement;
+import main.ast.nodes.expression.ChopStatement;
 import main.ast.nodes.expression.Expression;
 import main.ast.nodes.expression.Identifier;
 import main.ast.nodes.expression.LambdaExpression;
+import main.ast.nodes.expression.LenStatement;
 import main.ast.nodes.expression.MatchPatternStatement;
 import main.ast.nodes.expression.UnaryExpression;
 import main.ast.nodes.expression.value.FunctionPointer;
@@ -23,6 +27,8 @@ import main.ast.nodes.statement.ExpressionStatement;
 import main.ast.nodes.statement.ForStatement;
 import main.ast.nodes.statement.IfStatement;
 import main.ast.nodes.statement.LoopDoStatement;
+import main.ast.nodes.statement.PushStatement;
+import main.ast.nodes.statement.PutStatement;
 import main.ast.nodes.statement.ReturnStatement;
 import main.ast.nodes.statement.Statement;
 import main.compileError.CompileError;
@@ -52,9 +58,20 @@ public class DependencyDetector extends Visitor<Void> {
 	}
 
 	@Override
+	public Void visit(VarDeclaration varDeclaration) {
+		if (varDeclaration.getDefaultVal() != null) {
+			varDeclaration.getDefaultVal().accept(this);
+		}
+		return null;
+	}
+
+	@Override
 	public Void visit(FunctionDeclaration functionDeclaration) {
 		String functionName = functionDeclaration.getFunctionName().getName();
 		callStack.push(functionName);
+		for (VarDeclaration varDeclaration : functionDeclaration.getArgs()) {
+			varDeclaration.accept(this);
+		}
 		for (Statement statement : functionDeclaration.getBody()) {
 			statement.accept(this);
 		}
@@ -93,6 +110,37 @@ public class DependencyDetector extends Visitor<Void> {
 		for (Statement statement : ifStatement.getElseBody()) {
 			statement.accept(this);
 		}
+		return null;
+	}
+
+	@Override
+	public Void visit(PutStatement putStatement) {
+		putStatement.getExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(PushStatement pushStatement) {
+		pushStatement.getInitial().accept(this);
+		pushStatement.getToBeAdded().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(LenStatement lenStatement) {
+		lenStatement.getExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ChopStatement chopStatement) {
+		chopStatement.getChopExpression().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ChompStatement chompStatement) {
+		chompStatement.getChompExpression().accept(this);
 		return null;
 	}
 
@@ -201,6 +249,11 @@ public class DependencyDetector extends Visitor<Void> {
 	public Void visit(LambdaExpression lambdaExpression) {
 		for (Statement statement : lambdaExpression.getBody()) {
 			statement.accept(this);
+		}
+		if (lambdaExpression.isCalledImmediately()) {
+			for (Expression expression : lambdaExpression.getArgs()) {
+				expression.accept(this);
+			}
 		}
 		return null;
 	}

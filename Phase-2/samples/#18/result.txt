@@ -1,0 +1,2 @@
+Line:5-> Redefinition of function func
+Line:15-> Redefinition of pattern fib

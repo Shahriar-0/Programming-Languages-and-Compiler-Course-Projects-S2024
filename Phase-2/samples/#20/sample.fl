@@ -1,0 +1,22 @@
+def f(b, c)
+    return g(multiply(b, c));
+end
+
+def multiply(a, b)
+    a = K(b) + a;
+    b = K2.match(5);
+    C = fib.match(5);
+    return a*b;
+end
+
+pattern fib(n)
+    | (n == 0) = m + 1
+    | (n == 1) = 1
+    | (n > 2) = fib.match(n-1) + fib.match(n-2)
+;
+
+def main()
+    puts(1);
+    -> (arg1, arg2) { return s() * arg2;} (1, 2 , 3);
+    -> (arg1, arg2) { return fib2.match(10) * arg2;} (1, 2 , 3);
+end

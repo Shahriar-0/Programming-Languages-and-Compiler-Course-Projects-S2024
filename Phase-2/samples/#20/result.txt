@@ -1,0 +1,8 @@
+Line:2-> function g is not declared
+Line:6-> function K is not declared
+Line:7-> pattern K2 is not declared
+Line:13-> variable m is not declared
+Line:20-> function s is not declared
+Line:20-> number of arguments provided for function lambda does not match with its declaration
+Line:21-> pattern fib2 is not declared
+Line:21-> number of arguments provided for function lambda does not match with its declaration

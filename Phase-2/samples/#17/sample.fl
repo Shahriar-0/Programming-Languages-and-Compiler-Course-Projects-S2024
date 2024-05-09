@@ -1,0 +1,253 @@
+def func1()
+end
+
+def func2(func2) #error same name
+end
+
+def func3(a, b, c, [y=0, func3=9, x=p, z="i", i=990.23]) # error p, error func3
+    fdfd = fdfd; # error fdfd
+    x = fdfd;
+    x = a;
+    x = b;
+    x = c;
+    x = y;
+    x = func3;
+    x = x;
+    x = p; # error p
+    x = z;
+    x = i;
+    x = func3(); # error mismatch
+    x = func1();
+    x = pattern1.match(x);
+    x = pat.match(i);
+    x = x.match(x); # error
+    x = a.match(i); # error
+    x = b.match(i); # error
+    x = c.match(i); # error
+    x = y.match(i); # error
+    x = x(); # error
+    x = p(); # error
+    x = z(); # error
+    x = i(); # error
+    x = a(); # error
+    x = b(); # error
+    x = c(); # error
+    x = y(); # error
+end
+
+def func4(a)
+    b = 10;
+    c = 10;
+    d = 10;
+    e = 10;
+    func3(); #error
+    func3(a); #error
+    func3(a, b); #error
+    func3(a, b, c);
+    func3(a, b, c, d);
+    func3(a, b, c, d, a);
+    func3(a, b, c, d, a, a);
+    func3(a, b, c, d, a, a, e);
+    func3(a, b, c, d, a, a, e, e);
+    func3(a, b, c, d, a, a, a, e, a); # error
+    func3(a, b, c, d, a, a, a, e, a, a); # error
+    pat.match(a);
+    ->(a, b, [c=0, d=0]){}(); # error
+    ->(a, b, [c=0, d=0]){}(a); # error
+    ->(a, b, [c=0, d=0]){}(a, b);
+    ->(a, b, [c=0, d=0]){}(a, b, c);
+    ->(a, b, [c=0, d=0]){}(a, b, c, d);
+    ->(a, b, [c=0, d=0]){}(a, b, c, d, e); # error
+end
+
+def func5(a, [b=0, c=0, d=0])
+end
+
+def func1(a) # error dup
+end
+
+def testIfScope()
+    a = 0;
+    if (pat2.match(a) == a)
+        b = a;
+        func5(b, a);
+        pat.match(c); # error c
+        b = c; # error c
+    elseif(b == a) # error b
+        c = b;
+        b = a + c;
+    else
+        x = a * b + c;
+        if ((a == b)&&(c >= x)||(a + b <= c * x)||(func1())&&(func12(x))) # error notFound func12
+            w = a * b + c - x;
+        end
+        pat.match(w); # error w
+    end
+    t = a;
+    a = b; # error b
+    a = c; # error c
+    a = x; # error x
+    a = w; # error w
+end
+
+def testForLoop()
+    x = 10;
+    for i in (a..b) # not found a , func20
+        c = x + i;
+        p = [5 , 6 , x , c , func1() + func6()]; # func6 not found
+        next if(d == x); # not found d
+        break if(func20() == c); # not found func20 , c
+        next;
+        break;
+        if(c == x + i)
+            y = c + x + i;
+            next if(c == x);
+            break if(func1() > c - x);
+            next if(y == c); # not found y
+            break if(y < d); # not found y , d
+            next;
+            break;
+        end
+        for v in func1 # error func1
+            u = v + i;
+        end
+        for w in [1 , 2 , 3 , x , i , v , w] # error v , w
+            u = v + i; # error not found v
+        end
+        i = u; # error u
+        for z in r # not found r
+            break;
+            next;
+            break if(z == i);
+            next if(z == u); # error not found u
+        end
+        for z in p
+            break;
+            next;
+            break if(z == i);
+            next if(z == u); # error not found u
+        end
+    end
+end
+
+def testLoopDo()
+    x = 10;
+    loop do
+        c = x + i; # not found i
+        p = [5 , 6 , x , c , func1() + func6()]; # func6 not found
+        next if(d == x); # not found d
+        break if(func20() == c); # not found func20 , c
+        next;
+        break;
+        if(c == x + i) # not found i
+            y = c + x + i; # not found i
+            next if(c == x);
+            break if(func1() > c - x);
+            next if(y == c); # not found y
+            break if(y < d); # not found y , d
+            next;
+            break;
+        end
+        loop do
+            u = v + i; # not found v , i
+        end
+        loop do
+            u = v + i; # error not found v , i
+        end
+        i = u; # error u
+        for z in r # not found r
+            break;
+            next;
+            break if(z == i);
+            next if(z == u); # error not found u
+        end
+        loop do
+            break;
+            next;
+            break if(z == i); # error not found z
+            next if(z == u); # error not found  z , u
+        end
+    end
+end
+
+def lambdaExpScopeTest()
+    a = 10;
+    b = 10;
+    c = 10;
+    ->(f1 , f2 , f3){f1 = a; b = f2 + c; x = f3; c = x;}(a , b , c);
+    a = x; # error not found x
+    a = f1 + f2 + f3; # error f1 , f2 , f3
+    ->(r){
+      func1();
+      func5(r);
+      func5(f1); # error f1
+      func5(f2 , f3); # error f2 , f3
+      func5(x); # error x
+      pat.match(b);
+    }(a);
+    return ->(d , d1){
+        d = s + r; # error s , r
+    }(s , r); # error s , r
+end
+
+def listAccessTest()
+    l = [1 , 2 , 3 , 4 , [5 , 6, 7 , func1()]];
+    k = [k , 10]; # error k
+    a = l[1];
+    b = l[1][2];
+    a = l[a];
+    b = l[a][b];
+    a = l[func5(a)];
+    b = l[func2(b)][pat.match(l)];
+    a = l[true];
+    b = l["ak"][2.5];
+    a = l[z]; # not found z
+    b = l[f][b]; # not found f
+    b = l[b][w]; # not found w
+    b = l[f][w]; # not found f , w
+    a = l[func(a)]; # not found func
+    b = l[func(b)][pat98.match(l)]; # not found func , pat98
+    a = z[2]; #not found z
+end
+
+def appendTest()
+    l = [];
+    a = 0;
+    b = "ye3y7";
+    l << a;
+    l << a << b;
+    l << c; # not found c
+    l << a << c; # not found c
+    l << c << a; # not found c
+    l << c << z; # not found c , z
+    l << func1();
+    l << fun(); # not found fun
+    l << pat.match(b);
+    l << pat98.match(l); # not found pat98
+    m << a; # not found m
+    l << 2 << "ss";
+end
+
+pattern pattern1(pattern1) # error same name
+    | (pattern1 == 9) = 8
+;
+
+pattern pattern1(patt) # error dup
+    | (patt == 9) = 8
+;
+
+pattern pat(v)
+    | (func1() == func5()) = func4(v) # error func5 mismatch
+    | (func1() == func5(v)) = func4(v)
+    | (func1() == func5(v, v)) = func4(v)
+    | (func1() == func5(v, v, v)) = func5(v)
+    | (func6() == func5(v, v, v, v)) = func3(v1) # error notFound func6, error func3 mismatch , error v1
+    | (func6() == func5(v, v, v, v, v)) = func3(v1) # error notFound func6, error func5 mismatch, error func3 mismatch , error v1
+;
+
+pattern pat2(i) 
+    | (i > 8)&&(i == pat.match(i)) = ->(a, b){fun(a); func2(8); func2(a, b); func2(i);}(i, i) # error notFound fun, error mismatch func2
+;
+
+def main()
+end

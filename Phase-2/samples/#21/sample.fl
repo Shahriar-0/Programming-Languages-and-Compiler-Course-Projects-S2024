@@ -1,0 +1,25 @@
+def compare(compare, b)
+    return compare > b;
+end
+
+pattern fib(fib)
+    | (fib == 0) = 1
+    | (fib == 1) = 1
+    | (fib > 2) = fib.match(fib-1) + fib.match(fib-2)
+;
+
+def k(c, b , [k=10])
+    return c > b;
+end
+
+pattern fib2(fib2)
+    | (fib == 0) = 1
+    | (fib == 1) = 1
+    | (fib > 2) = fib3.match(fib-1) + fib3.match(fib-2)
+;
+
+def main()
+    a = 10;
+    b = 5;
+    compare(a, b);
+end

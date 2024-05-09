@@ -1,0 +1,64 @@
+
+def y()
+    return z();
+end
+
+def z()
+    return hh();
+end
+
+def hh()
+    y();
+end
+
+def f()
+    g();
+end
+
+def g()
+    return f();
+end
+
+def h()
+    a = 1;
+    b = 2;
+    return myfunc2(a, b);
+end
+
+
+def myfunc2(a, b, [c=1])
+    return;
+end
+
+def myfunc2()
+    return;
+end
+
+
+def aa(a, b, c)
+    return a+b+c;
+end
+
+def sameNameWithArg (a, sameNameWithArg, b, sameNameWithArg)
+end
+
+def sameNameWithArg2 (a, b, [sameNameWithArg2=12])
+end
+
+pattern sameNameWithArg(sameNameWithArg)
+    | (sameNameWithArg == 2) = 3
+;
+
+def main()
+    a = 5;
+    b = 6;
+    puts("salam");
+    myFunc(c, b);
+    myfunc2(a, b);
+    ali(a);
+    aa(a, b);
+
+    ->(asas, sasa){}(a, b);
+    ->(asas, sasa){}(a);
+    ->(asas, sasa){}(a, s, b);
+end

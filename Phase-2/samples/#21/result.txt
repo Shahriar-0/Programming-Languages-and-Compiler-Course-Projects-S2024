@@ -1,0 +1,11 @@
+Line:1-> argument compare has same name with function
+Line:5-> target variable fib has same name with pattern
+Line:11-> argument k has same name with function
+Line:15-> target variable fib2 has same name with pattern
+Line:16-> variable fib is not declared
+Line:17-> variable fib is not declared
+Line:18-> variable fib is not declared
+Line:18-> pattern fib3 is not declared
+Line:18-> variable fib is not declared
+Line:18-> pattern fib3 is not declared
+Line:18-> variable fib is not declared

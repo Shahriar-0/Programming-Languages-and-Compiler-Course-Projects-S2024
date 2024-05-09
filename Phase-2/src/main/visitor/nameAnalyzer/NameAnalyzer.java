@@ -165,6 +165,8 @@ public class NameAnalyzer extends Visitor<Void> {
 
 	@Override
 	public Void visit(IfStatement ifStatement) {
+		SymbolTable ifSymbolTable = new SymbolTable(SymbolTable.top);
+		SymbolTable.push(ifSymbolTable);
 		for (Expression expression : ifStatement.getConditions()) {
 			expression.accept(this);
 		}
@@ -174,6 +176,7 @@ public class NameAnalyzer extends Visitor<Void> {
 		for (Statement statement : ifStatement.getElseBody()) {
 			statement.accept(this);
 		}
+		SymbolTable.pop();
 		return null;
 	}
 

@@ -1,0 +1,14 @@
+Line:33-> Redefinition of function myfunc2
+Line:42-> argument sameNameWithArg has same name with function
+Line:42-> argument sameNameWithArg has same name with function
+Line:45-> argument sameNameWithArg2 has same name with function
+Line:48-> target variable sameNameWithArg has same name with pattern
+Line:56-> function myFunc is not declared
+Line:56-> variable c is not declared
+Line:58-> function ali is not declared
+Line:59-> number of arguments provided for function aa does not match with its declaration
+Line:62-> number of arguments provided for function lambda does not match with its declaration
+Line:63-> variable s is not declared
+Line:63-> number of arguments provided for function lambda does not match with its declaration
+*-> defenition of functions hh, z, y contains circular dependency
+*-> defenition of functions f, g contains circular dependency

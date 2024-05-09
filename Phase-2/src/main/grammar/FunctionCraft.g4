@@ -427,7 +427,6 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
 	;
 
 forStatement returns [ForStatement forStRet]:
-	//[ ]: construct forStatement node and set its attributes
 	f = FOR 
 	id = IDENTIFIER
 	{
@@ -446,13 +445,11 @@ forStatement returns [ForStatement forStRet]:
 
 
 range returns [ArrayList<Expression> rangeRet]:
-	{
-		$rangeRet = new ArrayList<Expression>();
-	}
 	(
 		LPAR 
 		e1 = expression
 		{
+			$rangeRet = new ArrayList<Expression>();
 			$rangeRet.add($e1.expRet);
 		}
 		DOUBLEDOT 
@@ -468,6 +465,7 @@ range returns [ArrayList<Expression> rangeRet]:
 			(
 				e3 = expression
 				{
+					$rangeRet = new ArrayList<Expression>();
 					$rangeRet.add($e3.expRet);
 				}
 				(
@@ -483,6 +481,7 @@ range returns [ArrayList<Expression> rangeRet]:
 
 	|	id = IDENTIFIER
 		{
+			$rangeRet = new ArrayList<Expression>();
 			Identifier id_ = new Identifier($id.text);
 			id_.setLine($id.line);
 			$rangeRet.add(id_);
@@ -1087,7 +1086,7 @@ NOT: '!';
 INCREMENT: '++';
 DECREMENT: '--';
 
-PATTERN_MATCHING_SEPARATOR: '	|';
+PATTERN_MATCHING_SEPARATOR: '	|' | '    |';
 SEPARATOR: '|';
 APPEND: '<<';
 
