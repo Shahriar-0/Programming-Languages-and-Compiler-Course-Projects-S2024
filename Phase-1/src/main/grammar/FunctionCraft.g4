@@ -266,8 +266,7 @@ funcCall
 	;
 
 funcCall_
-    :
-    funcCallArgs funcCall_
+    : funcCallArgs funcCall_
     | (LBRACKET expressionAddSub RBRACKET)+ funcCallArgs funcCall_
     | epsilon
     ;

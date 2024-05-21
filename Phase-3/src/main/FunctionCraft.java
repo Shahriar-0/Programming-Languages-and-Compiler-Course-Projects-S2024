@@ -24,11 +24,12 @@ public class FunctionCraft {
         TypeChecker typeChecker = new TypeChecker();
         typeChecker.visit(program);
         typeChecker.typeErrors.sort(Comparator.comparingInt(CompileError::getLine));
-        FileWriter fileWriter = new FileWriter("samples/out11.txt");
+        FileWriter fileWriter = new FileWriter(args[1]);
         PrintWriter printWriter = new PrintWriter(fileWriter);
         for(CompileError compileError : typeChecker.typeErrors){
             printWriter.println(compileError.getErrorMessage());
             System.out.println(compileError.getErrorMessage());
         }
+        printWriter.close();
     }
 }
