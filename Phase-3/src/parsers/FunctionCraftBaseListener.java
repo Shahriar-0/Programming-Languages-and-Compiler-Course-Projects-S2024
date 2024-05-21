@@ -1,13 +1,13 @@
 // Generated from D:/DEATH/Programming-Languages-and-Compiler-Course-Projects/Phase-3/src/main/grammar/FunctionCraft.g4 by ANTLR 4.13.1
 package parsers;
 
-    import main.ast.nodes.*;
-    import main.ast.nodes.declaration.*;
-    import main.ast.nodes.statement.*;
-    import main.ast.nodes.expression.*;
-    import main.ast.nodes.expression.operators.*;
-    import main.ast.nodes.expression.value.*;
-    import main.ast.nodes.expression.value.primitive.*;
+	import main.ast.nodes.*;
+	import main.ast.nodes.declaration.*;
+	import main.ast.nodes.statement.*;
+	import main.ast.nodes.expression.*;
+	import main.ast.nodes.expression.operators.*;
+	import main.ast.nodes.expression.value.*;
+	import main.ast.nodes.expression.value.primitive.*;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
