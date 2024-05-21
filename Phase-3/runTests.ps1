@@ -8,5 +8,7 @@ if ($ansContent -eq $outContent) {
 }
 else {
     Write-Host "Test Failed" -ForegroundColor Red
-    Compare-Object $ansContent $outContent | Format-Table -AutoSize | Out-File 'samples\err.txt' -Encoding utf8 -Width 1000
+    if ($outContent.Length -gt 0) {
+        Compare-Object $ansContent $outContent | Format-Table -AutoSize | Out-File 'samples\err.txt' -Encoding utf8 -Width 1000
+    }
 }
