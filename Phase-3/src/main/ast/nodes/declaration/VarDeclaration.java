@@ -2,12 +2,14 @@ package main.ast.nodes.declaration;
 
 import main.ast.nodes.expression.Expression;
 import main.ast.nodes.expression.Identifier;
+import main.ast.type.Type;
 import main.visitor.IVisitor;
 
 public class VarDeclaration extends Declaration {
 
 	private Identifier name;
 	private Expression defaultVal;
+	private Type type;
 
 	public VarDeclaration(Identifier name) {
 		this.name = name;
@@ -28,6 +30,14 @@ public class VarDeclaration extends Declaration {
 
 	public void setDefaultVal(Expression defaultVal) {
 		this.defaultVal = defaultVal;
+	}
+
+	public Type getType() {
+		return this.type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
 	}
 
 	@Override

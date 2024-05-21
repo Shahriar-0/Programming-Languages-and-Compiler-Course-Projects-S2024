@@ -502,7 +502,7 @@ accessExpression returns [Expression expRet]:
 		LPAR f = functionArguments //arrayList of expression
 		{
 			isAccessExpression = true;
-			isFunctionCall =true;
+			isFunctionCall = true;
 			args.addAll($f.funcArgsRet);
 		}
 		RPAR

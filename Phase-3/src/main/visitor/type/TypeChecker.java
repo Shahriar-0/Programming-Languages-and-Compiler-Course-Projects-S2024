@@ -38,7 +38,16 @@ public class TypeChecker extends Visitor<Type> {
 			} catch (ItemAlreadyExists ignored) {}
 		}
 		program.getMain().accept(this);
+		return null;
+	}
 
+	@Override
+	public Type visit(MainDeclaration mainDeclaration) {
+		SymbolTable.push(new SymbolTable());
+		for (Statement statement : mainDeclaration.getBody()) {
+			statement.accept(this);
+		}
+		SymbolTable.pop();
 		return null;
 	}
 
@@ -52,40 +61,56 @@ public class TypeChecker extends Visitor<Type> {
 			);
 			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
 			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
-				VarItem argItem = new VarItem(
-					functionDeclaration.getArgs().get(i).getName()
-				);
+				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
 				argItem.setType(currentArgTypes.get(i));
 				try {
 					SymbolTable.top.put(argItem);
 				} catch (ItemAlreadyExists ignored) {}
 			}
 		} catch (ItemNotFound ignored) {}
-		for (Statement statement : functionDeclaration.getBody()) statement.accept(
-			this
-		);
 
-		//TODO:Figure out whether return types of functions are not the same.
+		List<Type> returnTypes = new ArrayList<>();
+		for (Statement statement : functionDeclaration.getBody()) {
+			if (statement instanceof ReturnStatement returnStatement) {
+				Type returnType = returnStatement.accept(this);
+				if (returnTypes.isEmpty()) {
+					returnTypes.add(returnType);
+				} else {
+					if (!returnTypes.get(0).equals(returnType)) { 
+						// here we just check the first return, and also the first return 
+						// would be the inferred type of the function
+						typeErrors.add(
+							new FunctionIncompatibleReturnTypes(
+								returnStatement.getLine(),
+								functionDeclaration.getFunctionName().getName()
+							)
+						);
+					}
+				}
+			}
+			statement.accept(this);
+		}
+
 		SymbolTable.pop();
-		return null;
-		//TODO:Return the infered type of the function
+		return returnTypes.get(0);
 	}
 
 	@Override
 	public Type visit(PatternDeclaration patternDeclaration) {
 		SymbolTable.push(new SymbolTable());
+		List<Type> returnTypes = new ArrayList<>();
 		try {
 			PatternItem patternItem = (PatternItem) SymbolTable.root.getItem(
 				PatternItem.START_KEY +
 				patternDeclaration.getPatternName().getName()
 			);
-			VarItem varItem = new VarItem(
-				patternDeclaration.getTargetVariable()
-			);
+
+			VarItem varItem = new VarItem(patternDeclaration.getTargetVariable());
 			varItem.setType(patternItem.getTargetVarType());
 			try {
 				SymbolTable.top.put(varItem);
 			} catch (ItemAlreadyExists ignored) {}
+
 			for (Expression expression : patternDeclaration.getConditions()) {
 				if (!(expression.accept(this) instanceof BoolType)) {
 					typeErrors.add(
@@ -95,43 +120,75 @@ public class TypeChecker extends Visitor<Type> {
 					return new NoType();
 				}
 			}
-			//TODO:1-figure out whether return expression of different cases in pattern are of the same type/2-return the infered type
+
+			for (Expression expression : patternDeclaration.getReturnExp()) {
+				Type returnType = expression.accept(this);
+				if (returnTypes.isEmpty()) {
+					returnTypes.add(returnType);
+				} else {
+					if (!returnTypes.get(0).equals(returnType)) {
+						typeErrors.add(
+							new PatternIncompatibleReturnTypes(
+								expression.getLine(),
+								patternDeclaration.getPatternName().getName()
+							)
+						);
+					}
+				}
+			}
 		} catch (ItemNotFound ignored) {}
 
 		SymbolTable.pop();
-		return null;
-	}
-
-	@Override
-	public Type visit(MainDeclaration mainDeclaration) {
-		//TODO:visit main
-		return null;
+		return returnTypes.get(0);
 	}
 
 	@Override
 	public Type visit(AccessExpression accessExpression) {
 		if (accessExpression.isFunctionCall()) {
-			//TODO:function is called here.set the arguments type and visit its declaration
+			try { 
+				 // also a case here would be when it has default value and we pass something from other type
+				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY +
+					((Identifier) accessExpression.getAccessedExpression()).getName()
+				);
+				ArrayList<Type> argTypes = new ArrayList<>();
+				for (Expression arg : accessExpression.getArguments()) {
+					argTypes.add(arg.accept(this));
+				}
+				functionItem.setArgumentTypes(argTypes);
+				return functionItem.getFunctionDeclaration().accept(this);
+			}
+			catch (ItemNotFound ignored) {}
 		} else {
-			Type accessedType = accessExpression
-				.getAccessedExpression()
-				.accept(this);
-			if (
-				!(accessedType instanceof StringType) &&
-				!(accessedType instanceof ListType)
-			) {
-				typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
+			Type accessedType = accessExpression.getAccessedExpression().accept(this);
+			if (!(accessedType instanceof StringType) && !(accessedType instanceof ListType)) {
+				typeErrors.add(
+					new IsNotIndexable(accessExpression.getLine())
+				);
 				return new NoType();
 			}
-			//TODO:index of access list must be int
+			
+			else {
+				for (Expression expression : accessExpression.getDimentionalAccess()) {
+					if (!(expression.accept(this) instanceof IntType)) {
+						typeErrors.add(
+							new AccessIndexIsNotInt(expression.getLine())
+						);
+						return new NoType();
+					}
+				}
+			}
 		}
 		return null;
 	}
 
 	@Override
 	public Type visit(ReturnStatement returnStatement) {
-		// TODO:Visit return statement.Note that return type of functions are specified here
-		return null;
+		if (returnStatement.hasRetExpression()) {
+			return returnStatement.getReturnExp().accept(this);
+		} else {
+			return new NoType();
+		}
 	}
 
 	@Override
@@ -148,25 +205,27 @@ public class TypeChecker extends Visitor<Type> {
 			SymbolTable.top.put(varItem);
 		} catch (ItemAlreadyExists ignored) {}
 
-		for (Statement statement : forStatement.getLoopBodyStmts()) statement.accept(
-			this
-		);
+		for (Statement statement : forStatement.getLoopBodyStmts()) {
+			statement.accept(this);
+		}
 		SymbolTable.pop();
-		return null;
+		return new NoType();
 	}
 
 	@Override
 	public Type visit(IfStatement ifStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
-		for (Expression expression : ifStatement.getConditions()) if (
-			!(expression.accept(this) instanceof BoolType)
-		) typeErrors.add(new ConditionIsNotBool(expression.getLine()));
-		for (Statement statement : ifStatement.getThenBody()) statement.accept(
-			this
-		);
-		for (Statement statement : ifStatement.getElseBody()) statement.accept(
-			this
-		);
+		for (Expression expression : ifStatement.getConditions()) {
+			if (!(expression.accept(this) instanceof BoolType)) {
+				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
+			}
+		}
+		for (Statement statement : ifStatement.getThenBody()) {
+			statement.accept(this);
+		}
+		for (Statement statement : ifStatement.getElseBody()) {
+			statement.accept(this);
+		}
 		SymbolTable.pop();
 		return new NoType();
 	}
@@ -174,9 +233,9 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(LoopDoStatement loopDoStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
-		for (Statement statement : loopDoStatement.getLoopBodyStmts()) statement.accept(
-			this
-		);
+		for (Statement statement : loopDoStatement.getLoopBodyStmts()) {
+			statement.accept(this);
+		}
 		SymbolTable.pop();
 		return new NoType();
 	}
@@ -184,46 +243,133 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(AssignStatement assignStatement) {
 		if (assignStatement.isAccessList()) {
-			// TODO:assignment to list
-		} else {
+			Type accessedType = assignStatement.getAssignedId().accept(this);
+			if (!(accessedType instanceof ListType) && !(accessedType instanceof StringType)) {
+				typeErrors.add(new IsNotIndexable(assignStatement.getLine()));
+				return new NoType();
+			}
+
+			Expression AccessListExpression = assignStatement.getAccessListExpression();
+			if (AccessListExpression != null) {
+				if (!(AccessListExpression.accept(this) instanceof IntType)) {
+					typeErrors.add(new AccessIndexIsNotInt(assignStatement.getLine()));
+					return new NoType();
+				}
+			}
+
+			if (accessedType instanceof ListType listType) {
+				Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+				if (listType.getType() instanceof NoType) {
+					listType.setType(assignExpressionType);
+				} else {
+					if (!listType.getType().equals(assignExpressionType)) {
+						typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine()));
+					}
+				}
+				return listType;
+			} else { // StringType
+				Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+				if (!(assignExpressionType instanceof StringType)) {
+					typeErrors.add(new IsNotIndexable(assignStatement.getLine()));
+				}
+				return new StringType();
+			}
+		} 
+		
+		else if (assignStatement.getAssignOperator().equals(AssignOperator.ASSIGN)) {
 			VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
-			// TODO:maybe new type for a variable
+			Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+			newVarItem.setType(assignExpressionType);
 			try {
 				SymbolTable.top.put(newVarItem);
-			} catch (ItemAlreadyExists ignored) {}
+			} catch (ItemAlreadyExists ignored) {} 
+			// FIXME: not specified in the document that can we change the type or not
+			return assignExpressionType;
+		} 
+		
+		else { // PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN
+			Type assignedType = assignStatement.getAssignedId().accept(this);
+			Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+			if (assignedType instanceof NoType || assignExpressionType instanceof NoType) {
+				return new NoType();
+			} else if (assignedType instanceof IntType || assignedType instanceof FloatType) {
+				if (assignExpressionType instanceof IntType || assignExpressionType instanceof FloatType) {
+					return assignedType;
+				} else {
+					typeErrors.add(
+						new UnsupportedOperandType(
+							assignStatement.getLine(), 
+							assignStatement.getAssignOperator().toString())
+						);
+					return new NoType();
+				}
+			} else {
+				typeErrors.add(
+					new UnsupportedOperandType(
+						assignStatement.getLine(), 
+						assignStatement.getAssignOperator().toString())
+					);
+				return new NoType();
+			}
 		}
-		return new NoType();
 	}
 
 	@Override
 	public Type visit(BreakStatement breakStatement) {
-		for (Expression expression : breakStatement.getConditions()) if (
-			!((expression.accept(this)) instanceof BoolType)
-		) typeErrors.add(new ConditionIsNotBool(expression.getLine()));
-
+		for (Expression expression : breakStatement.getConditions()) {
+			if (!(expression.accept(this) instanceof BoolType)) {
+				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public Type visit(NextStatement nextStatement) {
-		for (Expression expression : nextStatement.getConditions()) if (
-			!((expression.accept(this)) instanceof BoolType)
-		) typeErrors.add(new ConditionIsNotBool(expression.getLine()));
-
+		for (Expression expression : nextStatement.getConditions()) {
+			if (!(expression.accept(this) instanceof BoolType)) {
+				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
+			}
+		}
 		return null;
 	}
 
 	@Override
 	public Type visit(PushStatement pushStatement) {
-		//TODO:visit push statement
+		Expression initial = pushStatement.getInitial();
+		Expression toBeAdded = pushStatement.getToBeAdded();
 
+		Type initialType = initial.accept(this);
+		Type toBeAddedType = toBeAdded.accept(this);
+
+		if (initialType instanceof ListType listType) {
+			if (listType.getType() instanceof NoType) {
+				listType.setType(toBeAddedType);
+			} else {
+				if (!listType.getType().equals(toBeAddedType)) {
+					typeErrors.add(
+						new PushArgumentsTypesMisMatch(pushStatement.getLine())
+					);
+				}
+			}
+				
+		} else if (initialType instanceof StringType) {
+			if (!(toBeAddedType instanceof StringType)) {
+				typeErrors.add(
+					new PushArgumentsTypesMisMatch(pushStatement.getLine())
+				);
+			}
+		} else {
+			typeErrors.add(
+				new IsNotPushedable(pushStatement.getLine())
+			);
+		}
 		return new NoType();
 	}
 
 	@Override
 	public Type visit(PutStatement putStatement) {
-		//TODO:visit putStatement
-
+		putStatement.getExpression().accept(this);
 		return new NoType();
 	}
 
@@ -249,7 +395,23 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(ListValue listValue) {
-		// TODO:visit listValue
+		ArrayList<Type> types = new ArrayList<>();
+		for (Expression expression : listValue.getElements()) {
+			Type type = expression.accept(this);
+			if (type instanceof NoType) {
+				return new NoType();
+			} else {
+				if (types.isEmpty()) {
+					types.add(type);
+				} else {
+					if (!types.get(0).equals(type)) {
+						typeErrors.add(
+							new ListElementsTypesMisMatch(expression.getLine())
+						);
+					}
+				}
+			}
+		}
 		return null;
 	}
 
@@ -261,10 +423,7 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(AppendExpression appendExpression) {
 		Type appendeeType = appendExpression.getAppendee().accept(this);
-		if (
-			!(appendeeType instanceof ListType) &&
-			!(appendeeType instanceof StringType)
-		) {
+		if (!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)) {
 			typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
 			return new NoType();
 		}
@@ -273,31 +432,104 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(BinaryExpression binaryExpression) {
-		//TODO:visit binary expression
-		return null;
+		Expression firstOperand = binaryExpression.getFirstOperand();
+		Expression secondOperand = binaryExpression.getSecondOperand();
+		BinaryOperator binaryOperator = binaryExpression.getOperator();
+
+		Type firstOperandType = firstOperand.accept(this);
+		Type secondOperandType = secondOperand.accept(this);
+
+		if (firstOperandType instanceof NoType || secondOperandType instanceof NoType) {
+			return new NoType();
+		}
+
+		if (!(firstOperandType.equals(secondOperandType))) {
+			typeErrors.add(
+				new NonSameOperands(
+					binaryExpression.getLine(),
+					binaryOperator
+				)
+			);
+			return new NoType();
+		} else {
+			if (binaryOperator.equals(BinaryOperator.EQUAL) 
+				|| binaryOperator.equals(BinaryOperator.NOT_EQUAL)) {
+				return new BoolType(); // FIXME: not specified in the document
+			} else if (binaryOperator.equals(BinaryOperator.GREATER_THAN) 
+				|| binaryOperator.equals(BinaryOperator.GREATER_EQUAL_THAN) 
+				|| binaryOperator.equals(BinaryOperator.LESS_THAN) 
+				|| binaryOperator.equals(BinaryOperator.LESS_EQUAL_THAN)) {
+				if (firstOperandType instanceof IntType || firstOperandType instanceof FloatType) {
+					return new BoolType();
+				} else {
+					typeErrors.add(
+						new UnsupportedOperandType(
+							binaryExpression.getLine(),
+							binaryOperator.toString()
+						)
+					);
+					return new NoType();
+				}
+			} else { // PLUS, MINUS, MULT, DIVIDE
+				if (firstOperandType instanceof IntType || firstOperandType instanceof FloatType) {
+					return firstOperandType;
+				} else {
+					typeErrors.add(
+						new UnsupportedOperandType(
+							binaryExpression.getLine(),
+							binaryOperator.toString()
+						)
+					);
+					return new NoType();
+				}
+			}
+		}
 	}
 
 	@Override
 	public Type visit(UnaryExpression unaryExpression) {
-		//TODO:visit unaryExpression
-		return null;
+		Expression expression = unaryExpression.getExpression();
+		UnaryOperator unaryOperator = unaryExpression.getOperator();
+
+		Type expressionType = expression.accept(this);
+
+		if (expressionType instanceof NoType) {
+			return new NoType();
+		} else if (unaryOperator.equals(UnaryOperator.NOT)) {
+			if (expressionType instanceof BoolType) {
+				return new BoolType();
+			} else {
+				typeErrors.add(
+					new UnsupportedOperandType(
+						unaryExpression.getLine(),
+						unaryOperator.toString()
+					)
+				);
+				return new NoType();
+			}
+		} else { // MINUS, INC, DEC
+			if (expressionType instanceof IntType || expressionType instanceof FloatType) {
+				return expressionType;
+			} else {
+				typeErrors.add(
+					new UnsupportedOperandType(
+						unaryExpression.getLine(),
+						unaryOperator.toString()
+					)
+				);
+				return new NoType();
+			}
+		}
 	}
 
 	@Override
 	public Type visit(ChompStatement chompStatement) {
-		if (
-			!(
-				chompStatement
-					.getChompExpression()
-					.accept(this) instanceof StringType
-			)
-		) {
+		if (!(chompStatement.getChompExpression().accept(this) instanceof StringType)) {
 			typeErrors.add(
 				new ChompArgumentTypeMisMatch(chompStatement.getLine())
 			);
 			return new NoType();
 		}
-
 		return new StringType();
 	}
 
@@ -308,14 +540,30 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(Identifier identifier) {
-		// TODO:visit Identifier
-		return null;
+		try {
+			VarItem varItem = (VarItem) SymbolTable.top.getItem(
+				VarItem.START_KEY +
+				identifier.getName()
+			);
+			return varItem.getType();
+		} catch (ItemNotFound ignored) {
+			return new NoType();
+		}
 	}
 
 	@Override
 	public Type visit(LenStatement lenStatement) {
-		//TODO:visit LenStatement.Be carefull about the return type of LenStatement.
-		return null;
+		Expression expression = lenStatement.getExpression();
+		Type expressionType = expression.accept(this);
+
+		if (expressionType instanceof StringType || expressionType instanceof ListType) {
+			return new IntType();
+		} else {
+			typeErrors.add(
+				new LenArgumentTypeMisMatch(lenStatement.getLine())
+			);
+			return new NoType();
+		}
 	}
 
 	@Override
@@ -325,9 +573,7 @@ public class TypeChecker extends Visitor<Type> {
 				PatternItem.START_KEY +
 				matchPatternStatement.getPatternId().getName()
 			);
-			patternItem.setTargetVarType(
-				matchPatternStatement.getMatchArgument().accept(this)
-			);
+			patternItem.setTargetVarType(matchPatternStatement.getMatchArgument().accept(this));
 			return patternItem.getPatternDeclaration().accept(this);
 		} catch (ItemNotFound ignored) {}
 		return new NoType();
@@ -338,9 +584,61 @@ public class TypeChecker extends Visitor<Type> {
 		RangeType rangeType = rangeExpression.getRangeType();
 
 		if (rangeType.equals(RangeType.LIST)) {
-			// TODO --> mind that the lists are declared explicitly in the grammar in this node, so handle the errors
+			ArrayList<Expression> rangeExpressions = rangeExpression.getRangeExpressions();
+			ArrayList<Type> rangeTypes = new ArrayList<>();
+			for (Expression expression : rangeExpressions) {
+				Type expressionType = expression.accept(this);
+				if (expressionType instanceof NoType) {
+					return new NoType();
+				} else if (rangeTypes.isEmpty()) {
+					rangeTypes.add(expressionType);
+				} else {
+					if (!rangeTypes.get(0).equals(expressionType)) {
+						typeErrors.add(
+							new ListElementsTypesMisMatch(expression.getLine())
+						);
+						return new NoType();
+					}
+				}
+			}
+			
+			if (rangeTypes.get(0) instanceof IntType) {
+				return new ListType(new IntType());
+			} else if (rangeTypes.get(0) instanceof FloatType) {
+				return new ListType(new FloatType());
+			} else {
+				typeErrors.add(
+					new ListElementsTypesMisMatch(rangeExpression.getLine())
+				);
+				return new NoType();
+			}
+		} else if (rangeType.equals(RangeType.DOUBLE_DOT)) {
+			Expression rangeExpression1 = rangeExpression.getRangeExpressions().get(0);
+			Expression rangeExpression2 = rangeExpression.getRangeExpressions().get(1);
+			Type rangeExpressionType1 = rangeExpression1.accept(this);
+			Type rangeExpressionType2 = rangeExpression2.accept(this);
+
+			if (rangeExpressionType1 instanceof NoType || rangeExpressionType2 instanceof NoType) {
+				return new NoType();
+			} else if (rangeExpressionType1 instanceof IntType && rangeExpressionType2 instanceof IntType) {
+				return new ListType(new IntType());
+			} else {
+				typeErrors.add(
+					new ListElementsTypesMisMatch(rangeExpression.getLine()) // FIXME: not specified in the document
+				);
+				return new NoType();
+			}
+		} else { // identifier
+			try {
+				VarItem varItem = (VarItem) SymbolTable.top.getItem(
+					VarItem.START_KEY +
+					((Identifier) rangeExpression.getRangeExpressions().get(0)).getName()
+				);
+				return varItem.getType();
+			} catch (ItemNotFound ignored) {
+				return new NoType();
+			}
 		}
 
-		return new NoType();
 	}
 }
