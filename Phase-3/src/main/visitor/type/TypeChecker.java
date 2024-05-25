@@ -634,7 +634,15 @@ public class TypeChecker extends Visitor<Type> {
 					VarItem.START_KEY +
 					((Identifier) rangeExpression.getRangeExpressions().get(0)).getName()
 				);
-				return varItem.getType();
+				
+				if (varItem.getType() instanceof ListType || varItem.getType() instanceof StringType) {
+					return varItem.getType();
+				} else {
+					typeErrors.add(
+						new IsNotIterable(rangeExpression.getLine()) // FIXME: not specified in the document
+					);
+					return new NoType();
+				}
 			} catch (ItemNotFound ignored) {
 				return new NoType();
 			}
