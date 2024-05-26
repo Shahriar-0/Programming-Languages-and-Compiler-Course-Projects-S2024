@@ -212,26 +212,41 @@ public class TypeChecker extends Visitor<Type> {
 
 				return functionItem.getFunctionDeclaration().accept(this);
 
-			} catch (ItemNotFound ignored) {}
+			} catch (ItemNotFound ignored) {
+				return new NoType();
+			}
 		} 
 		
 		else {
 			Type accessedType = accessExpression.getAccessedExpression().accept(this);
+
 			if (!(accessedType instanceof StringType) &&!(accessedType instanceof ListType)) {
-				typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
+				typeErrors.add(
+					new IsNotIndexable(
+						accessExpression.getLine()
+					)
+				);
 				return new NoType();
 			} else {
 				for (Expression expression : accessExpression.getDimentionalAccess()) {
+					// the for is for multi-dimensional arrays which is not supported anymore
 					if (!(expression.accept(this) instanceof IntType)) {
 						typeErrors.add(
-							new AccessIndexIsNotInt(expression.getLine())
+							new AccessIndexIsNotInt(
+								expression.getLine()
+							)
 						);
 						return new NoType();
 					}
 				}
+
+				if (accessedType instanceof ListType listType) {
+					return listType.getType();
+				} else {
+					return new StringType();
+				}
 			}
 		}
-		return null;
 	}
 
 	@Override
