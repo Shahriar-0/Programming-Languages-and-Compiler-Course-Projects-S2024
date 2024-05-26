@@ -266,8 +266,14 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(ForStatement forStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
-		forStatement.getRangeExpression().accept(this);
+
+		Type rangeType = forStatement.getRangeExpression().accept(this);
+		if (rangeType instanceof ListType listType) {
+			rangeType = listType.getType();
+		}
+
 		VarItem varItem = new VarItem(forStatement.getIteratorId());
+		varItem.setType(rangeType);
 		try {
 			SymbolTable.top.put(varItem);
 		} catch (ItemAlreadyExists ignored) {}
@@ -275,6 +281,7 @@ public class TypeChecker extends Visitor<Type> {
 		for (Statement statement : forStatement.getLoopBodyStmts()) {
 			statement.accept(this);
 		}
+
 		SymbolTable.pop();
 		return new NoType();
 	}
@@ -282,6 +289,7 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(IfStatement ifStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
+
 		for (Expression expression : ifStatement.getConditions()) {
 			if (!(expression.accept(this) instanceof BoolType)) {
 				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
@@ -293,6 +301,7 @@ public class TypeChecker extends Visitor<Type> {
 		for (Statement statement : ifStatement.getElseBody()) {
 			statement.accept(this);
 		}
+
 		SymbolTable.pop();
 		return new NoType();
 	}
@@ -701,81 +710,85 @@ public class TypeChecker extends Visitor<Type> {
 
 		if (rangeType.equals(RangeType.LIST)) {
 			ArrayList<Expression> rangeExpressions = rangeExpression.getRangeExpressions();
+			
 			ArrayList<Type> rangeTypes = new ArrayList<>();
+			Type listType = new NoType();
+			boolean hasIncompatibleTypes = false;
+			
 			for (Expression expression : rangeExpressions) {
 				Type expressionType = expression.accept(this);
-				if (expressionType instanceof NoType) {
-					return new NoType();
-				} else if (rangeTypes.isEmpty()) {
+
+				if (rangeTypes.isEmpty()) {
 					rangeTypes.add(expressionType);
+					listType = expressionType;
 				} else {
-					if (!rangeTypes.get(0).equals(expressionType)) {
-						typeErrors.add(
-							new ListElementsTypesMisMatch(expression.getLine())
-						);
-						return new NoType();
+					if (!listType.sameTypeConsideringNoType(expressionType)) {
+						hasIncompatibleTypes = true;
+						rangeTypes.add(expressionType);
+						listType = new NoType();
 					}
 				}
 			}
 
-			if (rangeTypes.get(0) instanceof IntType) {
-				return new ListType(new IntType());
-			} else if (rangeTypes.get(0) instanceof FloatType) {
-				return new ListType(new FloatType());
-			} else {
+
+			if (hasIncompatibleTypes) {
 				typeErrors.add(
-					new ListElementsTypesMisMatch(rangeExpression.getLine())
+					new ListElementsTypesMisMatch(
+						rangeExpression.getLine()
+					)
 				);
 				return new NoType();
+			} 
+			
+			else {
+				if (listType instanceof NoType) {
+					return new ListType(new NoType());
+				} else {
+					return new ListType(listType);
+				}
 			}
-		} else if (rangeType.equals(RangeType.DOUBLE_DOT)) {
-			Expression rangeExpression1 = rangeExpression
-				.getRangeExpressions()
-				.get(0);
-			Expression rangeExpression2 = rangeExpression
-				.getRangeExpressions()
-				.get(1);
+		} 
+		
+		else if (rangeType.equals(RangeType.DOUBLE_DOT)) {
+			Expression rangeExpression1 = rangeExpression.getRangeExpressions().get(0);
+			Expression rangeExpression2 = rangeExpression.getRangeExpressions().get(1);
+
 			Type rangeExpressionType1 = rangeExpression1.accept(this);
 			Type rangeExpressionType2 = rangeExpression2.accept(this);
 
-			if (
-				rangeExpressionType1 instanceof NoType ||
-				rangeExpressionType2 instanceof NoType
-			) {
+			if (rangeExpressionType1 instanceof NoType || rangeExpressionType2 instanceof NoType) {
 				return new NoType();
-			} else if (
-				rangeExpressionType1 instanceof IntType &&
-				rangeExpressionType2 instanceof IntType
-			) {
+			} else if (rangeExpressionType1 instanceof IntType && rangeExpressionType2 instanceof IntType) {
 				return new ListType(new IntType());
 			} else {
 				typeErrors.add(
-					new ListElementsTypesMisMatch(rangeExpression.getLine()) // FIXME: not specified in the document
+					new RangeValuesMisMatch(
+						rangeExpression.getLine()
+					) // FIXME: not specified in the document
 				);
 				return new NoType();
 			}
-		} else { // identifier
+		} 
+		
+		else { // identifier
 			try {
+				Identifier identifier = (Identifier) rangeExpression.getRangeExpressions().get(0);
 				VarItem varItem = (VarItem) SymbolTable.top.getItem(
 					VarItem.START_KEY +
-					(
-						(Identifier) rangeExpression
-							.getRangeExpressions()
-							.get(0)
-					).getName()
+					identifier.getName()
 				);
 
-				if (
-					varItem.getType() instanceof ListType ||
-					varItem.getType() instanceof StringType
-				) {
+				if (varItem.getType() instanceof ListType || varItem.getType() instanceof StringType) {
 					return varItem.getType();
 				} else {
 					typeErrors.add(
-						new IsNotIterable(rangeExpression.getLine()) // FIXME: not specified in the document
+						new IsNotIterable(
+							rangeExpression.getLine()
+						) // FIXME: not specified in the document
 					);
 					return new NoType();
 				}
+
 			} catch (ItemNotFound ignored) {
 				return new NoType();
 			}
