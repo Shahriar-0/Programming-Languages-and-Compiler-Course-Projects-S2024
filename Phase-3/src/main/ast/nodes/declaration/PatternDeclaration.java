@@ -10,7 +10,7 @@ public class PatternDeclaration extends Declaration {
 	private Identifier patternName;
 	private Identifier targetVariable;
 	private ArrayList<Expression> conditions = new ArrayList<>();
-	private ArrayList<Expression> returnExp = new ArrayList<>();
+	private ArrayList<Expression> returnExps = new ArrayList<>();
 
 	public PatternDeclaration(Identifier name, Identifier targetVariable) {
 		this.patternName = name;
@@ -45,16 +45,16 @@ public class PatternDeclaration extends Declaration {
 		this.conditions.add(condition);
 	}
 
-	public ArrayList<Expression> getReturnExp() {
-		return this.returnExp;
+	public ArrayList<Expression> getReturnExps() {
+		return this.returnExps;
 	}
 
-	public void setReturnExp(ArrayList<Expression> returnExp) {
-		this.returnExp = returnExp;
+	public void setReturnExps(ArrayList<Expression> returnExp) {
+		this.returnExps = returnExp;
 	}
 
 	public void addReturnExp(Expression returnExp) {
-		this.returnExp.add(returnExp);
+		this.returnExps.add(returnExp);
 	}
 
 	@Override

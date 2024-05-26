@@ -92,13 +92,16 @@ public class TypeChecker extends Visitor<Type> {
 					returnTypes.add(returnType);
 					functionReturnType = returnType;
 				} else {
-					if (!functionReturnType.sameTypeConsideringNoType(returnType)) {
+					if (
+						!functionReturnType.sameTypeConsideringNoType(
+							returnType
+						)
+					) {
 						hasIncompatibleReturnTypes = true;
 						returnTypes.add(returnType); // this is not specifically used, but just in case for debugging
 						functionReturnType = new NoType();
 					}
 				}
-
 			} else {
 				statement.accept(this);
 			}
@@ -120,7 +123,11 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(PatternDeclaration patternDeclaration) {
 		SymbolTable.push(new SymbolTable());
+
 		List<Type> returnTypes = new ArrayList<>();
+		Type patternReturnType = new NoType();
+		boolean hasIncompatibleReturnTypes = false;
+
 		try {
 			PatternItem patternItem = (PatternItem) SymbolTable.root.getItem(
 				PatternItem.START_KEY +
@@ -141,29 +148,39 @@ public class TypeChecker extends Visitor<Type> {
 						new ConditionIsNotBool(expression.getLine())
 					);
 					SymbolTable.pop();
-					return new NoType();
+					return new NoType(); // this is wrong since it doesn't check 
+					// the rest of the pattern but it was in the template so I kept it
 				}
 			}
 
-			for (Expression expression : patternDeclaration.getReturnExp()) {
+			for (Expression expression : patternDeclaration.getReturnExps()) {
 				Type returnType = expression.accept(this);
+				
 				if (returnTypes.isEmpty()) {
 					returnTypes.add(returnType);
+					patternReturnType = returnType;
 				} else {
-					if (!returnTypes.get(0).equals(returnType)) {
-						typeErrors.add(
-							new PatternIncompatibleReturnTypes(
-								expression.getLine(),
-								patternDeclaration.getPatternName().getName()
-							)
-						);
+					if (!patternReturnType.sameTypeConsideringNoType(returnType)) {
+						hasIncompatibleReturnTypes = true;
+						returnTypes.add(returnType);
+						patternReturnType = new NoType();
 					}
 				}
 			}
+
 		} catch (ItemNotFound ignored) {}
 
+		if (hasIncompatibleReturnTypes) {
+			typeErrors.add(
+				new PatternIncompatibleReturnTypes(
+					patternDeclaration.getLine(),
+					patternDeclaration.getPatternName().getName()
+				)
+			);
+		}
+
 		SymbolTable.pop();
-		return returnTypes.get(0);
+		return patternReturnType;
 	}
 
 	@Override
