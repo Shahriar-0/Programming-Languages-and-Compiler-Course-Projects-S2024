@@ -71,6 +71,12 @@ public class TypeChecker extends Visitor<Type> {
 
 			if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
 				for (int i = currentArgTypes.size(); i < functionDeclaration.getArgs().size(); i++) {
+
+					if (functionDeclaration.getArgs().get(i).getDefaultVal() == null) {
+						currentArgTypes.add(new NoType());
+						continue;
+					}
+
 					Type defaultType = functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
 					currentArgTypes.add(defaultType);	
 				}
@@ -139,9 +145,7 @@ public class TypeChecker extends Visitor<Type> {
 				patternDeclaration.getPatternName().getName()
 			);
 
-			VarItem varItem = new VarItem(
-				patternDeclaration.getTargetVariable()
-			);
+			VarItem varItem = new VarItem(patternDeclaration.getTargetVariable());
 			varItem.setType(patternItem.getTargetVarType());
 			try {
 				SymbolTable.top.put(varItem);
