@@ -32,6 +32,11 @@ public class SymbolTable {
 		items.put(item.getKey(), item);
 	}
 
+	public void update(SymbolTableItem item) throws ItemNotFound {
+		if (!items.containsKey(item.getKey())) throw new ItemNotFound();
+		items.put(item.getKey(), item);
+	}
+
 	public SymbolTableItem getItem(String key) throws ItemNotFound {
 		SymbolTableItem symbolTableItem = this.items.get(key);
 		if (symbolTableItem != null) {

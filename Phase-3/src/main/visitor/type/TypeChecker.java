@@ -468,6 +468,10 @@ public class TypeChecker extends Visitor<Type> {
 							varItem.setType(new ListType(new NoType())); // this is because we have mismatched types
 						}
 
+						try {
+							SymbolTable.top.update(varItem);
+						} catch (ItemNotFound ignored) {}
+
 					} catch (ItemNotFound ignored) {}
 				}
 			} 
@@ -749,7 +753,7 @@ public class TypeChecker extends Visitor<Type> {
 			);
 
 			return patternItem.getPatternDeclaration().accept(this);
-			
+
 		} catch (ItemNotFound ignored) {}
 
 		return new NoType();
