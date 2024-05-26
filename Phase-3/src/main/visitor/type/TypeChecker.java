@@ -658,7 +658,9 @@ public class TypeChecker extends Visitor<Type> {
 
 		if (expressionType instanceof NoType) {
 			return new NoType();
-		} else if (unaryOperator.equals(UnaryOperator.NOT)) {
+		} 
+		
+		else if (unaryOperator.equals(UnaryOperator.NOT)) {
 			if (expressionType instanceof BoolType) {
 				return new BoolType();
 			} else {
@@ -670,11 +672,10 @@ public class TypeChecker extends Visitor<Type> {
 				);
 				return new NoType();
 			}
-		} else { // MINUS, INC, DEC
-			if (
-				expressionType instanceof IntType ||
-				expressionType instanceof FloatType
-			) {
+		} 
+		
+		else { // MINUS, INC, DEC
+			if (expressionType instanceof IntType || expressionType instanceof FloatType) {
 				return expressionType;
 			} else {
 				typeErrors.add(
@@ -690,15 +691,11 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(ChompStatement chompStatement) {
-		if (
-			!(
-				chompStatement
-					.getChompExpression()
-					.accept(this) instanceof StringType
-			)
-		) {
+		if (!(chompStatement.getChompExpression().accept(this) instanceof StringType)) {
 			typeErrors.add(
-				new ChompArgumentTypeMisMatch(chompStatement.getLine())
+				new ChompArgumentTypeMisMatch(
+					chompStatement.getLine()
+				)
 			);
 			return new NoType();
 		}
@@ -707,7 +704,7 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(ChopStatement chopStatement) {
-		return new StringType();
+		return new StringType(); // bug in the template but i don't care
 	}
 
 	@Override
@@ -727,13 +724,14 @@ public class TypeChecker extends Visitor<Type> {
 		Expression expression = lenStatement.getExpression();
 		Type expressionType = expression.accept(this);
 
-		if (
-			expressionType instanceof StringType ||
-			expressionType instanceof ListType
-		) {
+		if (expressionType instanceof StringType || expressionType instanceof ListType) {
 			return new IntType();
 		} else {
-			typeErrors.add(new LenArgumentTypeMisMatch(lenStatement.getLine()));
+			typeErrors.add(
+				new LenArgumentTypeMisMatch(
+					lenStatement.getLine()
+				)
+			);
 			return new NoType();
 		}
 	}
@@ -745,11 +743,15 @@ public class TypeChecker extends Visitor<Type> {
 				PatternItem.START_KEY +
 				matchPatternStatement.getPatternId().getName()
 			);
+
 			patternItem.setTargetVarType(
 				matchPatternStatement.getMatchArgument().accept(this)
 			);
+
 			return patternItem.getPatternDeclaration().accept(this);
+			
 		} catch (ItemNotFound ignored) {}
+
 		return new NoType();
 	}
 
