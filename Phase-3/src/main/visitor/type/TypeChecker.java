@@ -428,7 +428,7 @@ public class TypeChecker extends Visitor<Type> {
 				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
 			}
 		}
-		return null;
+		return new NoType();
 	}
 
 	@Override
@@ -438,7 +438,7 @@ public class TypeChecker extends Visitor<Type> {
 				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
 			}
 		}
-		return null;
+		return new NoType();
 	}
 
 	@Override
@@ -452,21 +452,53 @@ public class TypeChecker extends Visitor<Type> {
 		if (initialType instanceof ListType listType) {
 			if (listType.getType() instanceof NoType) {
 				listType.setType(toBeAddedType);
-			} else {
+
+				if (initial instanceof ListValue listValue) {
+					// check that if it was an identifier, we update the type in the symbol table
+					try {
+						Identifier identifier = (Identifier) initial;
+						VarItem varItem = (VarItem) SymbolTable.top.getItem(
+							VarItem.START_KEY +
+							identifier.getName()
+						);
+
+						if (listValue.getElements().isEmpty()) {
+							varItem.setType(new ListType(toBeAddedType));
+						} else {
+							varItem.setType(new ListType(new NoType())); // this is because we have mismatched types
+						}
+
+					} catch (ItemNotFound ignored) {}
+				}
+			} 
+			
+			else {
 				if (!listType.getType().equals(toBeAddedType)) {
 					typeErrors.add(
-						new PushArgumentsTypesMisMatch(pushStatement.getLine())
+						new PushArgumentsTypesMisMatch(
+							pushStatement.getLine()
+						)
 					);
 				}
 			}
-		} else if (initialType instanceof StringType) {
+		} 
+		
+		else if (initialType instanceof StringType) {
 			if (!(toBeAddedType instanceof StringType)) {
 				typeErrors.add(
-					new PushArgumentsTypesMisMatch(pushStatement.getLine())
+					new PushArgumentsTypesMisMatch(
+						pushStatement.getLine()
+					)
 				);
 			}
-		} else {
-			typeErrors.add(new IsNotPushedable(pushStatement.getLine()));
+		} 
+		
+		else { // not pushable
+			typeErrors.add(
+				new IsNotPushedable(
+					pushStatement.getLine()
+				)
+			);
 		}
 		return new NoType();
 	}
