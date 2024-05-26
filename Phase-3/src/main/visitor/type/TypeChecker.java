@@ -574,11 +574,12 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(AppendExpression appendExpression) {
 		Type appendeeType = appendExpression.getAppendee().accept(this);
-		if (
-			!(appendeeType instanceof ListType) &&
-			!(appendeeType instanceof StringType)
-		) {
-			typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
+		if (!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)) {
+			typeErrors.add(
+				new IsNotAppendable(
+					appendExpression.getLine()
+				)
+			);
 			return new NoType();
 		}
 		return appendeeType;
@@ -593,34 +594,33 @@ public class TypeChecker extends Visitor<Type> {
 		Type firstOperandType = firstOperand.accept(this);
 		Type secondOperandType = secondOperand.accept(this);
 
-		if (
-			firstOperandType instanceof NoType ||
-			secondOperandType instanceof NoType
-		) {
+		if (firstOperandType instanceof NoType || secondOperandType instanceof NoType) {
 			return new NoType();
 		}
 
+
 		if (!(firstOperandType.equals(secondOperandType))) {
 			typeErrors.add(
-				new NonSameOperands(binaryExpression.getLine(), binaryOperator)
+				new NonSameOperands(
+					binaryExpression.getLine(), 
+					binaryOperator
+				)
 			);
 			return new NoType();
-		} else {
-			if (
-				binaryOperator.equals(BinaryOperator.EQUAL) ||
-				binaryOperator.equals(BinaryOperator.NOT_EQUAL)
-			) {
-				return new BoolType(); // FIXME: not specified in the document
-			} else if (
+		} 
+		else { // the operands are the same type
+			Type type = firstOperandType;
+			if (binaryOperator.equals(BinaryOperator.EQUAL) || binaryOperator.equals(BinaryOperator.NOT_EQUAL)) {
+				return new BoolType(); // FIXME: not specified in the document that all types have these or not
+			} 
+			else if (
 				binaryOperator.equals(BinaryOperator.GREATER_THAN) ||
 				binaryOperator.equals(BinaryOperator.GREATER_EQUAL_THAN) ||
 				binaryOperator.equals(BinaryOperator.LESS_THAN) ||
 				binaryOperator.equals(BinaryOperator.LESS_EQUAL_THAN)
 			) {
-				if (
-					firstOperandType instanceof IntType ||
-					firstOperandType instanceof FloatType
-				) {
+				
+				if (type instanceof IntType || type instanceof FloatType) {
 					return new BoolType();
 				} else {
 					typeErrors.add(
@@ -631,12 +631,11 @@ public class TypeChecker extends Visitor<Type> {
 					);
 					return new NoType();
 				}
-			} else { // PLUS, MINUS, MULT, DIVIDE
-				if (
-					firstOperandType instanceof IntType ||
-					firstOperandType instanceof FloatType
-				) {
-					return firstOperandType;
+			} 
+			
+			else { // PLUS, MINUS, MULT, DIVIDE
+				if (type instanceof IntType || type instanceof FloatType) {
+					return type;
 				} else {
 					typeErrors.add(
 						new UnsupportedOperandType(
