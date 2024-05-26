@@ -531,24 +531,39 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(ListValue listValue) {
-		ArrayList<Type> types = new ArrayList<>();
+		ArrayList<Type> listTypes = new ArrayList<>();
+		Type listType = new NoType();
+		boolean hasIncompatibleTypes = false;
 		for (Expression expression : listValue.getElements()) {
-			Type type = expression.accept(this);
-			if (type instanceof NoType) {
-				return new NoType();
+			Type expressionType = expression.accept(this);
+
+			if (listTypes.isEmpty()) {
+				listTypes.add(expressionType);
+				listType = expressionType;
 			} else {
-				if (types.isEmpty()) {
-					types.add(type);
-				} else {
-					if (!types.get(0).equals(type)) {
-						typeErrors.add(
-							new ListElementsTypesMisMatch(expression.getLine())
-						);
-					}
+				if (!listType.sameTypeConsideringNoType(expressionType)) {
+					hasIncompatibleTypes = true;
+					listTypes.add(expressionType);
+					listType = new NoType();
 				}
 			}
 		}
-		return null;
+		
+		if (hasIncompatibleTypes) {
+			typeErrors.add(
+				new ListElementsTypesMisMatch(
+					listValue.getLine()
+				)
+			);
+			return new ListType(new NoType());
+		} 
+		else {
+			if (listType instanceof NoType) {
+				return new ListType(new NoType());
+			} else {
+				return new ListType(listType);
+			}
+		}
 	}
 
 	@Override
