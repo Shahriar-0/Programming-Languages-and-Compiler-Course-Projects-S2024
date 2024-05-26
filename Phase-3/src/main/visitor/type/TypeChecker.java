@@ -309,9 +309,11 @@ public class TypeChecker extends Visitor<Type> {
 	@Override
 	public Type visit(LoopDoStatement loopDoStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
+
 		for (Statement statement : loopDoStatement.getLoopBodyStmts()) {
 			statement.accept(this);
 		}
+
 		SymbolTable.pop();
 		return new NoType();
 	}
@@ -320,28 +322,29 @@ public class TypeChecker extends Visitor<Type> {
 	public Type visit(AssignStatement assignStatement) {
 		if (assignStatement.isAccessList()) {
 			Type accessedType = assignStatement.getAssignedId().accept(this);
-			if (
-				!(accessedType instanceof ListType) &&
-				!(accessedType instanceof StringType)
-			) {
-				typeErrors.add(new IsNotIndexable(assignStatement.getLine()));
+
+			if (!(accessedType instanceof ListType) && !(accessedType instanceof StringType)) {
+				typeErrors.add(
+					new IsNotIndexable(
+						assignStatement.getLine()
+					)
+				);
+				return new NoType();
+			}
+			
+			if (!(assignStatement.getAccessListExpression().accept(this) instanceof IntType)) {
+				typeErrors.add(
+					new AccessIndexIsNotInt(
+						assignStatement.getLine()
+					)
+				);
 				return new NoType();
 			}
 
-			Expression AccessListExpression = assignStatement.getAccessListExpression();
-			if (AccessListExpression != null) {
-				if (!(AccessListExpression.accept(this) instanceof IntType)) {
-					typeErrors.add(
-						new AccessIndexIsNotInt(assignStatement.getLine())
-					);
-					return new NoType();
-				}
-			}
 
 			if (accessedType instanceof ListType listType) {
-				Type assignExpressionType = assignStatement
-					.getAssignExpression()
-					.accept(this);
+				Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+
 				if (listType.getType() instanceof NoType) {
 					listType.setType(assignExpressionType);
 				} else {
@@ -354,64 +357,64 @@ public class TypeChecker extends Visitor<Type> {
 					}
 				}
 				return listType;
-			} else { // StringType
-				Type assignExpressionType = assignStatement
-					.getAssignExpression()
-					.accept(this);
+			} 
+			else { // StringType
+				Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+
 				if (!(assignExpressionType instanceof StringType)) {
 					typeErrors.add(
-						new IsNotIndexable(assignStatement.getLine())
+						new ListElementsTypesMisMatch(
+							assignStatement.getLine()
+						) // FIXME: not specified in the document, the error name should be StringElementsTypesMisMatch or sth
 					);
 				}
 				return new StringType();
 			}
-		} else if (
-			assignStatement.getAssignOperator().equals(AssignOperator.ASSIGN)
-		) {
+		} 
+		
+		else if (assignStatement.getAssignOperator().equals(AssignOperator.ASSIGN)) {
 			VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
-			Type assignExpressionType = assignStatement
-				.getAssignExpression()
-				.accept(this);
+			
+			Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
 			newVarItem.setType(assignExpressionType);
+
 			try {
 				SymbolTable.top.put(newVarItem);
 			} catch (ItemAlreadyExists ignored) {}
 			// FIXME: not specified in the document that can we change the type or not
+			
 			return assignExpressionType;
-		} else { // PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN
+		} 
+		
+		else { // PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN
 			Type assignedType = assignStatement.getAssignedId().accept(this);
-			Type assignExpressionType = assignStatement
-				.getAssignExpression()
-				.accept(this);
-			if (
-				assignedType instanceof NoType ||
-				assignExpressionType instanceof NoType
-			) {
+			Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
+
+			if (assignedType instanceof NoType || assignExpressionType instanceof NoType) {
 				return new NoType();
-			} else if (
-				assignedType instanceof IntType ||
-				assignedType instanceof FloatType
-			) {
-				if (
-					assignExpressionType instanceof IntType ||
-					assignExpressionType instanceof FloatType
-				) {
+			} 
+			
+			else if (assignedType instanceof IntType || assignedType instanceof FloatType) {
+
+				if (assignedType.equals(assignExpressionType)) {
 					return assignedType;
 				} else {
 					typeErrors.add(
 						new UnsupportedOperandType(
 							assignStatement.getLine(),
 							assignStatement.getAssignOperator().toString()
-						)
-					);
+						) 
+					); // this should be NonSameOperands but the template is wrong and only takes BinaryOperator
 					return new NoType();
 				}
-			} else {
+			} 
+			
+			else { // other types that are not supported for these operators
 				typeErrors.add(
 					new UnsupportedOperandType(
 						assignStatement.getLine(),
 						assignStatement.getAssignOperator().toString()
-					)
+					) 
 				);
 				return new NoType();
 			}
