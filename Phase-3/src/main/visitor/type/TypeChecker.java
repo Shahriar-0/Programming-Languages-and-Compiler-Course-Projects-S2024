@@ -66,17 +66,24 @@ public class TypeChecker extends Visitor<Type> {
 				FunctionItem.START_KEY +
 				functionDeclaration.getFunctionName().getName()
 			);
-
+			
 			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+
+			if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
+				for (int i = currentArgTypes.size(); i < functionDeclaration.getArgs().size(); i++) {
+					Type defaultType = functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
+					currentArgTypes.add(defaultType);	
+				}
+			}
+
 			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
-				VarItem argItem = new VarItem(
-					functionDeclaration.getArgs().get(i).getName()
-				);
+				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
 				argItem.setType(currentArgTypes.get(i));
 				try {
 					SymbolTable.top.put(argItem);
 				} catch (ItemAlreadyExists ignored) {}
 			}
+
 		} catch (ItemNotFound ignored) {}
 
 		List<Type> returnTypes = new ArrayList<>();
@@ -92,17 +99,15 @@ public class TypeChecker extends Visitor<Type> {
 					returnTypes.add(returnType);
 					functionReturnType = returnType;
 				} else {
-					if (
-						!functionReturnType.sameTypeConsideringNoType(
-							returnType
-						)
-					) {
+					if (!functionReturnType.sameTypeConsideringNoType(returnType)) {
 						hasIncompatibleReturnTypes = true;
 						returnTypes.add(returnType); // this is not specifically used, but just in case for debugging
 						functionReturnType = new NoType();
 					}
 				}
-			} else {
+			} 
+			
+			else {
 				statement.accept(this);
 			}
 		}
@@ -145,7 +150,9 @@ public class TypeChecker extends Visitor<Type> {
 			for (Expression expression : patternDeclaration.getConditions()) {
 				if (!(expression.accept(this) instanceof BoolType)) {
 					typeErrors.add(
-						new ConditionIsNotBool(expression.getLine())
+						new ConditionIsNotBool(
+							expression.getLine()
+						)
 					);
 					SymbolTable.pop();
 					return new NoType(); // this is wrong since it doesn't check 
@@ -187,28 +194,26 @@ public class TypeChecker extends Visitor<Type> {
 	public Type visit(AccessExpression accessExpression) {
 		if (accessExpression.isFunctionCall()) {
 			try {
-				// also a case here would be when it has default value and we pass something from other type
+				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 					FunctionItem.START_KEY +
-					(
-						(Identifier) accessExpression.getAccessedExpression()
-					).getName()
+					accessedIdentifier.getName()
 				);
+
 				ArrayList<Type> argTypes = new ArrayList<>();
 				for (Expression arg : accessExpression.getArguments()) {
 					argTypes.add(arg.accept(this));
 				}
 				functionItem.setArgumentTypes(argTypes);
+
 				return functionItem.getFunctionDeclaration().accept(this);
+
 			} catch (ItemNotFound ignored) {}
-		} else {
-			Type accessedType = accessExpression
-				.getAccessedExpression()
-				.accept(this);
-			if (
-				!(accessedType instanceof StringType) &&
-				!(accessedType instanceof ListType)
-			) {
+		} 
+		
+		else {
+			Type accessedType = accessExpression.getAccessedExpression().accept(this);
+			if (!(accessedType instanceof StringType) &&!(accessedType instanceof ListType)) {
 				typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
 				return new NoType();
 			} else {
