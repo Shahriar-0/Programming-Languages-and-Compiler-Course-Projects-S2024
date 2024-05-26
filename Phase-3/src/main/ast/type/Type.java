@@ -8,4 +8,12 @@ public abstract class Type {
 			!((this instanceof NoType) || (other instanceof NoType))
 		);
 	}
+
+	public boolean sameTypeConsideringNoType(Type other) {
+		return this.getClass().equals(other.getClass());
+	}
+
+	public boolean isNoType() {
+		return this instanceof NoType;
+	}
 }
