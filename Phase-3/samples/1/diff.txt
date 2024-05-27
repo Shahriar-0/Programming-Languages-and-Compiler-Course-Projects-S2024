@@ -1,0 +1,11 @@
+
+InputObject                                                                                                                                             Side
+                                                                                                                                                        Indi
+                                                                                                                                                        cato
+                                                                                                                                                        r
+-----------                                                                                                                                             ----
+Line:41-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list =>
+Line:9-> types of return expressions of the function `func2` must be same                                                                               <=
+Line:29-> unsupported operand type for operator MULT                                                                                                    <=
+Line:41-> types of `push` function argument must be string or same as list's type                                                                       <=
+

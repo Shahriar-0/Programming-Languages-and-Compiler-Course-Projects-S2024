@@ -1,6 +1,8 @@
 package main.visitor.type;
 
 import java.util.*;
+import java.util.logging.Logger;
+
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.*;
 import main.ast.nodes.expression.*;

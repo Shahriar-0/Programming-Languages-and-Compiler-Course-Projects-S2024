@@ -50,4 +50,9 @@ public class SymbolTable {
 		newSymbolTable.items.putAll(this.items);
 		return newSymbolTable;
 	}
+
+	@Override
+	public String toString() {
+		return items.keySet().toString();
+	}
 }
