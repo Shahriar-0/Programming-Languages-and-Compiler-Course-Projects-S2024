@@ -1,8 +1,6 @@
-$folders = Get-ChildItem "samples" -Directory
-
 $ErrorActionPreference = "SilentlyContinue"
 
-for ($i = 0; $i -lt $folders.Length; $i++) {
+function RunTest($i) {
     Remove-Item "samples\$i\out.txt" "samples\$i\diff.txt" > $null 2>&1
 
     java "@arg.argfile" "main.FunctionCraft" "samples\$i\sample.fl" "samples\$i\out.txt" > $null
@@ -20,3 +18,22 @@ for ($i = 0; $i -lt $folders.Length; $i++) {
         }
     }
 }
+
+function RunAll() {
+    $folders = Get-ChildItem "samples" -Directory
+    
+    for ($i = 0; $i -lt $folders.Length; $i++) {
+        RunTest $i
+    }
+}
+
+if ($args.Length -eq 0) {
+    RunAll
+}
+else {
+    if ($args[0] -eq "-t") {
+        RunTest $args[1]
+    }
+}
+
+# © Sayeh
