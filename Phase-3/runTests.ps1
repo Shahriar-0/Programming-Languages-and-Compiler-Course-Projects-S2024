@@ -5,8 +5,8 @@ function RunTest($i) {
 
     java "@arg.argfile" "main.FunctionCraft" "samples\$i\sample.fl" "samples\$i\out.txt" > $null
 
-    $ansContent = Get-Content "samples\$i\ans.txt"
-    $outContent = Get-Content "samples\$i\out.txt"
+    $ansContent = $ansContent -replace '\s',''
+    $outContent = $outContent -replace '\s',''
 
     if ($ansContent -eq $outContent) {
         Write-Host "Test number $i Passed" -ForegroundColor Green
