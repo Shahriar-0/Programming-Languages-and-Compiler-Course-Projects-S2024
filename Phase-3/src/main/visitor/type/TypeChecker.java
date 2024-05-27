@@ -63,27 +63,28 @@ public class TypeChecker extends Visitor<Type> {
 	public Type visit(FunctionDeclaration functionDeclaration) {
 		SymbolTable.push(new SymbolTable());
 
+		
 		try {
 			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 				FunctionItem.START_KEY +
 				functionDeclaration.getFunctionName().getName()
-			);
-			
-			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
-
-			if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
+				);
+				
+				ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+				
+				if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
 				for (int i = currentArgTypes.size(); i < functionDeclaration.getArgs().size(); i++) {
-
+					
 					if (functionDeclaration.getArgs().get(i).getDefaultVal() == null) {
 						currentArgTypes.add(new NoType());
 						continue;
 					}
-
+					
 					Type defaultType = functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
 					currentArgTypes.add(defaultType);	
 				}
 			}
-
+			
 			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
 				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
 				argItem.setType(currentArgTypes.get(i));
@@ -91,14 +92,33 @@ public class TypeChecker extends Visitor<Type> {
 					SymbolTable.top.put(argItem);
 				} catch (ItemAlreadyExists ignored) {}
 			}
-
+			
 		} catch (ItemNotFound ignored) {}
-
+		
 		List<Type> returnTypes = new ArrayList<>();
 		Type functionReturnType = new NoType();
 		boolean hasIncompatibleReturnTypes = false;
 
-		for (Statement statement : functionDeclaration.getBody()) {
+		ArrayList<Statement> allStatements = new ArrayList<>(functionDeclaration.getBody());
+		// this is because there are some things like if that may contain return but we don't see them here
+
+		for (Statement statement : functionDeclaration.getBody()) { // FIXME: this two loops are shit.
+			if (statement instanceof IfStatement ifStatement) {
+				allStatements.addAll(ifStatement.getThenBody());
+				allStatements.addAll(ifStatement.getElseBody());
+			} else if (statement instanceof LoopDoStatement loopDoStatement) {
+				allStatements.addAll(loopDoStatement.getLoopBodyStmts());
+			} else if (statement instanceof ForStatement forStatement) {
+				allStatements.addAll(forStatement.getLoopBodyStmts());
+			}
+			
+			if (!(statement instanceof ReturnStatement)) {
+				statement.accept(this); // to avoid duplicate error 
+			}
+		}
+
+
+		for (Statement statement : allStatements) { // this is only for checking returns
 			if (statement instanceof ReturnStatement returnStatement) {
 				Type returnType = returnStatement.accept(this);
 
@@ -114,10 +134,6 @@ public class TypeChecker extends Visitor<Type> {
 					}
 				}
 			} 
-			
-			else {
-				statement.accept(this);
-			}
 		}
 
 		if (hasIncompatibleReturnTypes) {
@@ -200,10 +216,21 @@ public class TypeChecker extends Visitor<Type> {
 	public Type visit(AccessExpression accessExpression) {
 		if (accessExpression.isFunctionCall()) {
 			try {
-				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
+				Type accessedType = accessExpression.getAccessedExpression().accept(this);
+				String name;
+				if (accessedType instanceof FptrType fptrType) {
+					name = fptrType.getFunctionName();
+				} else if (accessedType instanceof NoType) { // normal function
+					Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
+					name = accessedIdentifier.getName();
+				} else {
+					// not a function, i don't think that that would be possible but just in case
+					return new NoType();
+				}
+
 				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 					FunctionItem.START_KEY +
-					accessedIdentifier.getName()
+					name
 				);
 
 				ArrayList<Type> argTypes = new ArrayList<>();
