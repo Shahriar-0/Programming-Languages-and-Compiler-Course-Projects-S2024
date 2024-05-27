@@ -1,14 +1,22 @@
-java '@arg.argfile' 'main.FunctionCraft' 'samples\sample1.fl' 'samples\out.txt'
+$folders = Get-ChildItem "samples" -Directory
 
-$ansContent = Get-Content 'samples\ans.txt'
-$outContent = Get-Content 'samples\out.txt'
+$ErrorActionPreference = "SilentlyContinue"
 
-if ($ansContent -eq $outContent) {
-    Write-Host "Test Passed" -ForegroundColor Green
-}
-else {
-    Write-Host "Test Failed" -ForegroundColor Red
-    if ($outContent.Length -gt 0) {
-        Compare-Object $ansContent $outContent | Format-Table -AutoSize | Out-File 'samples\err.txt' -Encoding utf8 -Width 1000
+for ($i = 0; $i -lt $folders.Length; $i++) {
+    Remove-Item "samples\$i\out.txt" "samples\$i\diff.txt" > $null 2>&1
+
+    java "@arg.argfile" "main.FunctionCraft" "samples\$i\sample.fl" "samples\$i\out.txt" > $null
+
+    $ansContent = Get-Content "samples\$i\ans.txt"
+    $outContent = Get-Content "samples\$i\out.txt"
+
+    if ($ansContent -eq $outContent) {
+        Write-Host "Test number $i Passed" -ForegroundColor Green
+    }
+    else {
+        Write-Host "Test number $i Failed" -ForegroundColor Red
+        if ($outContent.Length -gt 0) {
+            Compare-Object $ansContent $outContent | Format-Table -AutoSize | Out-File "samples\$i\diff.txt"
+        }
     }
 }
