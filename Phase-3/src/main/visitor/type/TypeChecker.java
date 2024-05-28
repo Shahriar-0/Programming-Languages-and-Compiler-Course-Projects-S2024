@@ -445,10 +445,11 @@ public class TypeChecker extends Visitor<Type> {
 
 			try {
 				SymbolTable.top.put(newVarItem);
-			} catch (ItemAlreadyExists ignored) {}
-			// not specified in the document that can we change the type or not
-			// it is not possible to change the type of a variable in the same scope
-			// call SymbolTable.top.update(newVarItem) to update the type of a variable
+			} catch (ItemAlreadyExists ignored) {
+				try { // if the variable already exists, update its type
+					SymbolTable.top.update(newVarItem);
+				} catch (ItemNotFound ignored2) {}
+			}
 			
 			return assignExpressionType;
 		} 
