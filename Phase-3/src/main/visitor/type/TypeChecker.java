@@ -67,7 +67,6 @@ public class TypeChecker extends Visitor<Type> {
 	public Type visit(FunctionDeclaration functionDeclaration) {
 		SymbolTable.push(new SymbolTable());
 
-		
 		try {
 			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 				FunctionItem.START_KEY +
@@ -81,7 +80,7 @@ public class TypeChecker extends Visitor<Type> {
 					
 					if (functionDeclaration.getArgs().get(i).getDefaultVal() == null) {
 						currentArgTypes.add(new NoType());
-						continue;
+						continue; // just for make the code not crash
 					}
 					
 					Type defaultType = functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
@@ -100,7 +99,7 @@ public class TypeChecker extends Visitor<Type> {
 		} catch (ItemNotFound ignored) {}
 		
 		List<Type> returnTypes = new ArrayList<>();
-		Type functionReturnType = new NoType();
+		Type functionReturnType = new NoType(); // note the difference here and other statements, we must return here
 		boolean isCompatible = true;
 
 		for (Statement statement : functionDeclaration.getBody()) {
@@ -131,7 +130,7 @@ public class TypeChecker extends Visitor<Type> {
 		SymbolTable.push(new SymbolTable());
 
 		List<Type> returnTypes = new ArrayList<>();
-		Type patternReturnType = new NoType();
+		Type patternReturnType = new NoType(); // note the difference here and other statements, we must return here
 		boolean isCompatible = true;
 
 		try {
@@ -162,6 +161,7 @@ public class TypeChecker extends Visitor<Type> {
 			for (Expression expression : patternDeclaration.getReturnExps()) {
 				Type returnType = expression.accept(this);
 				
+				// since all of them are return we don't need utility.mayContainReturn
 				result = Utility.isStillCompatible(returnTypes, returnType, patternReturnType);
 				patternReturnType = result.getKey();
 				isCompatible = result.getValue();
@@ -226,7 +226,7 @@ public class TypeChecker extends Visitor<Type> {
 
 			if (!(accessedType instanceof StringType) &&
 				!(accessedType instanceof ListType) &&
-				!(returnType instanceof StringType) &&
+				!(returnType instanceof StringType) && // since a return of a function may be accessed
 				!(returnType instanceof ListType)) {
 				typeErrors.add(
 					new IsNotIndexable(
@@ -389,15 +389,29 @@ public class TypeChecker extends Visitor<Type> {
 						assignStatement.getLine()
 					)
 				);
-				// return new NoType(); // not sure whether to keep this or not
 			}
 
-
+			// the if below is not really accurate but the case for it to make error is really complicated and not worth it
 			if (accessedType instanceof ListType listType) {
 				Type assignExpressionType = assignStatement.getAssignExpression().accept(this);
 
 				if (listType.getType() instanceof NoType) {
 					listType.setType(assignExpressionType);
+					
+					try { // update the type in the symbol table
+						Identifier identifier = (Identifier) assignStatement.getAssignedId();
+						VarItem varItem = (VarItem) SymbolTable.top.getItem(
+							VarItem.START_KEY +
+							identifier.getName()
+						);
+
+						varItem.setType(listType);
+						try {
+							SymbolTable.top.update(varItem);
+						} catch (ItemNotFound ignored) {}
+
+					} catch (ItemNotFound ignored) {}
+					
 				} else {
 					if (!listType.getType().equals(assignExpressionType)) {
 						typeErrors.add(
@@ -433,6 +447,8 @@ public class TypeChecker extends Visitor<Type> {
 				SymbolTable.top.put(newVarItem);
 			} catch (ItemAlreadyExists ignored) {}
 			// not specified in the document that can we change the type or not
+			// it is not possible to change the type of a variable in the same scope
+			// call SymbolTable.top.update(newVarItem) to update the type of a variable
 			
 			return assignExpressionType;
 		} 
@@ -505,7 +521,6 @@ public class TypeChecker extends Visitor<Type> {
 				listType.setType(toBeAddedType);
 
 				if (initial instanceof ListValue listValue) {
-					// check that if it was an identifier, we update the type in the symbol table
 					try {
 						Identifier identifier = (Identifier) initial;
 						VarItem varItem = (VarItem) SymbolTable.top.getItem(
