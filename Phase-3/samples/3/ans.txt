@@ -2,15 +2,13 @@ Line:68-> types of `push` function arguments must be string or the type of the s
 Line:71-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
 Line:87-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
 Line:90-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
-Line:93-> types of return expressions of the function `different_return_type1` must be same
-Line:101-> types of return expressions of the function `different_return_type2` must be same
-Line:109-> types of return expressions of the function `different_return_type3` must be same
-Line:117-> types of return expressions of the function `different_return_type4` must be same
-Line:125-> types of return expressions of the function `different_return_type5` must be same
-Line:135-> types of return expressions of the function `different_return_type6` must be same
-Line:156-> types of return expressions of the function `different_return_type7` must be same
-Line:164-> types of return expressions of the pattern `different_return_type8` must be same
-Line:169-> types of return expressions of the pattern `different_return_type9` must be same
+Line:93-> types of return expressions of the function `different_return_type1` must be the same
+Line:101-> types of return expressions of the function `different_return_type2` must be the same
+Line:109-> types of return expressions of the function `different_return_type3` must be the same
+Line:117-> types of return expressions of the function `different_return_type4` must be the same
+Line:125-> types of return expressions of the function `different_return_type5` must be the same
+Line:135-> types of return expressions of the function `different_return_type6` must be the same
+Line:156-> types of return expressions of the function `different_return_type7` must be the same
 Line:357-> unsupported operand type for operator PLUS
 Line:358-> unsupported operand type for operator PLUS
 Line:359-> unsupported operand type for operator PLUS
@@ -43,6 +41,9 @@ Line:402-> only lists and strings can be indexed
 Line:403-> operands of operator DIVIDE must be the same
 Line:403-> access index must be integer
 Line:404-> access index must be integer
+Line:417-> only lists can be iterated over
+Line:419-> only lists can be iterated over
+Line:421-> only lists can be iterated over
 Line:430-> operands of operator PLUS must be the same
 Line:434-> operands of operator PLUS must be the same
 Line:438-> operands of operator PLUS must be the same
@@ -99,8 +100,6 @@ Line:649-> all elements of the list must have same type
 Line:650-> all elements of the list must have same type
 Line:651-> all elements of the list must have same type
 Line:652-> all elements of the list must have same type
-#Line:653-> all elements of the list must have same type
-#Line:654-> all elements of the list must have same type
 Line:658-> only lists and strings can get appended into
 Line:659-> only lists and strings can get appended into
 Line:660-> only lists and strings can get appended into

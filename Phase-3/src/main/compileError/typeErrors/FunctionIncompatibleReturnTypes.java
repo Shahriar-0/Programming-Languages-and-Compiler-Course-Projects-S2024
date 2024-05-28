@@ -17,7 +17,7 @@ public class FunctionIncompatibleReturnTypes extends CompileError {
 			this.line +
 			"-> types of return expressions of the function `" +
 			this.functionName +
-			"` must be same"
+			"` must be the same"
 		);
 	}
 }

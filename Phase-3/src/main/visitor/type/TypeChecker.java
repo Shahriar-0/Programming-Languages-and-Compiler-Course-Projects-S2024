@@ -1,6 +1,7 @@
 package main.visitor.type;
 
 import java.util.*;
+import java.util.AbstractMap;
 import java.util.logging.Logger;
 
 import main.ast.nodes.Program;
@@ -19,9 +20,12 @@ import main.symbolTable.exceptions.*;
 import main.symbolTable.item.*;
 import main.visitor.Visitor;
 
+
 public class TypeChecker extends Visitor<Type> {
 
 	public ArrayList<CompileError> typeErrors = new ArrayList<>();
+	private static final Logger log = Logger.getLogger(TypeChecker.class.getName());
+	private AbstractMap.SimpleEntry<Type, Boolean> result;
 
 	@Override
 	public Type visit(Program program) {
@@ -97,63 +101,19 @@ public class TypeChecker extends Visitor<Type> {
 		
 		List<Type> returnTypes = new ArrayList<>();
 		Type functionReturnType = new NoType();
-		boolean hasIncompatibleReturnTypes = false;
-
-		ArrayList<Statement> allStatements = new ArrayList<>(functionDeclaration.getBody());
-		// this is because there are some things like if that may contain return but we don't see them here
-
-		// while there is if, loop, for statement in the body, we should add their body to allStatements
-		while (true) { // FIXME: this two loops are shit.
-			boolean hasChanged = false;
-			for (Statement statement : allStatements) {
-				if (statement instanceof IfStatement ifStatement) {
-					allStatements.addAll(ifStatement.getThenBody());
-					allStatements.addAll(ifStatement.getElseBody());
-					allStatements.remove(ifStatement);
-					hasChanged = true;
-					break;
-				} else if (statement instanceof LoopDoStatement loopDoStatement) {
-					allStatements.addAll(loopDoStatement.getLoopBodyStmts());
-					allStatements.remove(loopDoStatement);
-					hasChanged = true;
-					break;
-				} else if (statement instanceof ForStatement forStatement) {
-					allStatements.addAll(forStatement.getLoopBodyStmts());
-					allStatements.remove(forStatement);
-					hasChanged = true;
-					break;
-				}
-			}
-			if (!hasChanged) {
-				break;
-			}
-		}
+		boolean isCompatible = true;
 
 		for (Statement statement : functionDeclaration.getBody()) {
-			if (!(statement instanceof ReturnStatement)) {
-				statement.accept(this); // to avoid duplicate error 
+			Type statementType = statement.accept(this);
+			
+			if (Utility.mayContainReturn(statement)) {
+				result = Utility.isStillCompatible(returnTypes, statementType, functionReturnType);
+				functionReturnType = result.getKey();
+				isCompatible = result.getValue();
 			}
 		}
 
-		for (Statement statement : allStatements) { // this is only for checking returns
-			if (statement instanceof ReturnStatement returnStatement) {
-				Type returnType = returnStatement.accept(this);
-
-				if (returnTypes.isEmpty()) {
-					// this is used instead of `functionReturnType.isNoType()` because that would have made it complicated
-					returnTypes.add(returnType);
-					functionReturnType = returnType;
-				} else {
-					if (!functionReturnType.sameTypeConsideringNoType(returnType)) {
-						hasIncompatibleReturnTypes = true;
-						returnTypes.add(returnType); // this is not specifically used, but just in case for debugging
-						functionReturnType = new NoType();
-					}
-				}
-			} 
-		}
-
-		if (hasIncompatibleReturnTypes) {
+		if (!isCompatible) {
 			typeErrors.add(
 				new FunctionIncompatibleReturnTypes(
 					functionDeclaration.getLine(),
@@ -172,7 +132,7 @@ public class TypeChecker extends Visitor<Type> {
 
 		List<Type> returnTypes = new ArrayList<>();
 		Type patternReturnType = new NoType();
-		boolean hasIncompatibleReturnTypes = false;
+		boolean isCompatible = true;
 
 		try {
 			PatternItem patternItem = (PatternItem) SymbolTable.root.getItem(
@@ -202,21 +162,14 @@ public class TypeChecker extends Visitor<Type> {
 			for (Expression expression : patternDeclaration.getReturnExps()) {
 				Type returnType = expression.accept(this);
 				
-				if (returnTypes.isEmpty()) {
-					returnTypes.add(returnType);
-					patternReturnType = returnType;
-				} else {
-					if (!patternReturnType.sameTypeConsideringNoType(returnType)) {
-						hasIncompatibleReturnTypes = true;
-						returnTypes.add(returnType);
-						patternReturnType = new NoType();
-					}
-				}
+				result = Utility.isStillCompatible(returnTypes, returnType, patternReturnType);
+				patternReturnType = result.getKey();
+				isCompatible = result.getValue();
 			}
 
 		} catch (ItemNotFound ignored) {}
 
-		if (hasIncompatibleReturnTypes) {
+		if (!isCompatible) {
 			typeErrors.add(
 				new PatternIncompatibleReturnTypes(
 					patternDeclaration.getLine(),
@@ -332,44 +285,88 @@ public class TypeChecker extends Visitor<Type> {
 			SymbolTable.top.put(varItem);
 		} catch (ItemAlreadyExists ignored) {}
 
+		Type forReturnType = new NoReturn();
+		ArrayList<Type> returnTypes = new ArrayList<>();
+		boolean isCompatible = true;
+
 		for (Statement statement : forStatement.getLoopBodyStmts()) {
-			statement.accept(this);
+			Type statementType = statement.accept(this);
+
+			if (Utility.mayContainReturn(statement)) {
+				result = Utility.isStillCompatible(returnTypes, statementType, forReturnType);
+				forReturnType = result.getKey();
+				isCompatible = result.getValue();
+			}
 		}
 
 		SymbolTable.pop();
-		return new NoType();
+		
+		if (!isCompatible) {
+			return new MisMatchType();
+		}
+		return forReturnType;
 	}
 
 	@Override
 	public Type visit(IfStatement ifStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
 
+		Type ifReturnType = new NoReturn();
+		ArrayList<Type> returnTypes = new ArrayList<>();
+		boolean isCompatible = true;
+
 		for (Expression expression : ifStatement.getConditions()) {
 			if (!(expression.accept(this) instanceof BoolType)) {
 				typeErrors.add(new ConditionIsNotBool(expression.getLine()));
 			}
 		}
-		for (Statement statement : ifStatement.getThenBody()) {
-			statement.accept(this);
-		}
-		for (Statement statement : ifStatement.getElseBody()) {
-			statement.accept(this);
+
+		ArrayList<Statement> allStatements = new ArrayList<>();
+		allStatements.addAll(ifStatement.getThenBody());
+		allStatements.addAll(ifStatement.getElseBody());
+
+		for (Statement statement : allStatements) {
+			Type statementType = statement.accept(this);
+
+			if (Utility.mayContainReturn(statement)) {
+				result = Utility.isStillCompatible(returnTypes, statementType, ifReturnType);
+				ifReturnType = result.getKey();
+				isCompatible = result.getValue();
+			}
 		}
 
 		SymbolTable.pop();
-		return new NoType();
+		
+		if (!isCompatible) {
+			return new MisMatchType();
+		}
+		return ifReturnType;
 	}
 
 	@Override
 	public Type visit(LoopDoStatement loopDoStatement) {
 		SymbolTable.push(SymbolTable.top.copy());
 
+		Type loopReturnType = new NoReturn();
+		ArrayList<Type> returnTypes = new ArrayList<>();
+		boolean isCompatible = true;
+
 		for (Statement statement : loopDoStatement.getLoopBodyStmts()) {
-			statement.accept(this);
+			Type statementType = statement.accept(this);
+
+			if (Utility.mayContainReturn(statement)) {
+				result = Utility.isStillCompatible(returnTypes, statementType, loopReturnType);
+				loopReturnType = result.getKey();
+				isCompatible = result.getValue();
+			}
 		}
 
 		SymbolTable.pop();
-		return new NoType();
+		
+		if (!isCompatible) {
+			return new MisMatchType();
+		}
+		return loopReturnType;
 	}
 
 	@Override
@@ -419,7 +416,7 @@ public class TypeChecker extends Visitor<Type> {
 					typeErrors.add(
 						new ListElementsTypesMisMatch(
 							assignStatement.getLine()
-						) // FIXME: not specified in the document, the error name should be StringElementsTypesMisMatch or sth
+						) // not specified in the document, the error name should be StringElementsTypesMisMatch or sth
 					);
 				}
 				return new StringType();
@@ -435,7 +432,7 @@ public class TypeChecker extends Visitor<Type> {
 			try {
 				SymbolTable.top.put(newVarItem);
 			} catch (ItemAlreadyExists ignored) {}
-			// FIXME: not specified in the document that can we change the type or not
+			// not specified in the document that can we change the type or not
 			
 			return assignExpressionType;
 		} 
@@ -649,6 +646,7 @@ public class TypeChecker extends Visitor<Type> {
 		Expression secondOperand = binaryExpression.getSecondOperand();
 		BinaryOperator binaryOperator = binaryExpression.getOperator();
 
+		
 		Type firstOperandType = firstOperand.accept(this);
 		Type secondOperandType = secondOperand.accept(this);
 
@@ -669,7 +667,7 @@ public class TypeChecker extends Visitor<Type> {
 		else { // the operands are the same type
 			Type type = firstOperandType;
 			if (binaryOperator.equals(BinaryOperator.EQUAL) || binaryOperator.equals(BinaryOperator.NOT_EQUAL)) {
-				return new BoolType(); // FIXME: not specified in the document that all types have these or not
+				return new BoolType(); // not specified in the document that all types have these or not
 			} 
 			else if (
 				binaryOperator.equals(BinaryOperator.GREATER_THAN) ||
@@ -879,7 +877,7 @@ public class TypeChecker extends Visitor<Type> {
 				typeErrors.add(
 					new RangeValuesMisMatch(
 						rangeExpression.getLine()
-					) // FIXME: not specified in the document
+					) // not specified in the document
 				);
 				return new NoType();
 			}
@@ -899,7 +897,7 @@ public class TypeChecker extends Visitor<Type> {
 					typeErrors.add(
 						new IsNotIterable(
 							rangeExpression.getLine()
-						) // FIXME: not specified in the document
+						) // not specified in the document
 					);
 					return new NoType();
 				}

@@ -2,28 +2,13 @@ Line:68-> types of `push` function arguments must be string or the type of the s
 Line:71-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
 Line:87-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
 Line:90-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
-Line:93-> types of return expressions of the function `different_return_type1` must be same
-Line:101-> types of return expressions of the function `different_return_type2` must be same
-Line:109-> types of return expressions of the function `different_return_type3` must be same
-Line:117-> types of return expressions of the function `different_return_type4` must be same
-Line:125-> types of return expressions of the function `different_return_type5` must be same
-Line:135-> types of return expressions of the function `different_return_type6` must be same
-Line:156-> types of return expressions of the function `different_return_type7` must be same
-Line:186-> types of return expressions of the function `multi_int_return_func` must be same
-Line:197-> only lists and strings can be indexed
-Line:208-> types of return expressions of the function `multi_float_return_func` must be same
-Line:219-> only lists and strings can be indexed
-Line:230-> types of return expressions of the function `multi_bool_return_func` must be same
-Line:241-> only lists and strings can be indexed
-Line:256-> types of return expressions of the function `multi_string_return_func` must be same
-Line:267-> only lists and strings can be indexed
-Line:278-> types of return expressions of the function `multi_fptr_return_func` must be same
-Line:289-> only lists and strings can be indexed
-Line:300-> types of return expressions of the function `multi_list_return_func` must be same
-Line:311-> only lists and strings can be indexed
-Line:347-> unsupported operand type for operator NOT
-Line:348-> only lists and strings can get pushed into
-Line:350-> type of `len` function argument must be list or string
+Line:93-> types of return expressions of the function `different_return_type1` must be the same
+Line:101-> types of return expressions of the function `different_return_type2` must be the same
+Line:109-> types of return expressions of the function `different_return_type3` must be the same
+Line:117-> types of return expressions of the function `different_return_type4` must be the same
+Line:125-> types of return expressions of the function `different_return_type5` must be the same
+Line:135-> types of return expressions of the function `different_return_type6` must be the same
+Line:156-> types of return expressions of the function `different_return_type7` must be the same
 Line:357-> unsupported operand type for operator PLUS
 Line:358-> unsupported operand type for operator PLUS
 Line:359-> unsupported operand type for operator PLUS
@@ -83,8 +68,6 @@ Line:517-> type of `len` function argument must be list or string
 Line:523-> condition's type must be boolean
 Line:528-> condition's type must be boolean
 Line:534-> type of `len` function argument must be list or string
-Line:534-> type of `len` function argument must be list or string
-Line:537-> type of `len` function argument must be list or string
 Line:537-> type of `len` function argument must be list or string
 Line:540-> condition's type must be boolean
 Line:542-> condition's type must be boolean
@@ -94,7 +77,6 @@ Line:548-> condition's type must be boolean
 Line:555-> operands of operator MULT must be the same
 Line:562-> type of `len` function argument must be list or string
 Line:568-> condition's type must be boolean
-Line:574-> type of `len` function argument must be list or string
 Line:574-> type of `len` function argument must be list or string
 Line:585-> all elements of the list must have same type
 Line:586-> access index must be integer
