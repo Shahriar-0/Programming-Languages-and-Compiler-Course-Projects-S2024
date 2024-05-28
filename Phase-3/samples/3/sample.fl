@@ -1,0 +1,710 @@
+def return_int_func()
+    return 3+2+len("salam");
+end
+
+def return_float_func()
+    return 3.2+2.3;
+end
+
+def return_bool_func()
+    return 1 > 2;
+end
+
+def return_string_func()
+    return "fffffffffffffffffff";
+end
+
+def return_fptr_func()
+    return method(:return_fptr_func);
+end
+
+def return_list_func()
+    return [];
+end
+
+pattern return_int_pat(a)
+    | (true) = return_int_func()
+    | (true) = 2
+;
+
+pattern return_float_pat(a)
+    | (true) = return_float_func()
+    | (true) = 2.4
+;
+
+pattern return_bool_pat(a)
+    | (true) = return_bool_func()
+    | (true) = false
+;
+
+pattern return_string_pat(a)
+    | (true) = return_string_func()
+    | (true) = "2"
+;
+
+pattern return_fptr_pat(a)
+    | (true) = return_fptr_func()
+    | (true) = method(:return_fptr_func)
+;
+
+pattern return_list_pat(a)
+    | (true) = return_list_func()
+    | (true) = []
+;
+
+def test_utils_func()
+    a = return_int_func();
+    a = a - 3;
+    b = return_float_func();
+    b = b - 7.7;
+    c = return_bool_func();
+    c = !c;
+    d = return_string_func();
+    len(d);
+    e = return_fptr_func();
+    e();
+    f = return_list_func();
+    push(f, 2);
+    push(f, false); # should generate error
+    g = return_list_func();
+    push(g, "2");
+    push(g, 2); # should generate error
+end
+
+def test_utils_pat()
+    a = return_int_pat.match(1);
+    a = a - 3;
+    b = return_float_pat.match(1);
+    b = b - 7.7;
+    c = return_bool_pat.match(1);
+    c = !c;
+    d = return_string_pat.match(1);
+    len(d);
+    e = return_fptr_pat.match(1);
+    e();
+    f = return_list_pat.match(1);
+    push(f, 2);
+    push(f, false); # should generate error
+    g = return_list_pat.match(1);
+    push(g, "2");
+    push(g, 2); # should generate error
+end
+
+def different_return_type1()
+    if (true)
+        return 1;
+    else
+        return "asdf";
+    end
+end
+
+def different_return_type2()
+    if (true)
+        return 1.2;
+    else
+        return 1;
+    end
+end
+
+def different_return_type3()
+    if (true)
+        return 1.3;
+    else
+        return "asdf";
+    end
+end
+
+def different_return_type4()
+    if (true)
+        return true;
+    else
+        return [true];
+    end
+end
+
+def different_return_type5()
+    if (true)
+        loop do
+            return method(:different_return_type1);
+        end
+    else
+        return false;
+    end
+end
+
+def different_return_type6()
+    if (true)
+        return method(:different_return_type1);
+    else
+        if (false)
+            return false;
+        else
+            return 2.3;
+        end
+    end
+
+    a = [1,2,3];
+    for i in a
+        return a;
+    end
+    loop do
+        return "salam";
+    end
+    return 2;
+end
+
+def different_return_type7()
+    if(false)
+        return true;
+    else
+        return ;
+    end
+end
+
+pattern different_return_type8(a)
+    | (true) = method(:return_list_func)
+    | (false) = method(:return_int_func)
+;
+
+pattern different_return_type9(a)
+    | (true) = []
+    | (false) = [1,2]
+;
+
+def different_return_types_test()
+    different_return_type1();
+    different_return_type2();
+    different_return_type3();
+    different_return_type4();
+    different_return_type5();
+    different_return_type6();
+    different_return_type7();
+    different_return_type8.match(1);
+    different_return_type9.match(1);
+end
+
+def multi_int_return_func()
+    a = 1;
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return len("string");
+            else
+                loop do
+                    list = [1,3];
+                    return list[1];
+                end
+                return len([3, 4, 5, 3, a]);
+            end
+            return return_int_func()/4;
+        end
+        return --a;
+    end
+    return a+2;
+end
+
+def multi_float_return_func()
+    a = 1.3;
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return 3.7/8.0;
+            else
+                loop do
+                    list = [1.1,3.3];
+                    return list[1];
+                end
+                return --a;
+            end
+            return return_float_func()*4.3;
+        end
+        return ++a;
+    end
+    return a+2.1;
+end
+
+def multi_bool_return_func()
+    a = true;
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return false;
+            else
+                loop do
+                    list = [false,true];
+                    return list[1];
+                end
+                return true;
+            end
+            return !return_bool_func();
+        end
+        b = 9;
+        c = 3;
+        return b != c;
+    end
+    b = 4.5;
+    c = 3.4;
+    return c <= b+9.2;
+end
+
+def multi_string_return_func()
+    a = "salaaaam";
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return "string";
+            else
+                loop do
+                    list = ["string","ye string dige"];
+                    return list[1];
+                end
+                return "string";
+            end
+            return return_string_func();
+        end
+        return a[0];
+    end
+    return "string";
+end
+
+def multi_fptr_return_func()
+    a = method(:return_fptr_func);
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return return_fptr_func();
+            else
+                loop do
+                    list = [a, return_fptr_func()];
+                    return list[1];
+                end
+                return a;
+            end
+            return a;
+        end
+    end
+    b = method(:return_fptr_func);
+    return b();
+end
+
+def multi_list_return_func()
+    a = [1];
+    if (false)
+        return a;
+    else
+        for i in (1..9)
+            if (true)
+                return [1, 3, 4];
+            else
+                loop do
+                    list = [[1, 3],[3]];
+                    return list[1];
+                end
+                return [return_int_func()];
+            end
+            return a;
+        end
+        return a;
+    end
+    return a;
+end
+
+def multi_no_return_func()
+    a = [1];
+    if (false)
+        return;
+    else
+        for i in (1..9)
+            if (true)
+                return;
+            else
+                loop do
+                    list = [[1, 3],[3]];
+                    return;
+                end
+                return;
+            end
+            return;
+        end
+        return;
+    end
+    return;
+end
+
+def multi_return_test()
+    multi_int_return_func() + 1;
+    multi_float_return_func() + 3.4;
+    !multi_bool_return_func();
+    push(multi_string_return_func(), return_string_func());
+    multi_fptr_return_func()();
+    len(multi_list_return_func());
+    multi_no_return_func();
+end
+
+def operand_test()
+    i = 1 + 2;
+    f = 21.1 + 90.21;
+    s = "string" + "another string";
+    b = true + false;
+    fptr = method(:return_string_func) + method(:return_string_func);
+    l = [3,4] + [89,2];
+    t = !i;
+    t = !f;
+    t = !"string";
+    b = !(f == f);
+    t = !method(:return_string_func);
+    i = -len("");
+    f = -f;
+    t = -"string";
+    t = -(f == f);
+    t = -method(:return_string_func);
+    t = 1 + 3.4;
+    t = "string" / true;
+    t = method(:return_string_func) * [];
+    t = "string" > [3,4,5,0];
+    t = 4 < false;
+    t = 8.907 == method(:return_string_func);
+    t = "string" >= [3,4,5,0];
+    t = 4 <= false;
+    t = 8.907 != method(:return_string_func);
+end
+
+def function_call_test()
+    a = [3,2,4];
+    a();
+    b = method(:return_int_func);
+    c = b() + 1;
+    c();
+    return_string_func(1+4.4);
+    return_string_func()["ina dige che kossheraian man daram test mikonam"];
+    return_int_func()["lalala"];
+    return_list_func(!90.3)[true + false];
+    should_be_string = return_string_func()[3];
+    len(should_be_string);
+end
+
+def list_access_test()
+    a = [[1>9],[false],[true], [return_bool_func()]];
+    s = "string";
+    i = 0;
+    a2 = a[i];
+    s2 = s[method(:return_int_func)()];
+    i[1];
+    a[3/false];
+    s["3"];
+    len(s2);
+    !a2[1];
+end
+
+def for_statement_test()
+    int_value = 1;
+    f = 3.4;
+    b = true;
+    s = "string";
+    fptr = return_fptr_func();
+    l = [1,2,3,3];
+
+    for i in int_value # should be fixed before public repo
+    end
+    for i in f # should be fixed before public repo
+    end
+    for i in b # should be fixed before public repo
+    end
+    for i in s
+    end
+    for i in l
+    end
+
+    for i in [1,return_int_func()]
+        ++i;
+        i + 1.2;
+    end
+    for i in [1.4,4.5]
+        --i;
+        i + 3;
+    end
+    for i in [false, true]
+        !i;
+        i + 3;
+    end
+    for i in ["string", "sss"]
+        len(i);
+        i + 3;
+    end
+    for i in [l, l]
+        len(i);
+        i + 3;
+    end
+
+    l1 = [1,2];
+    for i in l1
+        ++i;
+        i + 1.2;
+    end
+
+    l2 = [1.4,4.5];
+    for i in l2
+        --i;
+        i + 3;
+    end
+
+    l3 = [false, true];
+    for i in l3
+        !i;
+        i + 3;
+    end
+
+    l4 = ["string", "sss"];
+    for i in l4
+        len(i);
+        i + 3;
+    end
+
+    l5 = [l, l];
+    for i in [l, l]
+        len(i);
+        i + 3;
+    end
+
+    for i in (1..6)
+        ++i;
+        i + 1.2;
+    end
+
+    for i in (1.."string")
+        for j in (f..int_value)
+            for k in (true..b)
+            end
+        end
+    end
+
+    for i in [1, 3, 4.5]
+        for j in [[1], 2]
+            for k in ["string", return_fptr_func()]
+            end
+        end
+    end
+end
+
+def if_statement_test()
+    b = method(:return_bool_func);
+
+    if (1>2)
+        1 * 3.4;
+    else
+        1 * 3.4;
+    end
+
+    if (return_bool_func())
+        list = [];
+        push(list, 2);
+        len(list);
+        len(list[0]);
+    else
+        list = [];
+        push(list, 2);
+        len(list);
+        len(list[0]);
+    end
+
+    if (b())
+        s = return_string_func();
+        len(s);
+        if(s)
+        end
+    else
+        s = return_string_func();
+        len(s);
+        if(s)
+        end
+    end
+
+    if (true)
+        push([1], 4);
+        return len(6);
+    else
+        push([1], 4);
+        return len(6);
+    end
+
+    if ("string")
+    end
+    if (return_int_func())
+    end
+    if (2.3)
+    end
+    if ([1,2])
+    end
+    if (b)
+    end
+end
+
+def loop_statement_test()
+    loop do
+        loop do
+            1 * 3.4;
+        end
+
+        loop do
+            list = [];
+            push(list, 2);
+            len(list);
+            len(list[0]);
+        end
+
+        loop do
+            s = return_string_func();
+            len(s);
+            if(s)
+            end
+        end
+
+        loop do
+            push([1], 4);
+            return len(6);
+        end
+    end
+end
+
+def assign_statement_test()
+    list = [3, 4];
+    string_value = return_string_pat.match(3);
+    int_value = len(string_value);
+    list[1] = 990;
+    list[int_value] = int_value;
+    list[int_value] = "string";
+    list[3.4] = return_int_func();
+    list[4.5] = 4.5;
+    int_value[3] = 4;
+    string_value[3] = 3;
+    string_value[3] = "salam";
+end
+
+def break_and_next_statement_test()
+    loop do
+        break if (!false);
+        next if (6);
+    end
+    for i in [true]
+        break if ("string");
+        next if (i);
+        loop do
+            break if (2.3+9.2);
+            next if (2.3<9.2);
+        end
+    end
+end
+
+def push_statement_test()
+    push(3, 4);
+    push(return_float_pat.match(3), 0.4);
+    push(return_bool_func(), true);
+    push(method(:return_string_func), return_fptr_func());
+    push(return_list_pat.match(2), 3);
+    push(return_string_func(), "ad");
+
+    list = [];
+    push(list, []);
+    push(list, [3]);
+    push(list[1], 3);
+    push(list, [3]);
+    push(list, []);
+
+    s = "string";
+    push(s, 3);
+    push(s, 3.5);
+    push(s, ture);
+    push(s, "3");
+    push(s, return_string_func());
+end
+
+def put_statement_test()
+    puts(1);
+    puts(1.2);
+    puts(true);
+    puts("string");
+    puts([]);
+    puts(return_fptr_func());
+end
+
+def list_value_test()
+    [1, 2, 3];
+    [1.2, 2.3, 3.5];
+    [false, true, return_bool_pat.match(3)];
+    ["1", "2", "3"];
+    [[2], [3], [4]];
+    a = method(:return_list_func);
+    [method(:return_list_func), method(:return_list_func), a];
+
+    [1, 2, true];
+    [1.2, 2, 3.5];
+    ["false", true, return_bool_pat.match(3)];
+    ["1", a, "3"];
+    [[2], [3], []];
+    [method(:return_list_func), method(:return_list_func), return_fptr_func()];
+end
+
+def append_expression_test()
+    3 << 4 << 5;
+    return_float_pat.match(3) << 0.4;
+    return_bool_func() << true;
+    method(:return_string_func) << return_fptr_func();
+    return_list_pat.match(2) << 3;
+    return_string_func() << "ad";
+
+    =begin  append grammar has problem, so this tests are useless right now
+    list = [];
+    list << [];
+    list << [3];
+    list[1] << 3;
+    list << [3];
+    list << [];
+    # append expression should change list structure like push statement.
+
+    s = "string";
+    s << 3;
+    s << 3.5;
+    s << ture;
+    s << "3";
+    s << return_string_func();
+    =end
+end
+
+def len_statement_test()
+    len(1);
+    len(1.2);
+    len(true);
+    len("string");
+    len([]);
+    len(return_fptr_func());
+end
+
+def main()
+    test_utils_func();
+    test_utils_pat();
+    different_return_types_test();
+    multi_return_test();
+    operand_test();
+    function_call_test();
+    list_access_test();
+    for_statement_test();
+    if_statement_test();
+    loop_statement_test();
+    assign_statement_test();
+    break_and_next_statement_test();
+    push_statement_test();
+    put_statement_test();
+    list_value_test();
+    append_expression_test();
+    len_statement_test();
+end

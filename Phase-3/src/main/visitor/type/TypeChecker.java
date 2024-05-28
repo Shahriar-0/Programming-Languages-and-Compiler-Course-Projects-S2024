@@ -231,9 +231,11 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(AccessExpression accessExpression) {
+		Type accessedType = accessExpression.getAccessedExpression().accept(this);
+		Type returnType = new NoType();
+		
 		if (accessExpression.isFunctionCall()) {
 			try {
-				Type accessedType = accessExpression.getAccessedExpression().accept(this);
 				String name;
 				if (accessedType instanceof FptrType fptrType) {
 					name = fptrType.getFunctionName();
@@ -241,7 +243,11 @@ public class TypeChecker extends Visitor<Type> {
 					Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 					name = accessedIdentifier.getName();
 				} else {
-					// not a function, i don't think that that would be possible but just in case
+					typeErrors.add(
+						new IsNotCallable(
+							accessExpression.getLine()
+						)
+					);
 					return new NoType();
 				}
 
@@ -256,23 +262,24 @@ public class TypeChecker extends Visitor<Type> {
 				}
 				functionItem.setArgumentTypes(argTypes);
 
-				return functionItem.getFunctionDeclaration().accept(this);
+				returnType = functionItem.getFunctionDeclaration().accept(this);
 
 			} catch (ItemNotFound ignored) {
 				return new NoType();
 			}
 		} 
 		
-		else {
-			Type accessedType = accessExpression.getAccessedExpression().accept(this);
+		if (!accessExpression.getDimentionalAccess().isEmpty()) {
 
-			if (!(accessedType instanceof StringType) &&!(accessedType instanceof ListType)) {
+			if (!(accessedType instanceof StringType) &&
+				!(accessedType instanceof ListType) &&
+				!(returnType instanceof StringType) &&
+				!(returnType instanceof ListType)) {
 				typeErrors.add(
 					new IsNotIndexable(
 						accessExpression.getLine()
 					)
 				);
-				return new NoType();
 			} else {
 				for (Expression expression : accessExpression.getDimentionalAccess()) {
 					// the for is for multi-dimensional arrays which is not supported anymore
@@ -286,12 +293,14 @@ public class TypeChecker extends Visitor<Type> {
 				}
 
 				if (accessedType instanceof ListType listType) {
-					return listType.getType();
+					returnType = listType.getType();
 				} else {
-					return new StringType();
+					returnType = new StringType();
 				}
 			}
 		}
+
+		return returnType;
 	}
 
 	@Override
@@ -383,7 +392,7 @@ public class TypeChecker extends Visitor<Type> {
 						assignStatement.getLine()
 					)
 				);
-				return new NoType();
+				// return new NoType(); // not sure whether to keep this or not
 			}
 
 

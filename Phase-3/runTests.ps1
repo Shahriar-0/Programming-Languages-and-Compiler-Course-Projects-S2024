@@ -40,6 +40,16 @@ else {
     if ($args[0] -eq "-t") {
         RunTest $args[1]
     }
+    elseif ($args[0] -eq "-a") {
+        RunAll
+    }
+    elseif ($args[0] -eq "-c") { 
+        Remove-Item "samples\*\out.txt" 
+        Remove-Item "samples\*\diff.txt"
+    }
+    else {
+        Write-Host "Invalid argument" -ForegroundColor Red
+    }
 }
 
 # © Sayeh
