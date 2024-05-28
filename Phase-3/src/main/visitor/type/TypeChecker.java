@@ -102,21 +102,38 @@ public class TypeChecker extends Visitor<Type> {
 		ArrayList<Statement> allStatements = new ArrayList<>(functionDeclaration.getBody());
 		// this is because there are some things like if that may contain return but we don't see them here
 
-		for (Statement statement : functionDeclaration.getBody()) { // FIXME: this two loops are shit.
-			if (statement instanceof IfStatement ifStatement) {
-				allStatements.addAll(ifStatement.getThenBody());
-				allStatements.addAll(ifStatement.getElseBody());
-			} else if (statement instanceof LoopDoStatement loopDoStatement) {
-				allStatements.addAll(loopDoStatement.getLoopBodyStmts());
-			} else if (statement instanceof ForStatement forStatement) {
-				allStatements.addAll(forStatement.getLoopBodyStmts());
+		// while there is if, loop, for statement in the body, we should add their body to allStatements
+		while (true) { // FIXME: this two loops are shit.
+			boolean hasChanged = false;
+			for (Statement statement : allStatements) {
+				if (statement instanceof IfStatement ifStatement) {
+					allStatements.addAll(ifStatement.getThenBody());
+					allStatements.addAll(ifStatement.getElseBody());
+					allStatements.remove(ifStatement);
+					hasChanged = true;
+					break;
+				} else if (statement instanceof LoopDoStatement loopDoStatement) {
+					allStatements.addAll(loopDoStatement.getLoopBodyStmts());
+					allStatements.remove(loopDoStatement);
+					hasChanged = true;
+					break;
+				} else if (statement instanceof ForStatement forStatement) {
+					allStatements.addAll(forStatement.getLoopBodyStmts());
+					allStatements.remove(forStatement);
+					hasChanged = true;
+					break;
+				}
 			}
-			
+			if (!hasChanged) {
+				break;
+			}
+		}
+
+		for (Statement statement : functionDeclaration.getBody()) {
 			if (!(statement instanceof ReturnStatement)) {
 				statement.accept(this); // to avoid duplicate error 
 			}
 		}
-
 
 		for (Statement statement : allStatements) { // this is only for checking returns
 			if (statement instanceof ReturnStatement returnStatement) {
@@ -265,7 +282,6 @@ public class TypeChecker extends Visitor<Type> {
 								expression.getLine()
 							)
 						);
-						return new NoType();
 					}
 				}
 
@@ -690,6 +706,12 @@ public class TypeChecker extends Visitor<Type> {
 		Type expressionType = expression.accept(this);
 
 		if (expressionType instanceof NoType) {
+			typeErrors.add(
+				new UnsupportedOperandType(
+					unaryExpression.getLine(),
+					unaryOperator.toString()
+				)
+			);
 			return new NoType();
 		} 
 		

@@ -1,14 +1,20 @@
 $ErrorActionPreference = "SilentlyContinue"
 
 function RunTest($i) {
-    Remove-Item "samples\$i\out.txt" "samples\$i\diff.txt" > $null 2>&1
+    Remove-Item "samples\$i\out.txt" 
+    Remove-Item "samples\$i\diff.txt"
 
     java "@arg.argfile" "main.FunctionCraft" "samples\$i\sample.fl" "samples\$i\out.txt" > $null
 
-    $ansContent = $ansContent -replace '\s',''
-    $outContent = $outContent -replace '\s',''
+    $ansContent = Get-Content "samples\$i\ans.txt" 
+    $outContent = Get-Content "samples\$i\out.txt"
 
-    if ($ansContent -eq $outContent) {
+    $ansContentNoWS = $ansContent -replace '\s', ''
+    $outContentNoWS = $outContent -replace '\s', ''
+
+    $diff = Compare-Object -ReferenceObject $ansContentNoWS -DifferenceObject $outContentNoWS
+
+    if ($null -eq $diff) {
         Write-Host "Test number $i Passed" -ForegroundColor Green
     }
     else {

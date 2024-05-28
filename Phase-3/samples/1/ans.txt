@@ -1,4 +1,5 @@
 Line:5-> unsupported operand type for operator PLUS
+Line:5-> unsupported operand type for operator PLUS
 Line:9-> types of return expressions of the function `func2` must be same
 Line:28-> operands of operator PLUS must be the same
 Line:29-> operands of operator MINUS must be the same
