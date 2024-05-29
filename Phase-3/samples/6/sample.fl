@@ -1,0 +1,12 @@
+def f3()
+end
+
+def f2()
+end
+
+def f1()
+end
+
+def main()
+    a = [method(:f1), method(:f2), method(:f3)];
+end

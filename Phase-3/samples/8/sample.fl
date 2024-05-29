@@ -1,0 +1,13 @@
+# remember how we used to love in september?
+# will you stay with me through the night one last time?
+def f(x)
+    x = x+7;
+    return x;
+end
+
+def main()
+    t="34";
+    t=f(t);
+    t=4;
+    t=f(t);
+end

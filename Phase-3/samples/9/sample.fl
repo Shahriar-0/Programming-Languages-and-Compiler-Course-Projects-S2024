@@ -1,0 +1,14 @@
+def f(x)
+    if (true)
+        return x;
+    else
+        return "55";
+    end
+end
+
+def main()
+    t="34";
+    t=f(t);
+    t=4;
+    t=f(t);
+end

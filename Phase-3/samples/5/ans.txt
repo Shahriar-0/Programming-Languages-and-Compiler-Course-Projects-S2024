@@ -1,0 +1,1 @@
+Line:1-> types of return expressions of the pattern `fib` must be same

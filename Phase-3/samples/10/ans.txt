@@ -1,0 +1,9 @@
+Line:5-> types of begin and end of ranges can only be integer
+Line:6-> operands of operator DIVIDE must be the same
+Line:6-> condition's type must be boolean
+Line:9-> operands of operator PLUS must be the same
+Line:9-> operands of operator PLUS must be the same
+Line:9-> all elements of the list must have same type
+Line:10-> operands of operator DIVIDE must be the same
+Line:10-> condition's type must be boolean
+Line:19-> all elements of the list must have same type
