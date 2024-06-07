@@ -18,6 +18,8 @@ target/
 # Package Files #
 *.jar
 !**/antlr-4.13.1-complete.jar
+!**/jasmin.jar
+!**/classFileAnalyzer.jar
 *.war
 *.nar
 *.ear
