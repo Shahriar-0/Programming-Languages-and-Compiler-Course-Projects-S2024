@@ -52,20 +52,22 @@ public class CodeGenerator extends Visitor<String> {
 		return slots.get(var);
 	}
 
-	public String getFreshLabel() {
+	private String getFreshLabel() {
 		String fresh = "Label_" + curLabel;
 		curLabel++;
 		return fresh;
 	}
 
-	public String getType(Type element) {
+	private String getType(Type element) {
 		String type = "";
 		switch (element) {
+			// the reason for using "Ljava/lang/Integer;" instead of "I" is that we need to use Integer.valueOf() method
+			// since passing an int to a function requires an object and not a primitive type
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "Ljava/lang/Integer;";
+			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
-			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
 			case null, default 		   -> {}
 		}
 		return type;
@@ -75,14 +77,20 @@ public class CodeGenerator extends Visitor<String> {
 		final String jasminPath    = "utilities/jarFiles/jasmin.jar";
 		final String listClassPath = "utilities/codeGenerationUtilityClasses/List.j";
 		final String fptrClassPath = "utilities/codeGenerationUtilityClasses/Fptr.j";
+		
 		try {
 			File directory = new File(this.outputPath);
 			File[] files = directory.listFiles();
-			if (files != null) for (File file : files) file.delete();
+			if (files != null) {
+				for (File file : files) {
+					file.delete();
+				}
+			} 
 			directory.mkdir();
 		} catch (SecurityException e) {
 			// ignore
 		}
+
 		copyFile(jasminPath,    this.outputPath + "jasmin.jar");
 		copyFile(listClassPath, this.outputPath + "List.j");
 		copyFile(fptrClassPath, this.outputPath + "Fptr.j");
@@ -105,9 +113,9 @@ public class CodeGenerator extends Visitor<String> {
 			OutputStream writingFileStream = new FileOutputStream(writingFile);
 			byte[] buffer = new byte[1024];
 			int readLength;
-			while (
-				(readLength = readingFileStream.read(buffer)) > 0
-			) writingFileStream.write(buffer, 0, readLength);
+			while ((readLength = readingFileStream.read(buffer)) > 0) {
+				writingFileStream.write(buffer, 0, readLength);
+			}
 			readingFileStream.close();
 			writingFileStream.close();
 		} catch (IOException e) {
@@ -136,7 +144,7 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	private void handleMainClass() {
-		String commands =
+		String mainCommands =
 		"""
 		.method public static main([Ljava/lang/String;)V
 		.limit stack 128
@@ -146,7 +154,7 @@ public class CodeGenerator extends Visitor<String> {
 		return
 		.end method
 		""";
-		addCommand(commands);
+		addCommand(mainCommands);
 	}
 
 	@Override
@@ -156,12 +164,13 @@ public class CodeGenerator extends Visitor<String> {
 		.class public Main
 		.super java/lang/Object
 		""";
+
 		addCommand(commands);
 		handleMainClass();
 
 		for (String funcName : this.visited) {
 			try {
-				this.curFunction =(FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + funcName);
+				this.curFunction = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + funcName);
 				this.curFunction.getFunctionDeclaration().accept(this);
 			} catch (ItemNotFound ignored) {}
 		}
@@ -171,36 +180,53 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	@Override
-	public String visit(FunctionDeclaration functionDeclaration) {
+	public String visit(MainDeclaration mainDeclaration) {
 		slots.clear();
 
 		String commands = "";
-		String args = ""; // TODO and add to the slots
-		String returnType = ""; // TODO
-		commands += ".method public " + functionDeclaration.getFunctionName().getName();
-		commands += args + returnType + "\n";
-		// TODO headers, body and return with corresponding type
+		commands       += ".method public <init>()V\n";
+		commands       += ".limit stack 128\n";
+		commands       += ".limit locals 128\n";
+		commands       += "aload_0\n";
+		commands       += "invokespecial java/lang/Object/<init>()V\n";
+
+		for (var statement : mainDeclaration.getBody()) {
+			commands += statement.accept(this);
+		}
+
+		commands += "return\n";
+		commands += ".end method\n";
 
 		addCommand(commands);
 		return null;
 	}
 
 	@Override
-	public String visit(MainDeclaration mainDeclaration) {
+	public String visit(FunctionDeclaration functionDeclaration) {
 		slots.clear();
-
 		String commands = "";
-		commands += ".method public <init>()V\n";
+
+		String args = "";
+		for (var arg : functionDeclaration.getArgs()) {
+			Type argType = this.typeChecker.visit(arg);
+			args += getType(argType);
+			slotOf(arg.getName().getName());
+		}
+
+		Type returnType = this.typeChecker.visit(functionDeclaration);
+		String returnTypeString = getType(returnType);
+
+		commands += ".method public " + functionDeclaration.getFunctionName().getName();
+		commands += args + returnTypeString + "\n";
+
 		commands += ".limit stack 128\n";
 		commands += ".limit locals 128\n";
-		commands += "aload_0\n";
-		commands += "invokespecial java/lang/Object/<init>()V\n";
-		for (var statement : mainDeclaration.getBody()) {
+
+		for (var statement : functionDeclaration.getBody()) {
 			commands += statement.accept(this);
 		}
-		commands += "return\n";
-		commands += ".end method\n";
 
+		// return with corresponding type is handled in return statement
 		addCommand(commands);
 		return null;
 	}
