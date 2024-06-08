@@ -1,7 +1,6 @@
 package main.ast.nodes.statement;
 
 import java.util.ArrayList;
-import main.ast.nodes.expression.Expression;
 import main.visitor.IVisitor;
 
 public class LoopDoStatement extends Statement {

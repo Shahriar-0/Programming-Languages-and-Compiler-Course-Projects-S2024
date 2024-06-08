@@ -1,6 +1,5 @@
 package main.ast.nodes;
 
-import com.sun.tools.javac.Main;
 import java.util.ArrayList;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;

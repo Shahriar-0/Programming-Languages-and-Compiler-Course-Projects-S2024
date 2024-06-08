@@ -1,7 +1,5 @@
 package main.ast.type;
 
-import main.ast.type.Type;
-
 public class FptrType extends Type {
 
 	private String functionName;

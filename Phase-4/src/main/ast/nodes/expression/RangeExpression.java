@@ -8,10 +8,7 @@ public class RangeExpression extends Expression {
 	RangeType rangeType;
 	ArrayList<Expression> rangeExpressions;
 
-	public RangeExpression(
-		RangeType rangeType,
-		ArrayList<Expression> rangeExpressions
-	) {
+	public RangeExpression(RangeType rangeType, ArrayList<Expression> rangeExpressions) {
 		this.rangeExpressions = rangeExpressions;
 		this.rangeType = rangeType;
 	}

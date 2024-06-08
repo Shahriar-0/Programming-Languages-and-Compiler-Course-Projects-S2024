@@ -7,10 +7,7 @@ public class MatchPatternStatement extends Expression {
 	private Identifier patternId;
 	Expression matchArgument;
 
-	public MatchPatternStatement(
-		Identifier patternId,
-		Expression matchArgument
-	) {
+	public MatchPatternStatement(Identifier patternId, Expression matchArgument) {
 		this.matchArgument = matchArgument;
 		this.patternId = patternId;
 	}

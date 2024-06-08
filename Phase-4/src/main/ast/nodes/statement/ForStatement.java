@@ -11,11 +11,7 @@ public class ForStatement extends Statement {
 	private RangeExpression rangeExpression;
 	private ArrayList<Statement> loopBodyStmts;
 
-	public ForStatement(
-		Identifier identifierId,
-		RangeExpression rangeExpression,
-		ArrayList<Statement> loopBodyStmts
-	) {
+	public ForStatement(Identifier identifierId, RangeExpression rangeExpression, ArrayList<Statement> loopBodyStmts) {
 		this.iteratorId = identifierId;
 		this.rangeExpression = rangeExpression;
 		this.loopBodyStmts = loopBodyStmts;
