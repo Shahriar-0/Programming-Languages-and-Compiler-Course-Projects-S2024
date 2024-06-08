@@ -5,6 +5,9 @@ target/
 
 # Compiled class file
 *.class
+!Phase-4/codeGenOutput/**/*.class
+!Phase-4/samples/**/*.class
+
 
 # Log file
 *.log
