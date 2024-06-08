@@ -18,6 +18,7 @@ import main.ast.nodes.expression.value.primitive.StringValue;
 import main.ast.nodes.statement.*;
 import main.ast.type.FptrType;
 import main.ast.type.ListType;
+import main.ast.type.NoType;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.IntType;
@@ -245,7 +246,7 @@ public class CodeGenerator extends Visitor<String> {
 
 		args += ")";
 
-		Type returnType = this.typeChecker.visit(functionDeclaration);
+		Type returnType = functionDeclaration.accept(typeChecker);
 		String returnTypeString = getType(returnType);
 
 		commands += ".method public " + functionDeclaration.getFunctionName().getName();
@@ -261,7 +262,6 @@ public class CodeGenerator extends Visitor<String> {
 			commands += statement.accept(this);
 		}
 
-		// commands += "return\n"; // FIXME: this is just temporary till we implement return statement
 		commands += ".end method\n\n\n"; // few new lines for readability
 
 		// return with corresponding type is handled in return statement
@@ -308,8 +308,17 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ReturnStatement returnStatement) {
-		//TODO
-		return null;
+		Type returnType = returnStatement.accept(typeChecker);
+		
+		String commands = "";
+		if (returnType instanceof NoType) {
+			commands += "return\n";
+		} else if (returnType instanceof IntType || returnType instanceof BoolType) {
+			commands += "ireturn\n";
+		} else {
+			commands += "areturn\n";
+		}
+		return commands;
 	}
 
 	@Override
