@@ -209,7 +209,12 @@ public class CodeGenerator extends Visitor<String> {
 			""";
 
 		for (var statement : mainDeclaration.getBody()) {
-			commands += statement.accept(this);
+			// commands += statement.accept(this);
+			
+			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			if (temp != null) {
+				commands += temp;
+			}
 		}
 
 		commands += "return\n";
@@ -282,8 +287,16 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	public String visit(AccessExpression accessExpression) {
+		Type accessedType = accessExpression.accept(typeChecker);
+
 		if (accessExpression.isFunctionCall()) {
-			Identifier functionName = (Identifier) accessExpression.getAccessedExpression();
+			String functionName;
+			if (accessedType instanceof FptrType fptrType) {
+				functionName = fptrType.getFunctionName();
+			} else { // normal function 
+				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
+				functionName = accessedIdentifier.getName();
+			}
 			
 			String args = "(";
 			for (var arg : accessExpression.getArguments()) {
@@ -296,20 +309,21 @@ public class CodeGenerator extends Visitor<String> {
 			try {
 				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 					FunctionItem.START_KEY + 
-					functionName.getName()
+					functionName
 				);
 				returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
 			} catch (ItemNotFound ignored) {}
 
 			return (
 				"invokestatic Main/" +
-				functionName.getName() +
+				functionName +
 				args +
 				returnType +
 				"\n"
 			);
-		} else {
-			// TODO
+
+		} else { // access to a string
+			
 		}
 		//TODO
 		return null;
