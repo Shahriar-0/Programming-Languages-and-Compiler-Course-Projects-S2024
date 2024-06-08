@@ -3,23 +3,25 @@ package main.symbolTable.item;
 import main.ast.nodes.expression.Identifier;
 import main.ast.type.Type;
 
-public class VarItem extends SymbolTableItem{
-    public static String START_KEY = "VAR:";
-    private Type type;
+public class VarItem extends SymbolTableItem {
 
-    public Type getType() {
-        return type;
-    }
+	public static String START_KEY = "VAR:";
+	private Type type;
 
-    public void setType(Type type) {
-        this.type = type;
-    }
+	public Type getType() {
+		return type;
+	}
 
-    public VarItem(Identifier identifier){
-        this.name = identifier.getName();
-    }
+	public void setType(Type type) {
+		this.type = type;
+	}
 
+	public VarItem(Identifier identifier) {
+		this.name = identifier.getName();
+	}
 
-    @Override
-    public String getKey(){return START_KEY + this.name;}
+	@Override
+	public String getKey() {
+		return START_KEY + this.name;
+	}
 }
