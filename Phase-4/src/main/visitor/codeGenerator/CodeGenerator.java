@@ -334,6 +334,15 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	@Override
+	public String visit(ReturnStatement returnStatement) {
+		// since we determined the return type in function declaration, we can just visit the expression and nothing else
+		if (returnStatement.hasRetExpression()) {
+			return returnStatement.getReturnExp().accept(this);
+		}
+		return null;
+	}
+
+	@Override
 	public String visit(ExpressionStatement expressionStatement) {
 		return expressionStatement.getExpression().accept(this);
 	}
