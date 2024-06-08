@@ -1,11 +1,14 @@
 package main.visitor.codeGenerator;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.logging.Logger;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
+import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
@@ -30,6 +33,8 @@ public class CodeGenerator extends Visitor<String> {
 	private final String outputPath;
 	private final TypeChecker typeChecker;
 	private final Set<String> visited;
+
+	private static final Logger log = Logger.getLogger(TypeChecker.class.getName());
 
 	private FileWriter mainFile;
 	private FunctionItem curFunction;
@@ -61,11 +66,22 @@ public class CodeGenerator extends Visitor<String> {
 	private String getType(Type element) {
 		String type = "";
 		switch (element) {
-			// the reason for using "Ljava/lang/Integer;" instead of "I" is that we need to use Integer.valueOf() method
-			// since passing an int to a function requires an object and not a primitive type
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "Ljava/lang/Integer;";
 			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
+			case FptrType fptrType     -> type += "LFptr;";
+			case ListType listType     -> type += "LList;";
+			case null, default 		   -> {}
+		}
+		return type;
+	}
+
+	private String getTypeSignature(Type element) {
+		String type = "";
+		switch (element) {
+			case StringType stringType -> type += "Ljava/lang/String;";
+			case IntType intType       -> type += "I";
+			case BoolType boolType     -> type += "Z";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
 			case null, default 		   -> {}
@@ -159,7 +175,7 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(Program program) {
-		String commands =
+		String commands = 
 		"""
 		.class public Main
 		.super java/lang/Object
@@ -182,13 +198,14 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(MainDeclaration mainDeclaration) {
 		slots.clear();
-
-		String commands = "";
-		commands       += ".method public <init>()V\n";
-		commands       += ".limit stack 128\n";
-		commands       += ".limit locals 128\n";
-		commands       += "aload_0\n";
-		commands       += "invokespecial java/lang/Object/<init>()V\n";
+		String commands = 
+			"""
+			.method public <init>()V
+			.limit stack 128
+			.limit locals 128
+			aload_0
+			invokespecial java/lang/Object/<init>()V
+			""";
 
 		for (var statement : mainDeclaration.getBody()) {
 			commands += statement.accept(this);
@@ -206,12 +223,27 @@ public class CodeGenerator extends Visitor<String> {
 		slots.clear();
 		String commands = "";
 
-		String args = "";
-		for (var arg : functionDeclaration.getArgs()) {
-			Type argType = this.typeChecker.visit(arg);
-			args += getType(argType);
-			slotOf(arg.getName().getName());
-		}
+		String args = "(";
+
+		try {
+			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+				FunctionItem.START_KEY + 
+				functionDeclaration.getFunctionName().getName()
+			);
+
+			ArrayList<Type> argTypes = functionItem.getArgumentTypes();
+			ArrayList<VarDeclaration> argDeclarations = functionDeclaration.getArgs();
+
+			for (int i = 0; i < argTypes.size(); i++) {
+				Type argType = argTypes.get(i);
+				VarDeclaration argDeclaration = argDeclarations.get(i);
+				args += getType(argType);
+				slotOf(argDeclaration.getName().getName());
+			}
+
+		} catch (ItemNotFound ignored) {}
+
+		args += ")";
 
 		Type returnType = this.typeChecker.visit(functionDeclaration);
 		String returnTypeString = getType(returnType);
@@ -219,12 +251,18 @@ public class CodeGenerator extends Visitor<String> {
 		commands += ".method public " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnTypeString + "\n";
 
-		commands += ".limit stack 128\n";
-		commands += ".limit locals 128\n";
+		commands += 
+			"""
+			.limit stack 128
+			.limit locals 128
+			""";
 
 		for (var statement : functionDeclaration.getBody()) {
 			commands += statement.accept(this);
 		}
+
+		// commands += "return\n"; // FIXME: this is just temporary till we implement return statement
+		commands += ".end method\n\n\n"; // few new lines for readability
 
 		// return with corresponding type is handled in return statement
 		addCommand(commands);

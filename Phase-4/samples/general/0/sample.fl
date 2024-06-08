@@ -12,6 +12,7 @@ def f1()
     else
         return f2(1, "sss", true);
     end
+    f3();
     return "11";
 end
 
@@ -19,12 +20,7 @@ def f4(v)
     return v;
 end
 
-def f5()
-    return "5";
-end
-
 def main()
     f1();
-    # f4(1);
-    f5();
+    f4(1);
 end
