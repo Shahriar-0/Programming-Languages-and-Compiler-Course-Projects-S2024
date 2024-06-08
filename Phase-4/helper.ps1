@@ -33,6 +33,10 @@ function MoveFilesToSample($i) {
     Move-Item "./samples/typeCheckErrors.txt" "./samples/$i"
 }
 
+function DeleteFiles() {
+    Remove-Item "./codeGenOutput/*"
+}
+
 if ($args.Length -eq 0) {
     CompileTest
 }
@@ -54,6 +58,9 @@ else {
     }
     elseif ($args[0] -eq "-m" -or $args[0] -eq "--move") {
         MoveFilesToSample $args[1]
+    }
+    elseif (args[0] -eq "-d" -or $args[0] -eq "--delete") {
+        DeleteFiles
     }
     elseif ($args[0] -eq "-h" -or $args[0] -eq "--help") {
         Write-Host "Usage: runTests.ps1 [OPTION] [ARGUMENT]"
