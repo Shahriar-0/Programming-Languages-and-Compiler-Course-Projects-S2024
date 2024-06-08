@@ -55,6 +55,7 @@ function FixPrecedingSpaces($file) {
 
 if ($args.Length -eq 0) {
     CompileTest
+    FixPrecedingSpaces Main
 }
 else {
     if ($args[0] -eq "-t" -or $args[0] -eq "--test") {
