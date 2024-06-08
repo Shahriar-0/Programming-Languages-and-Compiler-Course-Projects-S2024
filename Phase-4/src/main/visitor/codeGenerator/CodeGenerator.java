@@ -291,7 +291,16 @@ public class CodeGenerator extends Visitor<String> {
 			}
 			args += ")";
 
-			String returnType = ""; // TODO
+			String returnType = "return"; // default return type, this shouldn't happen but just in case
+			
+			try {
+				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY + 
+					functionName.getName()
+				);
+				returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
+			} catch (ItemNotFound ignored) {}
+
 			return (
 				"invokestatic Main/" +
 				functionName.getName() +
