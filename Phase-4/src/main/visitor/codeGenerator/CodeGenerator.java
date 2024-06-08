@@ -169,7 +169,7 @@ public class CodeGenerator extends Visitor<String> {
 		new Main
 		invokespecial Main/<init>()V
 		return
-		.end method
+		.end method\n\n
 		""";
 		addCommand(mainCommands);
 	}
@@ -213,7 +213,7 @@ public class CodeGenerator extends Visitor<String> {
 		}
 
 		commands += "return\n";
-		commands += ".end method\n";
+		commands += ".end method\n\n"; // few new lines for readability
 
 		addCommand(commands);
 		return null;
@@ -259,12 +259,24 @@ public class CodeGenerator extends Visitor<String> {
 			""";
 
 		for (var statement : functionDeclaration.getBody()) {
-			commands += statement.accept(this);
+			// commands += statement.accept(this);
+			
+			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			if (temp != null) {
+				commands += temp;
+			}
 		}
 
-		commands += ".end method\n\n\n"; // few new lines for readability
+		if (returnType instanceof NoType) {
+			commands += "return\n";
+		} else if (returnType instanceof IntType || returnType instanceof BoolType) {
+			commands += "ireturn\n";
+		} else {
+			commands += "areturn\n";
+		}
 
-		// return with corresponding type is handled in return statement
+		commands += ".end method\n\n"; // few new lines for readability
+
 		addCommand(commands);
 		return null;
 	}
@@ -272,7 +284,13 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(AccessExpression accessExpression) {
 		if (accessExpression.isFunctionCall()) {
 			Identifier functionName = (Identifier) accessExpression.getAccessedExpression();
-			String args = ""; // TODO
+			
+			String args = "(";
+			for (var arg : accessExpression.getArguments()) {
+				args += arg.accept(this);
+			}
+			args += ")";
+
 			String returnType = ""; // TODO
 			return (
 				"invokestatic Main/" +
@@ -304,21 +322,6 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(PutStatement putStatement) {
 		//TODO
 		return null;
-	}
-
-	@Override
-	public String visit(ReturnStatement returnStatement) {
-		Type returnType = returnStatement.accept(typeChecker);
-		
-		String commands = "";
-		if (returnType instanceof NoType) {
-			commands += "return\n";
-		} else if (returnType instanceof IntType || returnType instanceof BoolType) {
-			commands += "ireturn\n";
-		} else {
-			commands += "areturn\n";
-		}
-		return commands;
 	}
 
 	@Override
