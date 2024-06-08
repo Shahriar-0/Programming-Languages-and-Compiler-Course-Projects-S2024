@@ -24,9 +24,7 @@ public class FunctionCraft {
 		Program program = flParser.program().flProgram;
 		TypeChecker typeChecker = new TypeChecker();
 		typeChecker.visit(program);
-		typeChecker.typeErrors.sort(
-			Comparator.comparingInt(CompileError::getLine)
-		);
+		typeChecker.typeErrors.sort(Comparator.comparingInt(CompileError::getLine));
 		FileWriter fileWriter = new FileWriter("./samples/typeCheckErrors.txt");
 		PrintWriter printWriter = new PrintWriter(fileWriter);
 		for (CompileError compileError : typeChecker.typeErrors) {
