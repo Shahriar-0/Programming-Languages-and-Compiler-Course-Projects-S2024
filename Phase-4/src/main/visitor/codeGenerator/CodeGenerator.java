@@ -28,10 +28,12 @@ import main.visitor.type.TypeChecker;
 public class CodeGenerator extends Visitor<String> {
 
 	private final String outputPath;
-	private FileWriter mainFile;
 	private final TypeChecker typeChecker;
 	private final Set<String> visited;
+
+	private FileWriter mainFile;
 	private FunctionItem curFunction;
+
 	private final HashMap<String, Integer> slots = new HashMap<>();
 	private int curLabel = 0;
 
@@ -60,19 +62,19 @@ public class CodeGenerator extends Visitor<String> {
 		String type = "";
 		switch (element) {
 			case StringType stringType -> type += "Ljava/lang/String;";
-			case IntType intType -> type += "Ljava/lang/Integer;";
-			case FptrType fptrType -> type += "LFptr;";
-			case ListType listType -> type += "LList;";
-			case BoolType boolType -> type += "Ljava/lang/Boolean;";
-			case null, default -> {}
+			case IntType intType       -> type += "Ljava/lang/Integer;";
+			case FptrType fptrType     -> type += "LFptr;";
+			case ListType listType     -> type += "LList;";
+			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
+			case null, default 		   -> {}
 		}
 		return type;
 	}
 
 	private void prepareOutputFolder() {
-		String jasminPath = "utilities/jarFiles/jasmin.jar";
-		String listClassPath = "utilities/codeGenerationUtilityClasses/List.j";
-		String fptrClassPath = "utilities/codeGenerationUtilityClasses/Fptr.j";
+		final String jasminPath    = "utilities/jarFiles/jasmin.jar";
+		final String listClassPath = "utilities/codeGenerationUtilityClasses/List.j";
+		final String fptrClassPath = "utilities/codeGenerationUtilityClasses/Fptr.j";
 		try {
 			File directory = new File(this.outputPath);
 			File[] files = directory.listFiles();
@@ -81,7 +83,7 @@ public class CodeGenerator extends Visitor<String> {
 		} catch (SecurityException e) {
 			// ignore
 		}
-		copyFile(jasminPath, this.outputPath + "jasmin.jar");
+		copyFile(jasminPath,    this.outputPath + "jasmin.jar");
 		copyFile(listClassPath, this.outputPath + "List.j");
 		copyFile(fptrClassPath, this.outputPath + "Fptr.j");
 
@@ -116,12 +118,18 @@ public class CodeGenerator extends Visitor<String> {
 	private void addCommand(String command) {
 		try {
 			command = String.join("\n\t\t", command.split("\n"));
-			if (command.startsWith("Label_")) mainFile.write(
-				"\t" + command + "\n"
-			); else if (command.startsWith(".")) mainFile.write(
-				command + "\n"
-			); else mainFile.write("\t\t" + command + "\n");
+
+			if (command.startsWith("Label_")) {
+				mainFile.write("\t" + command + "\n"); 
+			} 
+			else if (command.startsWith(".")) {
+				mainFile.write(command + "\n"); 
+			}
+			else {
+				mainFile.write("\t\t" + command + "\n");
+			}
 			mainFile.flush();
+
 		} catch (IOException e) {
 			// ignore
 		}
@@ -153,10 +161,7 @@ public class CodeGenerator extends Visitor<String> {
 
 		for (String funcName : this.visited) {
 			try {
-				this.curFunction =
-					(FunctionItem) SymbolTable.root.getItem(
-						FunctionItem.START_KEY + funcName
-					);
+				this.curFunction =(FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + funcName);
 				this.curFunction.getFunctionDeclaration().accept(this);
 			} catch (ItemNotFound ignored) {}
 		}
@@ -172,8 +177,7 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		String args = ""; // TODO and add to the slots
 		String returnType = ""; // TODO
-		commands +=
-			".method public " + functionDeclaration.getFunctionName().getName();
+		commands += ".method public " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnType + "\n";
 		// TODO headers, body and return with corresponding type
 
@@ -191,8 +195,9 @@ public class CodeGenerator extends Visitor<String> {
 		commands += ".limit locals 128\n";
 		commands += "aload_0\n";
 		commands += "invokespecial java/lang/Object/<init>()V\n";
-		for (var statement : mainDeclaration.getBody()) commands +=
-			statement.accept(this);
+		for (var statement : mainDeclaration.getBody()) {
+			commands += statement.accept(this);
+		}
 		commands += "return\n";
 		commands += ".end method\n";
 
