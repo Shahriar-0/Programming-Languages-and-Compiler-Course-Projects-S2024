@@ -4,5 +4,21 @@
 		"utilities\\antlr-4.13.1-complete.jar",
 		"utilities\\jarFiles\\jasmin.jar",
 		"utilities\\jarFiles\\classFileAnalyzer.jar"
+	],
+	"cSpell.words": [
+		"aload",
+		"areturn",
+		"astore",
+		"checkcast",
+		"getfield",
+		"ifeq",
+		"iload",
+		"instanceof",
+		"invokeinterface",
+		"invokespecial",
+		"invokestatic",
+		"invokevirtual",
+		"Ljava",
+		"putfield"
 	]
 }
