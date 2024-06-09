@@ -398,6 +398,7 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(IfStatement ifStatement) {
+		// not sure this is right at all
 		String commands = "";
 		String elseLabel = getFreshLabel();
 		String endLabel = getFreshLabel();
@@ -435,12 +436,18 @@ public class CodeGenerator extends Visitor<String> {
 		}
 
 		commands += endLabel + ":\n";
-		return commands;
+		addCommand(commands);
+		return null;
 	}
 
 	@Override
 	public String visit(PutStatement putStatement) {
-		//TODO
+		String commands = "";
+		commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
+		commands += putStatement.getExpression().accept(this);
+		commands += "invokevirtual java/io/PrintStream/println(" + 
+					getTypeSignature(putStatement.getExpression().accept(typeChecker)) + ")V\n";
+		addCommand(commands);
 		return null;
 	}
 
