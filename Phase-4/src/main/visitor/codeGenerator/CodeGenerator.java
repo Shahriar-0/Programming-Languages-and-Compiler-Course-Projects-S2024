@@ -526,19 +526,41 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(LoopDoStatement loopDoStatement) {
-		//TODO
+		String commands = "";
+		String startLabel = getFreshLabel();
+		String endLabel = getFreshLabel();
+		breakLabels.push(endLabel);
+		nextLabels.push(startLabel);
+
+		commands += startLabel + ":\n";
+		for (var statement : loopDoStatement.getLoopBodyStmts()) {
+			// commands += statement.accept(this);
+			
+			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			if (temp != null) {
+				commands += temp;
+			}
+		}
+
+		commands += endLabel + ":\n";
+		commands += "goto " + startLabel + "\n";
+		breakLabels.pop();
+		nextLabels.pop();
+		addCommand(commands);
 		return null;
 	}
 
 	@Override
 	public String visit(BreakStatement breakStatement) {
-		//TODO
+		String commands = "goto " + breakLabels.peek() + "\n";
+		addCommand(commands);
 		return null;
 	}
 
 	@Override
 	public String visit(NextStatement nextStatement) {
-		//TODO
+		String commands = "goto " + nextLabels.peek() + "\n";
+		addCommand(commands);
 		return null;
 	}
 
