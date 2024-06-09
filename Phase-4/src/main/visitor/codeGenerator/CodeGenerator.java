@@ -440,8 +440,7 @@ public class CodeGenerator extends Visitor<String> {
 		}
 
 		commands += endLabel + ":\n";
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
@@ -451,8 +450,7 @@ public class CodeGenerator extends Visitor<String> {
 		commands += putStatement.getExpression().accept(this);
 		commands += "invokevirtual java/io/PrintStream/println(" + 
 					getTypeSignature(putStatement.getExpression().accept(typeChecker)) + ")V\n";
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
@@ -546,22 +544,21 @@ public class CodeGenerator extends Visitor<String> {
 		commands += "goto " + startLabel + "\n";
 		breakLabels.pop();
 		nextLabels.pop();
-		addCommand(commands);
-		return null;
+		
+
+		return commands;
 	}
 
 	@Override
 	public String visit(BreakStatement breakStatement) {
 		String commands = "goto " + breakLabels.peek() + "\n";
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
 	public String visit(NextStatement nextStatement) {
 		String commands = "goto " + nextLabels.peek() + "\n";
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
@@ -576,8 +573,7 @@ public class CodeGenerator extends Visitor<String> {
 			commands += "invokevirtual List/size()I\n";
 		} 
 
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
@@ -586,8 +582,7 @@ public class CodeGenerator extends Visitor<String> {
 		commands += chopStatement.getChopExpression().accept(this);
 		commands += "iconst_1\n";
 		commands += "invokevirtual java/lang/String/substring(I)Ljava/lang/String;\n";
-		addCommand(commands);
-		return null;
+		return commands;
 	}
 
 	@Override
@@ -615,7 +610,7 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		commands += "ldc " + intValue.getIntVal();
 		return commands;
-		}
+	}
 		
 	@Override
 	public String visit(BoolValue boolValue) {
