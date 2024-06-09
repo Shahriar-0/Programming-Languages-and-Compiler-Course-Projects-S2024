@@ -566,13 +566,27 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(LenStatement lenStatement) {
-		//TODO
+		Type lenType = lenStatement.getExpression().accept(typeChecker);
+		String commands = "";
+		commands += lenStatement.getExpression().accept(this);
+		
+		if (lenType instanceof StringType) { 
+			commands += "invokevirtual java/lang/String/length()I\n";
+		} else if (lenType instanceof ListType) { // not sure if this is right, i still dunno how to handle lists
+			commands += "invokevirtual List/size()I\n";
+		} 
+
+		addCommand(commands);
 		return null;
 	}
 
 	@Override
 	public String visit(ChopStatement chopStatement) {
-		//TODO
+		String commands = "";
+		commands += chopStatement.getChopExpression().accept(this);
+		commands += "iconst_1\n";
+		commands += "invokevirtual java/lang/String/substring(I)Ljava/lang/String;\n";
+		addCommand(commands);
 		return null;
 	}
 
