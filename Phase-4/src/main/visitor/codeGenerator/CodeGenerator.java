@@ -2,6 +2,7 @@ package main.visitor.codeGenerator;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -10,6 +11,7 @@ import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
 import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
+import main.ast.nodes.expression.operators.BinaryOperator;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.expression.value.primitive.BoolValue;
@@ -42,6 +44,8 @@ public class CodeGenerator extends Visitor<String> {
 
 	private final HashMap<String, Integer> slots = new HashMap<>();
 	private int curLabel = 0;
+	private Stack<String> nextLabels = new Stack<>();
+	private Stack<String> breakLabels = new Stack<>();
 
 	public CodeGenerator(TypeChecker typeChecker) {
 		this.typeChecker = typeChecker;
@@ -467,20 +471,57 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(BinaryExpression binaryExpression) {
-		//TODO
-		return null;
+		String commands = "";
+		commands += binaryExpression.getFirstOperand().accept(this);
+		commands += binaryExpression.getSecondOperand().accept(this);
+		BinaryOperator operator = binaryExpression.getOperator();
+		switch (operator) {
+			// we only have int and bool types so we don't need to check
+			case PLUS		        -> commands += "iadd\n";
+			case MINUS		        -> commands += "isub\n";
+			case MULT		        -> commands += "imul\n";
+			case DIVIDE		        -> commands += "idiv\n";
+			case EQUAL		        -> commands += "if_icmpeq ";
+			case NOT_EQUAL	        -> commands += "if_icmpne ";
+			case LESS_THAN	        -> commands += "if_icmplt ";
+			case LESS_EQUAL_THAN    -> commands += "if_icmple ";
+			case GREATER_THAN       -> commands += "if_icmpgt ";
+			case GREATER_EQUAL_THAN -> commands += "if_icmpge ";
+			case null, default      -> {}
+		}
+		return commands;
 	}
 
 	@Override
 	public String visit(UnaryExpression unaryExpression) {
-		//TODO
-		return null;
+		String commands = "";
+		commands += unaryExpression.getExpression().accept(this);
+		switch (unaryExpression.getOperator()) {
+			case MINUS         -> commands += "ineg\n";
+			case NOT           -> commands += "iconst_1\nixor\n";
+			case null, default -> {}
+		}
+		return commands;
 	}
 
 	@Override
 	public String visit(Identifier identifier) {
-		//TODO
-		return null;
+		String varName = identifier.getName();
+		int slot = slotOf(varName);
+		Type varType = identifier.accept(typeChecker);
+		String commands = "";
+		if (varType instanceof IntType || varType instanceof BoolType) {
+			commands += "iload " + slot + "\n";
+		} else if (varType instanceof StringType) {
+			commands += "aload " + slot + "\n";
+		} else if (varType instanceof FptrType) {
+			// TODO: dunno what to do with this yet
+		} else if (varType instanceof ListType) {
+			// TODO: dunno what to do with this yet
+		} else {
+			commands += "aload " + slot + "\n";
+		}
+		return commands;
 	}
 
 	@Override
