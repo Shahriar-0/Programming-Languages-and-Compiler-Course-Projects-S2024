@@ -325,6 +325,8 @@ public class CodeGenerator extends Visitor<String> {
 					returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
 				} catch (ItemNotFound ignored) {}
 
+				// TODO: i think we can pop here if it's not an rvalue
+
 				return (
 					"invokestatic Main/" +
 					functionName +
@@ -373,6 +375,7 @@ public class CodeGenerator extends Visitor<String> {
 				} else {
 					commands += "aload " + slot + "\n";
 				}
+
 				commands += assignExpression.accept(this);
 				switch (assignOperator) {
 					case PLUS_ASSIGN   -> commands += "iadd\n";
@@ -381,6 +384,12 @@ public class CodeGenerator extends Visitor<String> {
 					case DIVIDE_ASSIGN -> commands += "idiv\n";
 					case MOD_ASSIGN    -> commands += "irem\n";
 					case null, default -> {}
+				}
+				
+				if (varType instanceof IntType || varType instanceof BoolType) {
+					commands += "istore " + slot + "\n";
+				} else {
+					commands += "astore " + slot + "\n";
 				}
 			}
 			return commands;
