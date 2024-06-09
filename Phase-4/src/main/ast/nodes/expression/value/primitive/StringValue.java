@@ -15,6 +15,10 @@ public class StringValue extends Value {
 		return str;
 	}
 
+	public String getStrWithQuotes() {
+		return "\"" + str + "\"";
+	}
+
 	public void setStr(String str) {
 		this.str = str;
 	}

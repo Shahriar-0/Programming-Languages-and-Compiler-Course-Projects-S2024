@@ -15,6 +15,10 @@ public class BoolValue extends Value {
 		return bool;
 	}
 
+	public int getIntValue() {
+		return bool ? 1 : 0;
+	}
+
 	public void setBool(Boolean bool) {
 		this.bool = bool;
 	}

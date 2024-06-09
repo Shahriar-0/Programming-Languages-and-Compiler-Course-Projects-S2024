@@ -604,25 +604,32 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ListValue listValue) {
-		//TODO
+		// Fuck you
 		return null;
 	}
 
 	@Override
 	public String visit(IntValue intValue) {
 		//TODO, use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
-		return null;
-	}
-
+		// why? why should we store it with class?
+		String commands = "";
+		commands += "ldc " + intValue.getIntVal();
+		return commands;
+		}
+		
 	@Override
 	public String visit(BoolValue boolValue) {
 		//TODO, use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
-		return null;
+		String commands = "";
+		commands += "ldc " + boolValue.getIntValue();
+		return commands;
 	}
 
 	@Override
 	public String visit(StringValue stringValue) {
 		//TODO
-		return null;
+		String commands = "";
+		commands += stringValue.getStrWithQuotes();
+		return commands;
 	}
 }
