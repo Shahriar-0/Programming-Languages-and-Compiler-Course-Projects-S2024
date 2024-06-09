@@ -58,6 +58,12 @@ public class CodeGenerator extends Visitor<String> {
 		return slots.get(var);
 	}
 
+	private String getFreshName() {
+		String fresh = "Var_" + slots.size();
+		slotOf(fresh);
+		return fresh;
+	}
+
 	private String getFreshLabel() {
 		String fresh = "Label_" + curLabel;
 		curLabel++;
@@ -172,6 +178,11 @@ public class CodeGenerator extends Visitor<String> {
 		.end method\n\n
 		""";
 		addCommand(mainCommands);
+	}
+
+	private ArrayList<Object> convertLastNArgumentsToObjects(int n) {
+		// I dunno use store and load to implement it maybe?
+		return null;
 	}
 
 	@Override
@@ -290,49 +301,90 @@ public class CodeGenerator extends Visitor<String> {
 		Type accessedType = accessExpression.accept(typeChecker);
 
 		if (accessExpression.isFunctionCall()) {
-			String functionName;
-			if (accessedType instanceof FptrType fptrType) {
-				functionName = fptrType.getFunctionName();
-			} else { // normal function 
+			if (accessedType instanceof FptrType) { // function pointer
+				FunctionPointer functionPointer = (FunctionPointer) accessExpression.getAccessedExpression();
+				// TODO: dunno what to do with this yet
+			} 
+			
+			else { // normal function 
 				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
-				functionName = accessedIdentifier.getName();
-			}
-			
-			String args = "(";
-			for (var arg : accessExpression.getArguments()) {
-				args += arg.accept(this);
-			}
-			args += ")";
+				String functionName = accessedIdentifier.getName();
+				String args = "(";
+				for (var arg : accessExpression.getArguments()) {
+					args += arg.accept(this);
+				}
+				args += ")";
 
-			String returnType = "return"; // default return type, this shouldn't happen but just in case
-			
-			try {
-				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
-					FunctionItem.START_KEY + 
-					functionName
+				String returnType = "return"; // default return type, this shouldn't happen but just in case
+				
+				try {
+					FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+						FunctionItem.START_KEY + 
+						functionName
+					);
+					returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
+				} catch (ItemNotFound ignored) {}
+
+				return (
+					"invokestatic Main/" +
+					functionName +
+					args +
+					returnType +
+					"\n"
 				);
-				returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
-			} catch (ItemNotFound ignored) {}
-
-			return (
-				"invokestatic Main/" +
-				functionName +
-				args +
-				returnType +
-				"\n"
-			);
-
-		} else { // access to a string
+			}
 			
+
+		} else { // access to a list
+			// TODO: dunno what to do with this yet
 		}
-		//TODO
 		return null;
 	}
 
 	@Override
 	public String visit(AssignStatement assignStatement) {
-		//TODO
-		return null;
+		if (assignStatement.isAccessList()) {
+			// TODO: dunno what to do with this yet
+			// NOTE: be careful to use iastore and iaload for arrays
+			return null;
+		} 
+		else {
+			Identifier assignedId = assignStatement.getAssignedId();
+			Expression assignExpression = assignStatement.getAssignExpression();
+			AssignOperator assignOperator = assignStatement.getAssignOperator();
+
+			String varName = assignedId.getName();
+			int slot = slotOf(varName);
+			Type varType = assignStatement.getAssignedId().accept(typeChecker);
+			
+			
+			String commands = "";
+			if (assignOperator == AssignOperator.ASSIGN) {
+				commands += assignExpression.accept(this);
+				if (varType instanceof IntType || varType instanceof BoolType) {
+					commands += "istore " + slot + "\n";
+				} else {
+					commands += "astore " + slot + "\n";
+				}
+			}
+			else {
+				if (varType instanceof IntType || varType instanceof BoolType) {
+					commands += "iload " + slot + "\n";
+				} else {
+					commands += "aload " + slot + "\n";
+				}
+				commands += assignExpression.accept(this);
+				switch (assignOperator) {
+					case PLUS_ASSIGN   -> commands += "iadd\n";
+					case MINUS_ASSIGN  -> commands += "isub\n";
+					case MULT_ASSIGN   -> commands += "imul\n";
+					case DIVIDE_ASSIGN -> commands += "idiv\n";
+					case MOD_ASSIGN    -> commands += "irem\n";
+					case null, default -> {}
+				}
+			}
+			return commands;
+		}
 	}
 
 	@Override
