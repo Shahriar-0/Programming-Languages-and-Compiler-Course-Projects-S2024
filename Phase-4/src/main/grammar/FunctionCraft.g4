@@ -140,11 +140,11 @@ condition
 	returns[ArrayList<Expression> conditionRet]
 	: {
         $conditionRet = new ArrayList<Expression>();
-    } (
-		LPAR e = expression {$conditionRet.add($e.expRet);} RPAR (
-			(AND | OR) (LPAR)? c = condition {$conditionRet.addAll($c.conditionRet);} (RPAR)?
+    } 	
+		(
+			LPAR e = expression {$conditionRet.add($e.expRet);} RPAR 
+			((AND | OR) (LPAR)? c = condition {$conditionRet.addAll($c.conditionRet);} (RPAR)?)*
 		)*
-	)*
 	;
 
 putsStatement

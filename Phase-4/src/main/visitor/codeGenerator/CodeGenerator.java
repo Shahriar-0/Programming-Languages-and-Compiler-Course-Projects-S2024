@@ -398,8 +398,44 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(IfStatement ifStatement) {
-		//TODO
-		return null;
+		String commands = "";
+		String elseLabel = getFreshLabel();
+		String endLabel = getFreshLabel();
+
+		for (var condition : ifStatement.getConditions()) { 
+			// FIXME: there is no where that they store && or || in the AST :)))))))))))))))))
+			commands += condition.accept(this);
+			commands += "ifeq " + elseLabel + "\n";
+		}
+
+		commands += "goto " + endLabel + "\n";
+		commands += elseLabel + ":\n";
+
+
+
+		for (var statement : ifStatement.getThenBody()) {
+			// commands += statement.accept(this);
+			
+			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			if (temp != null) {
+				commands += temp;
+			}
+		}
+
+		commands += "goto " + endLabel + "\n";
+		commands += elseLabel + ":\n";
+
+		for (var statement : ifStatement.getElseBody()) {
+			// commands += statement.accept(this);
+			
+			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			if (temp != null) {
+				commands += temp;
+			}
+		}
+
+		commands += endLabel + ":\n";
+		return commands;
 	}
 
 	@Override
