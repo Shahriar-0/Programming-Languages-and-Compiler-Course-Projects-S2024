@@ -25,6 +25,8 @@ end
 
 def main()
     f1();
+    f2 = method(:f4);
+    # f2(1);
     # f4(1);
     f5();
 end

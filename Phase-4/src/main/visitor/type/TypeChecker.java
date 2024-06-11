@@ -46,6 +46,15 @@ public class TypeChecker extends Visitor<Type> {
 
 	@Override
 	public Type visit(FunctionDeclaration functionDeclaration) {
+		if (visited.contains(functionDeclaration.getFunctionName().getName())) {
+			try {
+				return ((FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY +
+					functionDeclaration.getFunctionName().getName())
+					).getReturnType();
+			} catch (ItemNotFound e) {}
+		}
+		
 		SymbolTable.push(new SymbolTable());
 		returnTypesStack.push(new HashSet<>());
 		visited.add(functionDeclaration.getFunctionName().getName());
@@ -82,6 +91,12 @@ public class TypeChecker extends Visitor<Type> {
 			return new NoType();
 		} else if (returnStmtsTypes.size() == 1) {
 			SymbolTable.pop();
+			try {
+				((FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY +
+					functionDeclaration.getFunctionName().getName())
+				).setReturnType(returnStmtsTypes.iterator().next());
+			} catch (ItemNotFound e) {}
 			return returnStmtsTypes.iterator().next();
 		} else {
 			SymbolTable.pop();

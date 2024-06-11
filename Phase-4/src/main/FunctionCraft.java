@@ -1,5 +1,6 @@
 package main;
 
+import java.io.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,5 +36,34 @@ public class FunctionCraft {
 
 		CodeGenerator codeGenerator = new CodeGenerator(typeChecker);
 		codeGenerator.visit(program);
+
+		runJasminCode();
+	}
+
+	private static void runJasminCode() {
+		try {
+			System.out.println("---------------------------Compilation Successful---------------------------");
+			File dir = new File("./codeGenOutput");
+			Process process = Runtime
+				.getRuntime()
+				.exec("java -jar jasmin.jar *.j", null, dir);
+			process = Runtime.getRuntime().exec("java Main", null, dir);
+			printResults(process.getInputStream());
+			printResults(process.getErrorStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void printResults(InputStream stream) {
+		BufferedReader reader = new BufferedReader(
+			new InputStreamReader(stream)
+		);
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) System.out.println(line);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

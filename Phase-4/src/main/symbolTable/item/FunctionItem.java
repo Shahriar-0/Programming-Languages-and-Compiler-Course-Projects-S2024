@@ -11,6 +11,15 @@ public class FunctionItem extends SymbolTableItem {
 	private SymbolTable functionSymbolTable;
 	private FunctionDeclaration functionDeclaration;
 	private ArrayList<Type> argumentTypes = new ArrayList<>();
+	private Type returnType;
+
+	public Type getReturnType() {
+		return returnType;
+	}
+
+	public void setReturnType(Type returnType) {
+		this.returnType = returnType;
+	}
 
 	public ArrayList<Type> getArgumentTypes() {
 		return argumentTypes;
