@@ -317,7 +317,7 @@ public class CodeGenerator extends Visitor<String> {
 				for (var arg : accessExpression.getArguments()) {
 					Type argType = arg.accept(typeChecker);
 					commands += arg.accept(this);
-					args += getTypeSignature(argType);
+					args += getType(argType);
 				}
 				args += ")";
 
@@ -444,7 +444,7 @@ public class CodeGenerator extends Visitor<String> {
 		commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
 		commands += putStatement.getExpression().accept(this);
 		commands += "invokevirtual java/io/PrintStream/println(" + 
-					getTypeSignature(putStatement.getExpression().accept(typeChecker)) + ")V\n";
+					getType(putStatement.getExpression().accept(typeChecker)) + ")V\n";
 		return commands;
 	}
 

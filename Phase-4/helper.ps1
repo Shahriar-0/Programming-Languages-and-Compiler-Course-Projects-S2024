@@ -6,6 +6,7 @@ function CompileTest() {
 
 function ConvertJasminToClass() {
     java -jar "./utilities/jarFiles/jasmin.jar" "./codeGenOutput/*.j" > $null
+    Remove-Item "./codeGenOutput/*.class" -Force
     Move-Item "./*.class" "./codeGenOutput"
 }
 

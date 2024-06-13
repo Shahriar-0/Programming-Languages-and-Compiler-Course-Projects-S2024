@@ -11,6 +11,8 @@
 		"astore",
 		"checkcast",
 		"getfield",
+		"getstatic",
+		"iadd",
 		"ifeq",
 		"iload",
 		"instanceof",
