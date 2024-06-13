@@ -223,9 +223,9 @@ public class CodeGenerator extends Visitor<String> {
 			invokespecial java/lang/Object/<init>()V
 			""";
 
+		slotOf("this"); // save slot 0 for this
+
 		for (var statement : mainDeclaration.getBody()) {
-			// commands += statement.accept(this);
-			
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
@@ -270,7 +270,7 @@ public class CodeGenerator extends Visitor<String> {
 
 		String returnTypeString = getType(returnType);
 
-		commands += ".method public " + functionDeclaration.getFunctionName().getName();
+		commands += ".method public static " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnTypeString + "\n";
 
 		commands += 
@@ -280,8 +280,6 @@ public class CodeGenerator extends Visitor<String> {
 			""";
 
 		for (var statement : functionDeclaration.getBody()) {
-			// commands += statement.accept(this);
-			
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
