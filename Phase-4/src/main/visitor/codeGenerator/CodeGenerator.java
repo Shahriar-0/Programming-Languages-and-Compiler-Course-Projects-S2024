@@ -245,12 +245,14 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 
 		String args = "(";
+		Type returnType = new NoType();
 
 		try {
 			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 				FunctionItem.START_KEY + 
 				functionDeclaration.getFunctionName().getName()
 			);
+			returnType = functionItem.getReturnType();
 
 			ArrayList<Type> argTypes = functionItem.getArgumentTypes();
 			ArrayList<VarDeclaration> argDeclarations = functionDeclaration.getArgs();
@@ -266,7 +268,6 @@ public class CodeGenerator extends Visitor<String> {
 
 		args += ")";
 
-		Type returnType = functionDeclaration.accept(typeChecker);
 		String returnTypeString = getType(returnType);
 
 		commands += ".method public " + functionDeclaration.getFunctionName().getName();
@@ -497,6 +498,8 @@ public class CodeGenerator extends Visitor<String> {
 		switch (unaryExpression.getOperator()) {
 			case MINUS         -> commands += "ineg\n";
 			case NOT           -> commands += "iconst_1\nixor\n";
+			case INC 		   -> commands += "iconst_1\niadd\n";
+			case DEC 		   -> commands += "iconst_1\nisub\n";
 			case null, default -> {}
 		}
 		return commands;
