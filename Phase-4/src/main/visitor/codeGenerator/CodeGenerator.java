@@ -226,7 +226,7 @@ public class CodeGenerator extends Visitor<String> {
 		for (var statement : mainDeclaration.getBody()) {
 			// commands += statement.accept(this);
 			
-			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
@@ -282,7 +282,7 @@ public class CodeGenerator extends Visitor<String> {
 		for (var statement : functionDeclaration.getBody()) {
 			// commands += statement.accept(this);
 			
-			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
@@ -405,42 +405,34 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(IfStatement ifStatement) {
 		// not sure this is right at all
 		String commands = "";
+		String thenLabel = getFreshLabel();
 		String elseLabel = getFreshLabel();
 		String endLabel = getFreshLabel();
 
 		for (var condition : ifStatement.getConditions()) { 
-			// FIXME: there is no where that they store && or || in the AST :)))))))))))))))))
-			commands += condition.accept(this);
-			commands += "ifeq " + elseLabel + "\n";
+			commands += condition.accept(this) + " " + thenLabel + "\n";
 		}
-
-		commands += "goto " + endLabel + "\n";
-		commands += elseLabel + ":\n";
-
-
-
-		for (var statement : ifStatement.getThenBody()) {
-			// commands += statement.accept(this);
-			
-			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
-			if (temp != null) {
-				commands += temp;
-			}
-		}
-
-		commands += "goto " + endLabel + "\n";
-		commands += elseLabel + ":\n";
 
 		for (var statement : ifStatement.getElseBody()) {
-			// commands += statement.accept(this);
-			
-			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
 		}
 
+		commands += "goto " + endLabel + "\n";
+		commands += thenLabel + ":\n";
+
+		for (var statement : ifStatement.getThenBody()) {
+			String temp = statement.accept(this);
+			if (temp != null) {
+				commands += temp;
+			}
+		}
+
+		commands += "goto " + endLabel + "\n";
 		commands += endLabel + ":\n";
+
 		return commands;
 	}
 
@@ -537,7 +529,7 @@ public class CodeGenerator extends Visitor<String> {
 		for (var statement : loopDoStatement.getLoopBodyStmts()) {
 			// commands += statement.accept(this);
 			
-			String temp = statement.accept(this); // FIXME: this is a temporary fix till we implement the rest of the methods
+			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
@@ -611,7 +603,7 @@ public class CodeGenerator extends Visitor<String> {
 		//TODO, use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
 		// why? why should we store it with class?
 		String commands = "";
-		commands += "ldc " + intValue.getIntVal();
+		commands += "ldc " + intValue.getIntVal() + "\n";
 		return commands;
 	}
 		
@@ -619,7 +611,7 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(BoolValue boolValue) {
 		//TODO, use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
 		String commands = "";
-		commands += "ldc " + boolValue.getIntValue();
+		commands += "ldc " + boolValue.getIntValue() + "\n";
 		return commands;
 	}
 
@@ -627,7 +619,7 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(StringValue stringValue) {
 		//TODO
 		String commands = "";
-		commands += stringValue.getStrWithQuotes();
+		commands += stringValue.getStrWithQuotes() + "\n";
 		return commands;
 	}
 }
