@@ -88,7 +88,7 @@ else {
         Write-Host "  -t, --test        Compile the test file"
         Write-Host "  -c, --convert     Convert Jasmin to class files"
         Write-Host "  -b, --bytecode    Convert class file to Java bytecode"
-        Write-Host "  -j, --jasmin     Convert class file to Jasmin"
+        Write-Host "  -j, --jasmin      Convert class file to Jasmin"
         Write-Host "  -r, --run         Run the compiled code"
         Write-Host "  -m, --move        Move files to samples directory"
         Write-Host "  -d, --delete      Delete files in codeGenOutput directory"

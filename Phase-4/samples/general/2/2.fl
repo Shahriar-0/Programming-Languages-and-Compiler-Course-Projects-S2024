@@ -6,7 +6,7 @@ def calcPow(a, b)
             break;
         end
         sum = sum * a;
-        i++;
+        ++i;
     end
     return sum;
 end
