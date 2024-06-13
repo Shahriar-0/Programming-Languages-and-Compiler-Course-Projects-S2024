@@ -47,6 +47,9 @@ function FixPrecedingSpaces($file) {
         elseif ($_ -match "^\s*\.") {
             $_ -replace "^\s+", ""
         }
+        elseif ($_ -match "^\s*Label") {
+            $_ -replace "^\s+", "`t"
+        }
         else {
             $_
         }

@@ -314,9 +314,12 @@ public class CodeGenerator extends Visitor<String> {
 			else { // normal function 
 				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 				String functionName = accessedIdentifier.getName();
+				String commands = "";
 				String args = "(";
 				for (var arg : accessExpression.getArguments()) {
-					args += arg.accept(this);
+					Type argType = arg.accept(typeChecker);
+					commands += arg.accept(this);
+					args += getTypeSignature(argType);
 				}
 				args += ")";
 
@@ -333,6 +336,7 @@ public class CodeGenerator extends Visitor<String> {
 				// TODO: i think we can pop here if it's not an rvalue
 
 				return (
+					commands +
 					"invokestatic Main/" +
 					functionName +
 					args +
