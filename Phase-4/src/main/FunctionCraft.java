@@ -37,6 +37,8 @@ public class FunctionCraft {
 		CodeGenerator codeGenerator = new CodeGenerator(typeChecker);
 		codeGenerator.visit(program);
 
+		codeGenerator.cleanMainJasminFile();
+
 		runJasminCode();
 	}
 
@@ -56,9 +58,7 @@ public class FunctionCraft {
 	}
 
 	private static void printResults(InputStream stream) {
-		BufferedReader reader = new BufferedReader(
-			new InputStreamReader(stream)
-		);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		String line;
 		try {
 			while ((line = reader.readLine()) != null) System.out.println(line);

@@ -1,10 +1,9 @@
 package main.visitor.codeGenerator;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Stack;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.*;
+import java.nio.file.*;
 import java.util.logging.Logger;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
@@ -100,6 +99,32 @@ public class CodeGenerator extends Visitor<String> {
 		return type;
 	}
 
+	public void cleanMainJasminFile() {
+		log.info("Cleaning up Main.j file for readability");
+		String fileName = "./codeGenOutput/Main.j";
+        Path filePath = Paths.get(fileName);
+        try {
+            List<String> content = Files.readAllLines(filePath);
+            List<String> newContent = new ArrayList<>();
+            for (String line : content) {
+				log.info("Cleaning line: " + line);
+				if (Pattern.compile("^\\s*\\.method").matcher(line).find()) {
+                    newContent.add("\n\n" + line.replaceAll("^\\s+", ""));
+                } else if (Pattern.compile("^\\s*\\.").matcher(line).find()) {
+                    newContent.add(line.replaceAll("^\\s+", ""));
+                } else if (Pattern.compile("^\\s*Label").matcher(line).find()) {
+                    newContent.add(line.replaceAll("^\\s+", "\t"));
+                } else {
+                    newContent.add(line);
+                }
+				log.info("Cleaned line: " + newContent.get(newContent.size() - 1));
+            }
+            Files.write(filePath, newContent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+
 	private void prepareOutputFolder() {
 		final String jasminPath    = "utilities/jarFiles/jasmin.jar";
 		final String listClassPath = "utilities/codeGenerationUtilityClasses/List.j";
@@ -115,7 +140,7 @@ public class CodeGenerator extends Visitor<String> {
 			} 
 			directory.mkdir();
 		} catch (SecurityException e) {
-			// ignore
+			e.printStackTrace();
 		}
 
 		copyFile(jasminPath,    this.outputPath + "jasmin.jar");
@@ -128,7 +153,7 @@ public class CodeGenerator extends Visitor<String> {
 			file.createNewFile();
 			mainFile = new FileWriter(path);
 		} catch (IOException e) {
-			// ignore
+			e.printStackTrace();
 		}
 	}
 
@@ -146,7 +171,7 @@ public class CodeGenerator extends Visitor<String> {
 			readingFileStream.close();
 			writingFileStream.close();
 		} catch (IOException e) {
-			// ignore
+			e.printStackTrace();
 		}
 	}
 
@@ -467,6 +492,7 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		commands += binaryExpression.getFirstOperand().accept(this);
 		commands += binaryExpression.getSecondOperand().accept(this);
+		// TODO: convert primitive types to objects
 		BinaryOperator operator = binaryExpression.getOperator();
 		switch (operator) {
 			// we only have int and bool types so we don't need to check
