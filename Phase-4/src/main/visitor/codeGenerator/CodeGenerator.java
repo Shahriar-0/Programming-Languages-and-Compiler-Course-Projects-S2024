@@ -430,11 +430,16 @@ public class CodeGenerator extends Visitor<String> {
 		// not sure this is right at all
 		String commands = "";
 		String thenLabel = getFreshLabel();
-		String elseLabel = getFreshLabel();
 		String endLabel = getFreshLabel();
 
 		for (var condition : ifStatement.getConditions()) { 
-			commands += condition.accept(this) + " " + thenLabel + "\n";
+			commands += condition.accept(this);
+
+			if (condition instanceof BinaryExpression) {
+				commands += thenLabel + "\n"; // this is for when we have sth like if_cmpne or if_cmpeq
+			} else {
+				commands += "ifne " + thenLabel + "\n"; 
+			}
 		}
 
 		for (var statement : ifStatement.getElseBody()) {
@@ -544,26 +549,26 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(LoopDoStatement loopDoStatement) {
 		String commands = "";
+		
 		String startLabel = getFreshLabel();
 		String endLabel = getFreshLabel();
+
 		breakLabels.push(endLabel);
 		nextLabels.push(startLabel);
 
 		commands += startLabel + ":\n";
 		for (var statement : loopDoStatement.getLoopBodyStmts()) {
-			// commands += statement.accept(this);
-			
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
 		}
-
-		commands += endLabel + ":\n";
 		commands += "goto " + startLabel + "\n";
+		
 		breakLabels.pop();
 		nextLabels.pop();
-		
+
+		commands += endLabel + ":\n";
 
 		return commands;
 	}
