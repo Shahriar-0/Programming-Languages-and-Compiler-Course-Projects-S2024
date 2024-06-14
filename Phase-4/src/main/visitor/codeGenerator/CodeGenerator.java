@@ -427,7 +427,6 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(IfStatement ifStatement) {
-		// not sure this is right at all
 		String commands = "";
 		String thenLabel = getFreshLabel();
 		String endLabel = getFreshLabel();
@@ -435,8 +434,15 @@ public class CodeGenerator extends Visitor<String> {
 		for (var condition : ifStatement.getConditions()) { 
 			commands += condition.accept(this);
 
-			if (condition instanceof BinaryExpression) {
-				commands += thenLabel + "\n"; // this is for when we have sth like if_cmpne or if_cmpeq
+			if (condition instanceof BinaryExpression binaryExpression) {
+				if (binaryExpression.getOperator() == BinaryOperator.EQUAL || 
+					binaryExpression.getOperator() == BinaryOperator.NOT_EQUAL ||
+					binaryExpression.getOperator() == BinaryOperator.LESS_THAN ||
+					binaryExpression.getOperator() == BinaryOperator.LESS_EQUAL_THAN ||
+					binaryExpression.getOperator() == BinaryOperator.GREATER_THAN ||
+					binaryExpression.getOperator() == BinaryOperator.GREATER_EQUAL_THAN) {
+						commands += thenLabel + "\n"; 
+				} // no need to check for else
 			} else {
 				commands += "ifne " + thenLabel + "\n"; 
 			}
