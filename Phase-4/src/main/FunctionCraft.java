@@ -39,7 +39,25 @@ public class FunctionCraft {
 
 		codeGenerator.cleanMainJasminFile();
 
-		runJasminCode();
+		// runJasminCode();
+		runJasminCodeNotDeprecated();
+	}
+
+	private static void runJasminCodeNotDeprecated() {
+		try {
+			System.out.println("---------------------------Compilation Successful---------------------------");
+			File dir = new File("./codeGenOutput");
+			ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "jasmin.jar", "*.j");
+			processBuilder.directory(dir);
+			Process process = processBuilder.start();
+			processBuilder = new ProcessBuilder("java", "Main");
+			processBuilder.directory(dir);
+			process = processBuilder.start();
+			printResults(process.getInputStream());
+			printResults(process.getErrorStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static void runJasminCode() {

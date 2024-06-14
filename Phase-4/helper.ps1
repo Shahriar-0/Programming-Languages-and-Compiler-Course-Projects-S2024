@@ -1,7 +1,29 @@
 $ErrorActionPreference = "SilentlyContinue"
 
 function CompileTest() {
-    java "@arg.argfile" "main.FunctionCraft" "samples/sample.fl" > $null
+    java "@arg.argfile" "main.FunctionCraft" "samples/sample.fl" > "./codeGenOutput/compileOutput.txt"
+
+    if (Test-Path "./codeGenOutput/compileOutput.txt") {
+        $ansContent = Get-Content "./codeGenOutput/compileOutput.txt"
+        $outContent = Get-Content "./codeGenOutput/ans.txt"
+
+        $ansContentNoWS = $ansContent -replace '\s', ''
+        $outContentNoWS = $outContent -replace '\s', ''
+
+        $diff = Compare-Object -ReferenceObject $ansContentNoWS -DifferenceObject $outContentNoWS
+
+        if ($null -eq $diff) {
+            Write-Host "Test Passed" -ForegroundColor Green
+        }
+        else {
+            Write-Host "Test Failed" -ForegroundColor Red
+        }
+
+
+    }
+    else {
+        Write-Host "Compilation failed" -ForegroundColor Red
+    }
 }
 
 function ConvertJasminToClass() {
