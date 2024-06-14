@@ -100,14 +100,12 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	public void cleanMainJasminFile() {
-		log.info("Cleaning up Main.j file for readability");
 		String fileName = "./codeGenOutput/Main.j";
         Path filePath = Paths.get(fileName);
         try {
             List<String> content = Files.readAllLines(filePath);
             List<String> newContent = new ArrayList<>();
             for (String line : content) {
-				log.info("Cleaning line: " + line);
 				if (Pattern.compile("^\\s*\\.method").matcher(line).find()) {
                     newContent.add("\n\n" + line.replaceAll("^\\s+", ""));
                 } else if (Pattern.compile("^\\s*\\.").matcher(line).find()) {
@@ -117,7 +115,6 @@ public class CodeGenerator extends Visitor<String> {
                 } else {
                     newContent.add(line);
                 }
-				log.info("Cleaned line: " + newContent.get(newContent.size() - 1));
             }
             Files.write(filePath, newContent);
         } catch (IOException e) {
@@ -191,7 +188,7 @@ public class CodeGenerator extends Visitor<String> {
 			mainFile.flush();
 
 		} catch (IOException e) {
-			// ignore
+			e.printStackTrace();
 		}
 	}
 
@@ -457,7 +454,6 @@ public class CodeGenerator extends Visitor<String> {
 			}
 		}
 
-		commands += "goto " + endLabel + "\n";
 		commands += endLabel + ":\n";
 
 		return commands;
