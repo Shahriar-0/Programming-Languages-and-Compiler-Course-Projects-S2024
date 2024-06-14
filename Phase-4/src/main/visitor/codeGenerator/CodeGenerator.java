@@ -194,15 +194,15 @@ public class CodeGenerator extends Visitor<String> {
 
 	private void handleMainClass() {
 		String mainCommands =
-		"""
-		.method public static main([Ljava/lang/String;)V
-		.limit stack 128
-		.limit locals 128
-		new Main
-		invokespecial Main/<init>()V
-		return
-		.end method\n\n
-		""";
+			"""
+			.method public static main([Ljava/lang/String;)V
+			.limit stack 128
+			.limit locals 128
+			new Main
+			invokespecial Main/<init>()V
+			return
+			.end method\n\n
+			""";
 		addCommand(mainCommands);
 	}
 
@@ -214,10 +214,10 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(Program program) {
 		String commands = 
-		"""
-		.class public Main
-		.super java/lang/Object
-		""";
+			"""
+			.class public Main
+			.super java/lang/Object
+			""";
 
 		addCommand(commands);
 		handleMainClass();
