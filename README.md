@@ -5,6 +5,7 @@
   - [Phase 1](#phase-1)
   - [Phase 2](#phase-2)
   - [Phase 3](#phase-3)
+  - [Phase 4](#phase-4)
 
 ## Intro
 
@@ -21,3 +22,7 @@ In the second phase of the project, first we implemented and generated an abstra
 ## Phase 3
 
 In the third phase of the project, we implemented the type checking part of the semantic analysis. The type checking is implemented using the visitor pattern. The compiler is designed in a way to gather as much error as possible in one run. The type checking is implemented for many different types of expressions and statements. The type checker checks for valid operations and expressions, and for type compatibility. The return type of the functions and the type of the arguments passed to the functions, the type of the variables and the type of the values assigned to the variables are also checked.
+
+## Phase 4
+
+In the fourth phase of the project, we implemented the code generation part of the compiler. The code generation is implemented using the visitor pattern. The compiler generates the code in the `Jasmin` assembly language. The code generation is implemented for many different types of expressions and statements. The generated code can be run by converting it to the `JVM` bytecode using the `Jasmin` assembler, and then run it in the `JVM`. The `Jasmin` can be found in the utilities directory of the project. Also you can use `classFileAnalyzer` to convert the `JVm` bytecode to the `Jasmin` assembly code. The compiled code is then run and the output is stored in the `codeGenOutput` directory of the project. The output of the code generation is tested using the provided test cases, you can find tests and their output in the respective directory of this phase.
