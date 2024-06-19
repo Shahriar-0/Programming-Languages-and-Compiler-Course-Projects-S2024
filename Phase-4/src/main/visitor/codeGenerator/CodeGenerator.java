@@ -362,7 +362,16 @@ public class CodeGenerator extends Visitor<String> {
 			
 
 		} else { // access to a list
-			// TODO: dunno what to do with this yet
+			String commands = "";
+			
+			Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
+			String listName = accessedIdentifier.getName();
+			int slot = slotOf(listName);
+			commands += "aload " + slot + "\n";
+			commands += accessExpression.getDimentionalAccess().get(0).accept(this);
+			
+			commands += "invokevirtual List/getElement(Ljava/lang/Integer;)Ljava/lang/Object;" + "\n";
+			return commands;
 		}
 		return null;
 	}
