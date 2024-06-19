@@ -25,8 +25,10 @@ import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.IntType;
 import main.ast.type.primitiveType.StringType;
 import main.symbolTable.SymbolTable;
+import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.FunctionItem;
+import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 import main.visitor.type.TypeChecker;
 
@@ -278,7 +280,17 @@ public class CodeGenerator extends Visitor<String> {
 				functionDeclaration.getFunctionName().getName()
 			);
 			returnType = functionItem.getReturnType();
-
+			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
+				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
+				argItem.setType(currentArgTypes.get(i));
+				try {
+					SymbolTable.top.put(argItem);
+				} catch (ItemAlreadyExists ignored) {
+					var item = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY + argItem.getName());
+					item.setType(currentArgTypes.get(i));
+				}
+			}
 			ArrayList<Type> argTypes = functionItem.getArgumentTypes();
 			ArrayList<VarDeclaration> argDeclarations = functionDeclaration.getArgs();
 
@@ -319,62 +331,44 @@ public class CodeGenerator extends Visitor<String> {
 
 	public String visit(AccessExpression accessExpression) {
 		String commands = "";
-		Type accessedType = accessExpression.accept(typeChecker);
 		Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
-
+		Type accessedType = accessedIdentifier.accept(typeChecker);
+		String functionName;
 		if (accessExpression.isFunctionCall()) {
-			if (false) { // function pointer
-				FunctionPointer functionPointer = new FunctionPointer(accessedIdentifier);
-				commands += functionPointer.accept(this);
-
-				commands += "new java/util/ArrayList" + "\n";
-				commands += "dup" + "\n";
-				commands += "invokespecial java/util/ArrayList/<init>()V" + "\n";	
-				int slot = slotOf("temp");
-				commands += "astore " + slot + "\n";
-				for (var element : accessExpression.getArguments()) {
-					commands += "aload " + slot + "\n";
-					commands += element.accept(this);
-					commands +=  "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z" + "\n";
-					commands += "pop" + "\n";
-				}
-				commands += "aload " + slot + "\n";
-				commands += "invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;";
-
-				return commands;
+			if (accessedType instanceof FptrType fptr) { // function pointer
+				functionName = fptr.getFunctionName();
 			} 
-			
 			else { // normal function 
-				String functionName = accessedIdentifier.getName();
-				String args = "(";
-				for (var arg : accessExpression.getArguments()) {
-					Type argType = arg.accept(typeChecker);
-					commands += arg.accept(this);
-					args += getType(argType);
-				}
-				args += ")";
-
-				String returnType = "return"; // default return type, this shouldn't happen but just in case
-				
-				try {
-					FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
-						FunctionItem.START_KEY + 
-						functionName
-					);
-					returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
-				} catch (ItemNotFound ignored) {}
-
-				// TODO: i think we can pop here if it's not an rvalue
-
-				return (
-					commands +
-					"invokestatic Main/" +
-					functionName +
-					args +
-					returnType +
-					"\n"
-				);
+				functionName = accessedIdentifier.getName();
 			}
+			String args = "(";
+			for (var arg : accessExpression.getArguments()) {
+				Type argType = arg.accept(typeChecker);
+				commands += arg.accept(this);
+				args += getType(argType);
+			}
+			args += ")";
+
+			String returnType = "";
+			
+			try {
+				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY + 
+					functionName
+				);
+				// log.info(functionItem.getReturnType().toString());
+				returnType = getType(functionItem.getReturnType());
+			} catch (ItemNotFound ignored) {}
+
+			return (
+				commands +
+				"invokestatic Main/" +
+				functionName +
+				args +
+				returnType +
+				"\n"
+			);
+		
 			
 
 		} else { // access to a list
@@ -392,7 +386,6 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(AssignStatement assignStatement) {
 		String commands = "";
 		if (assignStatement.isAccessList()) {
-
 			String listName = assignStatement.getAssignedId().getName();
 			int slot = slotOf(listName);
 			commands += "aload " + slot + "\n";
@@ -406,7 +399,14 @@ public class CodeGenerator extends Visitor<String> {
 			Identifier assignedId = assignStatement.getAssignedId();
 			Expression assignExpression = assignStatement.getAssignExpression();
 			AssignOperator assignOperator = assignStatement.getAssignOperator();
-
+			
+			Type assignExpType = assignStatement.getAssignExpression().accept(typeChecker);
+			VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
+			newVarItem.setType(assignExpType);
+			try {
+				SymbolTable.top.put(newVarItem);
+			} catch (ItemAlreadyExists ignore) {}
+		
 			String varName = assignedId.getName();
 			int slot = slotOf(varName);
 			Type varType = assignStatement.getAssignedId().accept(typeChecker);
@@ -676,7 +676,6 @@ public class CodeGenerator extends Visitor<String> {
 		commands += "aload " + slot + "\n";
 		commands += "invokespecial List/<init>(Ljava/util/ArrayList;)V" + "\n";
 		// slots.remove("temp");
-		// TODO
 		return commands;
 	}
 
