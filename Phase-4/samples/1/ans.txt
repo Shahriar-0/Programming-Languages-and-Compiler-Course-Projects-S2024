@@ -1,2 +1,4 @@
 ---------------------------Compilation Successful---------------------------
-243
+Enter a number: 
+The number you entered is: 5
+120

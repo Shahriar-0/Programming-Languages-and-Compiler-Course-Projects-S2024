@@ -1,0 +1,13 @@
+---------------------------Compilation Successful---------------------------
+Original List: 
+5
+3
+8
+6
+2
+Sorted List:
+2
+3
+5
+6
+8
