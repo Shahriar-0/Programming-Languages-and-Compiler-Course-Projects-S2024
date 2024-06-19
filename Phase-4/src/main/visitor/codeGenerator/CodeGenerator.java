@@ -247,7 +247,8 @@ public class CodeGenerator extends Visitor<String> {
 			invokespecial java/lang/Object/<init>()V
 			""";
 
-		slotOf("this"); // save slot 0 for this
+		// save slot 0 for this
+		slotOf("this");
 
 		for (var statement : mainDeclaration.getBody()) {
 			String temp = statement.accept(this);
@@ -293,7 +294,6 @@ public class CodeGenerator extends Visitor<String> {
 		args += ")";
 
 		String returnTypeString = getType(returnType);
-		log.info(returnTypeString);
 		commands += ".method public static " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnTypeString + "\n";
 
@@ -318,18 +318,34 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	public String visit(AccessExpression accessExpression) {
+		String commands = "";
 		Type accessedType = accessExpression.accept(typeChecker);
+		Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 
 		if (accessExpression.isFunctionCall()) {
-			if (accessedType instanceof FptrType) { // function pointer
-				FunctionPointer functionPointer = (FunctionPointer) accessExpression.getAccessedExpression();
-				// TODO: dunno what to do with this yet
+			if (true) { // function pointer
+				FunctionPointer functionPointer = new FunctionPointer(accessedIdentifier);
+				commands += functionPointer.accept(this);
+
+				commands += "new java/util/ArrayList" + "\n";
+				commands += "dup" + "\n";
+				commands += "invokespecial java/util/ArrayList/<init>()V" + "\n";	
+				int slot = slotOf("temp");
+				commands += "astore " + slot + "\n";
+				for (var element : accessExpression.getArguments()) {
+					commands += "aload " + slot + "\n";
+					commands += element.accept(this);
+					commands +=  "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z" + "\n";
+					commands += "pop" + "\n";
+				}
+				commands += "aload " + slot + "\n";
+				commands += "invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;";
+
+				return commands;
 			} 
 			
 			else { // normal function 
-				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 				String functionName = accessedIdentifier.getName();
-				String commands = "";
 				String args = "(";
 				for (var arg : accessExpression.getArguments()) {
 					Type argType = arg.accept(typeChecker);
@@ -362,9 +378,6 @@ public class CodeGenerator extends Visitor<String> {
 			
 
 		} else { // access to a list
-			String commands = "";
-			
-			Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 			String listName = accessedIdentifier.getName();
 			int slot = slotOf(listName);
 			commands += "aload " + slot + "\n";
@@ -373,15 +386,22 @@ public class CodeGenerator extends Visitor<String> {
 			commands += "invokevirtual List/getElement(Ljava/lang/Integer;)Ljava/lang/Object;" + "\n";
 			return commands;
 		}
-		return null;
 	}
 
 	@Override
 	public String visit(AssignStatement assignStatement) {
+		String commands = "";
 		if (assignStatement.isAccessList()) {
-			// TODO: dunno what to do with this yet
-			// NOTE: be careful to use iastore and iaload for arrays
-			return null;
+			log.info(assignStatement.getAccessListExpression().toString());
+
+			String listName = assignStatement.getAssignedId().getName();
+			int slot = slotOf(listName);
+			commands += "aload " + slot + "\n";
+			commands += assignStatement.getAccessListExpression().accept(this);
+			commands += assignStatement.getAssignExpression().accept(this);
+			
+			commands += "invokevirtual List/setElement(Ljava/lang/Integer;Ljava/lang/Object;)V" + "\n";
+			return commands;
 		} 
 		else {
 			Identifier assignedId = assignStatement.getAssignedId();
@@ -392,8 +412,6 @@ public class CodeGenerator extends Visitor<String> {
 			int slot = slotOf(varName);
 			Type varType = assignStatement.getAssignedId().accept(typeChecker);
 			
-			
-			String commands = "";
 			if (assignOperator == AssignOperator.ASSIGN) {
 				commands += assignExpression.accept(this);
 				if (varType instanceof IntType || varType instanceof BoolType) {
@@ -497,7 +515,6 @@ public class CodeGenerator extends Visitor<String> {
 			commands += returnStatement.getReturnExp().accept(this);
 			commands += "areturn\n";
 		}
-		log.info(commands);
 		return commands;
 	}
 
@@ -655,6 +672,7 @@ public class CodeGenerator extends Visitor<String> {
 		commands += "aload " + slot + "\n";
 		commands += "invokespecial List/<init>(Ljava/util/ArrayList;)V" + "\n";
 		// slots.remove("temp");
+		// TODO
 		return commands;
 	}
 
