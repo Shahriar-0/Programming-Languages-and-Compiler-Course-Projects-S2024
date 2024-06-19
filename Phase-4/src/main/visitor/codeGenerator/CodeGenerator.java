@@ -323,7 +323,7 @@ public class CodeGenerator extends Visitor<String> {
 		Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
 
 		if (accessExpression.isFunctionCall()) {
-			if (true) { // function pointer
+			if (false) { // function pointer
 				FunctionPointer functionPointer = new FunctionPointer(accessedIdentifier);
 				commands += functionPointer.accept(this);
 
@@ -392,7 +392,6 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(AssignStatement assignStatement) {
 		String commands = "";
 		if (assignStatement.isAccessList()) {
-			log.info(assignStatement.getAccessListExpression().toString());
 
 			String listName = assignStatement.getAssignedId().getName();
 			int slot = slotOf(listName);
@@ -634,9 +633,14 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(ChopStatement chopStatement) {
 		String commands = "";
-		commands += chopStatement.getChopExpression().accept(this);
+		String exp = chopStatement.getChopExpression().accept(this);
+		commands += exp;
+		commands += "iconst_0\n";
+		commands += exp;
+		commands += "invokevirtual java/lang/String/length()I\n";
 		commands += "iconst_1\n";
-		commands += "invokevirtual java/lang/String/substring(I)Ljava/lang/String;\n";
+		commands += "isub\n";
+		commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";
 		return commands;
 	}
 
