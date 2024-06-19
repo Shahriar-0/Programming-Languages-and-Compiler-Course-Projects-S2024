@@ -25,8 +25,10 @@ import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.IntType;
 import main.ast.type.primitiveType.StringType;
 import main.symbolTable.SymbolTable;
+import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.FunctionItem;
+import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 import main.visitor.type.TypeChecker;
 
@@ -76,12 +78,13 @@ public class CodeGenerator extends Visitor<String> {
 	private String getType(Type element) {
 		String type = "";
 		switch (element) {
+			case NoType noType 		   -> type += "V";
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "Ljava/lang/Integer;";
 			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
-			case null, default 		   -> {}
+			case null, default 		   -> type += "V";
 		}
 		return type;
 	}
@@ -89,12 +92,13 @@ public class CodeGenerator extends Visitor<String> {
 	private String getTypeSignature(Type element) {
 		String type = "";
 		switch (element) {
+			case NoType noType 		   -> type += "V";
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "I";
 			case BoolType boolType     -> type += "Z";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
-			case null, default 		   -> {}
+			case null, default 		   -> type += "V";
 		}
 		return type;
 	}
@@ -245,7 +249,8 @@ public class CodeGenerator extends Visitor<String> {
 			invokespecial java/lang/Object/<init>()V
 			""";
 
-		slotOf("this"); // save slot 0 for this
+		// save slot 0 for this
+		slotOf("this");
 
 		for (var statement : mainDeclaration.getBody()) {
 			String temp = statement.accept(this);
@@ -275,7 +280,17 @@ public class CodeGenerator extends Visitor<String> {
 				functionDeclaration.getFunctionName().getName()
 			);
 			returnType = functionItem.getReturnType();
-
+			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
+				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
+				argItem.setType(currentArgTypes.get(i));
+				try {
+					SymbolTable.top.put(argItem);
+				} catch (ItemAlreadyExists ignored) {
+					var item = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY + argItem.getName());
+					item.setType(currentArgTypes.get(i));
+				}
+			}
 			ArrayList<Type> argTypes = functionItem.getArgumentTypes();
 			ArrayList<VarDeclaration> argDeclarations = functionDeclaration.getArgs();
 
@@ -291,7 +306,6 @@ public class CodeGenerator extends Visitor<String> {
 		args += ")";
 
 		String returnTypeString = getType(returnType);
-
 		commands += ".method public static " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnTypeString + "\n";
 
@@ -308,14 +322,7 @@ public class CodeGenerator extends Visitor<String> {
 			}
 		}
 
-		if (returnType instanceof NoType) {
-			commands += "return\n";
-		} else if (returnType instanceof IntType || returnType instanceof BoolType) {
-			commands += "ireturn\n";
-		} else {
-			commands += "areturn\n";
-		}
-
+		commands += "return" + "\n";
 		commands += ".end method\n\n"; // few new lines for readability
 
 		addCommand(commands);
@@ -323,78 +330,94 @@ public class CodeGenerator extends Visitor<String> {
 	}
 
 	public String visit(AccessExpression accessExpression) {
-		Type accessedType = accessExpression.accept(typeChecker);
-
+		String commands = "";
+		Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
+		Type accessedType = accessedIdentifier.accept(typeChecker);
+		String functionName;
 		if (accessExpression.isFunctionCall()) {
-			if (accessedType instanceof FptrType) { // function pointer
-				FunctionPointer functionPointer = (FunctionPointer) accessExpression.getAccessedExpression();
-				// TODO: dunno what to do with this yet
+			if (accessedType instanceof FptrType fptr) { // function pointer
+				functionName = fptr.getFunctionName();
 			} 
-			
 			else { // normal function 
-				Identifier accessedIdentifier = (Identifier) accessExpression.getAccessedExpression();
-				String functionName = accessedIdentifier.getName();
-				String commands = "";
-				String args = "(";
-				for (var arg : accessExpression.getArguments()) {
-					Type argType = arg.accept(typeChecker);
-					commands += arg.accept(this);
-					args += getType(argType);
-				}
-				args += ")";
-
-				String returnType = "return"; // default return type, this shouldn't happen but just in case
-				
-				try {
-					FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
-						FunctionItem.START_KEY + 
-						functionName
-					);
-					returnType = getType(functionItem.getFunctionDeclaration().accept(typeChecker));
-				} catch (ItemNotFound ignored) {}
-
-				// TODO: i think we can pop here if it's not an rvalue
-
-				return (
-					commands +
-					"invokestatic Main/" +
-					functionName +
-					args +
-					returnType +
-					"\n"
-				);
+				functionName = accessedIdentifier.getName();
 			}
+			String args = "(";
+			for (var arg : accessExpression.getArguments()) {
+				Type argType = arg.accept(typeChecker);
+				commands += arg.accept(this);
+				args += getType(argType);
+			}
+			args += ")";
+
+			String returnType = "";
+			
+			try {
+				FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+					FunctionItem.START_KEY + 
+					functionName
+				);
+				// log.info(functionItem.getReturnType().toString());
+				returnType = getType(functionItem.getReturnType());
+			} catch (ItemNotFound ignored) {}
+
+			return (
+				commands +
+				"invokestatic Main/" +
+				functionName +
+				args +
+				returnType +
+				"\n"
+			);
+		
 			
 
 		} else { // access to a list
-			// TODO: dunno what to do with this yet
+			String listName = accessedIdentifier.getName();
+			int slot = slotOf(listName);
+			commands += "aload " + slot + "\n";
+			commands += accessExpression.getDimentionalAccess().get(0).accept(this);
+			
+			commands += "invokevirtual List/getElement(Ljava/lang/Integer;)Ljava/lang/Object;" + "\n";
+			return commands;
 		}
-		return null;
 	}
 
 	@Override
 	public String visit(AssignStatement assignStatement) {
+		String commands = "";
 		if (assignStatement.isAccessList()) {
-			// TODO: dunno what to do with this yet
-			// NOTE: be careful to use iastore and iaload for arrays
-			return null;
+			String listName = assignStatement.getAssignedId().getName();
+			int slot = slotOf(listName);
+			commands += "aload " + slot + "\n";
+			commands += assignStatement.getAccessListExpression().accept(this);
+			commands += assignStatement.getAssignExpression().accept(this);
+			
+			commands += "invokevirtual List/setElement(Ljava/lang/Integer;Ljava/lang/Object;)V" + "\n";
+			return commands;
 		} 
 		else {
 			Identifier assignedId = assignStatement.getAssignedId();
 			Expression assignExpression = assignStatement.getAssignExpression();
 			AssignOperator assignOperator = assignStatement.getAssignOperator();
-
+			
+			Type assignExpType = assignStatement.getAssignExpression().accept(typeChecker);
+			VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
+			newVarItem.setType(assignExpType);
+			try {
+				SymbolTable.top.put(newVarItem);
+			} catch (ItemAlreadyExists ignore) {}
+		
 			String varName = assignedId.getName();
 			int slot = slotOf(varName);
 			Type varType = assignStatement.getAssignedId().accept(typeChecker);
 			
-			
-			String commands = "";
 			if (assignOperator == AssignOperator.ASSIGN) {
 				commands += assignExpression.accept(this);
 				if (varType instanceof IntType || varType instanceof BoolType) {
 					commands += "istore " + slot + "\n";
-				} else {
+				} else if (varType instanceof ListType) {
+					commands += "astore " + slot + "\n";
+				}  else {
 					commands += "astore " + slot + "\n";
 				}
 			}
@@ -482,11 +505,16 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ReturnStatement returnStatement) {
-		// since we determined the return type in function declaration, we can just visit the expression and nothing else
-		if (returnStatement.hasRetExpression()) {
-			return returnStatement.getReturnExp().accept(this);
+		String commands = "";
+		
+		if (!returnStatement.hasRetExpression()) {
+			commands += "return\n";
 		}
-		return null;
+		else {
+			commands += returnStatement.getReturnExp().accept(this);
+			commands += "areturn\n";
+		}
+		return commands;
 	}
 
 	@Override
@@ -498,8 +526,9 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(BinaryExpression binaryExpression) {
 		String commands = "";
 		commands += binaryExpression.getFirstOperand().accept(this);
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		commands += binaryExpression.getSecondOperand().accept(this);
-		// TODO: convert primitive types to objects
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		BinaryOperator operator = binaryExpression.getOperator();
 		switch (operator) {
 			// we only have int and bool types so we don't need to check
@@ -522,6 +551,7 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(UnaryExpression unaryExpression) {
 		String commands = "";
 		commands += unaryExpression.getExpression().accept(this);
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		switch (unaryExpression.getOperator()) {
 			case MINUS         -> commands += "ineg\n";
 			case NOT           -> commands += "iconst_1\nixor\n";
@@ -540,12 +570,6 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		if (varType instanceof IntType || varType instanceof BoolType) {
 			commands += "iload " + slot + "\n";
-		} else if (varType instanceof StringType) {
-			commands += "aload " + slot + "\n";
-		} else if (varType instanceof FptrType) {
-			// TODO: dunno what to do with this yet
-		} else if (varType instanceof ListType) {
-			// TODO: dunno what to do with this yet
 		} else {
 			commands += "aload " + slot + "\n";
 		}
@@ -599,7 +623,7 @@ public class CodeGenerator extends Visitor<String> {
 		
 		if (lenType instanceof StringType) { 
 			commands += "invokevirtual java/lang/String/length()I\n";
-		} else if (lenType instanceof ListType) { // not sure if this is right, i still dunno how to handle lists
+		} else if (lenType instanceof ListType) {
 			commands += "invokevirtual List/size()I\n";
 		} 
 
@@ -609,9 +633,14 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(ChopStatement chopStatement) {
 		String commands = "";
-		commands += chopStatement.getChopExpression().accept(this);
+		String exp = chopStatement.getChopExpression().accept(this);
+		commands += exp;
+		commands += "iconst_0\n";
+		commands += exp;
+		commands += "invokevirtual java/lang/String/length()I\n";
 		commands += "iconst_1\n";
-		commands += "invokevirtual java/lang/String/substring(I)Ljava/lang/String;\n";
+		commands += "isub\n";
+		commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";
 		return commands;
 	}
 
@@ -629,32 +658,47 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ListValue listValue) {
-		// Fuck you
-		return null;
+		String commands = "";
+		commands += "new List" + "\n";
+		commands += "dup" + "\n";
+		commands += "new java/util/ArrayList" + "\n";
+		commands += "dup" + "\n";
+		commands += "invokespecial java/util/ArrayList/<init>()V" + "\n";
+		
+		int slot = slotOf("temp");
+		commands += "astore " + slot + "\n";
+		for (var element : listValue.getElements()) {
+			commands += "aload " + slot + "\n";
+			commands += element.accept(this);
+			commands +=  "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z" + "\n";
+			commands += "pop" + "\n";
+		}
+		commands += "aload " + slot + "\n";
+		commands += "invokespecial List/<init>(Ljava/util/ArrayList;)V" + "\n";
+		// slots.remove("temp");
+		return commands;
 	}
 
 	@Override
 	public String visit(IntValue intValue) {
-		//TODO, use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
-		// why? why should we store it with class?
 		String commands = "";
 		commands += "ldc " + intValue.getIntVal() + "\n";
+		commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;" + "\n";
 		return commands;
 	}
 		
 	@Override
 	public String visit(BoolValue boolValue) {
-		//TODO, use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
 		String commands = "";
 		commands += "ldc " + boolValue.getIntValue() + "\n";
+		commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;" + "\n";
 		return commands;
 	}
 
 	@Override
 	public String visit(StringValue stringValue) {
-		//TODO
 		String commands = "";
-		commands += stringValue.getStrWithQuotes() + "\n";
+		commands += "ldc " + stringValue.getStr() + "\n";
 		return commands;
 	}
 }
