@@ -622,13 +622,7 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(Identifier identifier) {
 		String varName = identifier.getName();
 		int slot = slotOf(varName);
-		Type varType = identifier.accept(typeChecker);
 		String commands = "aload " + slot + "\n";
-		// if (varType instanceof IntType || varType instanceof BoolType) {
-		// 	commands += "iload " + slot + "\n";
-		// } else {
-		// 	commands += "aload " + slot + "\n";
-		// }
 		return commands;
 	}
 
