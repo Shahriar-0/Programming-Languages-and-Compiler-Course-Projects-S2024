@@ -1,0 +1,7 @@
+def f(x)
+    return x * x;
+end
+
+def main() 
+    puts(f(3));
+end

@@ -41,8 +41,8 @@ end
 def main() 
     list = [5, 3, 8, 6, 2];
     puts("Original List: ");
+    i = 0;
     loop do
-        i = 0;
         if (i >= 5)
             break;
         end
@@ -51,8 +51,8 @@ def main()
     end
     insertionsort(list, 5);
     puts("Sorted List: ");
+    i = 0;
     loop do
-        i = 0;
         if (i >= 5)
             break;
         end

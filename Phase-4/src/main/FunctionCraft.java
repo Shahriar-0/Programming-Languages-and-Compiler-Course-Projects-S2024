@@ -39,11 +39,10 @@ public class FunctionCraft {
 
 		codeGenerator.cleanMainJasminFile();
 
-		// runJasminCode();
-		runJasminCodeNotDeprecated();
+		runJasminCode();
 	}
 
-	private static void runJasminCodeNotDeprecated() {
+	private static void runJasminCode() {
 		try {
 			System.out.println("---------------------------Compilation Successful---------------------------");
 			File dir = new File("./codeGenOutput");
@@ -55,24 +54,6 @@ public class FunctionCraft {
 			processBuilder = new ProcessBuilder("java", "Main");
 			processBuilder.directory(dir);
 			process = processBuilder.start();
-			printResults(process.getInputStream());
-			printResults(process.getErrorStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void runJasminCode() {
-		try {
-			System.out.println("---------------------------Compilation Successful---------------------------");
-			File dir = new File("./codeGenOutput");
-			Process process = Runtime
-				.getRuntime()
-				.exec("java -jar jasmin.jar *.j", null, dir);
-			Thread.sleep(1000);
-			process = Runtime.getRuntime().exec("java Main", null, dir);
 			printResults(process.getInputStream());
 			printResults(process.getErrorStream());
 		} catch (IOException e) {

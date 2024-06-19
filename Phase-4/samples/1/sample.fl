@@ -7,14 +7,17 @@ def factorial(n)
     # since these fuckers didnt handle recursion, we will do it iteratively
     result = 1;
     loop do
-        break if (n == 0);
+        if (n == 0)
+            break;
+        end
         result *= n;
         n -= 1;
     end
+    return result;
 end
 
 def main() 
     puts("Enter a number: ");
-    puts("The number you entered is: 5")
+    puts("The number you entered is: 5");
     puts(factorial(5));
 end

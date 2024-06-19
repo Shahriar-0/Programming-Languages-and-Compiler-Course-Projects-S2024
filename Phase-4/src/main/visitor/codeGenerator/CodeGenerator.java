@@ -11,6 +11,7 @@ import main.ast.nodes.declaration.MainDeclaration;
 import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.operators.BinaryOperator;
+import main.ast.nodes.expression.operators.UnaryOperator;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.expression.value.primitive.BoolValue;
@@ -99,6 +100,17 @@ public class CodeGenerator extends Visitor<String> {
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
 			case null, default 		   -> type += "V";
+		}
+		return type;
+	}
+
+	private String getEquivalentJVMType(Type element) {
+		String type = "";
+		switch (element) {
+			case StringType stringType -> type += "java/lang/String";
+			case IntType intType       -> type += "java/lang/Integer";
+			case BoolType boolType     -> type += "java/lang/Boolean";
+			case null, default 		   -> type += "java/lang/Object";
 		}
 		return type;
 	}
@@ -208,11 +220,6 @@ public class CodeGenerator extends Visitor<String> {
 			.end method\n\n
 			""";
 		addCommand(mainCommands);
-	}
-
-	private ArrayList<Object> convertLastNArgumentsToObjects(int n) {
-		// I dunno use store and load to implement it maybe?
-		return null;
 	}
 
 	@Override
@@ -358,7 +365,6 @@ public class CodeGenerator extends Visitor<String> {
 					FunctionItem.START_KEY + 
 					functionName
 				);
-				// log.info(functionItem.getReturnType().toString());
 				returnType = getType(functionItem.getReturnType());
 			} catch (ItemNotFound ignored) {}
 
@@ -370,16 +376,17 @@ public class CodeGenerator extends Visitor<String> {
 				returnType +
 				"\n"
 			);
-		
-			
-
 		} else { // access to a list
 			String listName = accessedIdentifier.getName();
 			int slot = slotOf(listName);
 			commands += "aload " + slot + "\n";
 			commands += accessExpression.getDimentionalAccess().get(0).accept(this);
-			
-			commands += "invokevirtual List/getElement(Ljava/lang/Integer;)Ljava/lang/Object;" + "\n";
+			commands += "invokevirtual java/lang/Integer/intValue()I\n";
+			commands += "invokevirtual List/getElement(I)Ljava/lang/Object;" + "\n";
+			Type listType = accessedIdentifier.accept(typeChecker);
+			if (listType instanceof ListType list) {
+				commands += "checkcast " + getEquivalentJVMType(list.getType()) + "\n";
+			}
 			return commands;
 		}
 	}
@@ -392,9 +399,10 @@ public class CodeGenerator extends Visitor<String> {
 			int slot = slotOf(listName);
 			commands += "aload " + slot + "\n";
 			commands += assignStatement.getAccessListExpression().accept(this);
+			commands += "invokevirtual java/lang/Integer/intValue()I\n";
 			commands += assignStatement.getAssignExpression().accept(this);
 			
-			commands += "invokevirtual List/setElement(Ljava/lang/Integer;Ljava/lang/Object;)V" + "\n";
+			commands += "invokevirtual List/setElement(ILjava/lang/Object;)V" + "\n";
 			return commands;
 		} 
 		else {
@@ -415,22 +423,14 @@ public class CodeGenerator extends Visitor<String> {
 			
 			if (assignOperator == AssignOperator.ASSIGN) {
 				commands += assignExpression.accept(this);
-				if (varType instanceof IntType || varType instanceof BoolType) {
-					commands += "istore " + slot + "\n";
-				} else if (varType instanceof ListType) {
-					commands += "astore " + slot + "\n";
-				}  else {
-					commands += "astore " + slot + "\n";
-				}
+				commands += "astore " + slot + "\n";
 			}
 			else {
-				if (varType instanceof IntType || varType instanceof BoolType) {
-					commands += "iload " + slot + "\n";
-				} else {
-					commands += "aload " + slot + "\n";
-				}
+				commands += "aload " + slot + "\n";
+				commands += "invokevirtual java/lang/Integer/intValue()I\n";
 
 				commands += assignExpression.accept(this);
+				commands += "invokevirtual java/lang/Integer/intValue()I\n";
 				switch (assignOperator) {
 					case PLUS_ASSIGN   -> commands += "iadd\n";
 					case MINUS_ASSIGN  -> commands += "isub\n";
@@ -440,11 +440,8 @@ public class CodeGenerator extends Visitor<String> {
 					case null, default -> {}
 				}
 				
-				if (varType instanceof IntType || varType instanceof BoolType) {
-					commands += "istore " + slot + "\n";
-				} else {
-					commands += "astore " + slot + "\n";
-				}
+				commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+				commands += "astore " + slot + "\n";
 			}
 			return commands;
 		}
@@ -469,6 +466,8 @@ public class CodeGenerator extends Visitor<String> {
 						commands += thenLabel + "\n"; 
 				} // no need to check for else
 			} else {
+				commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
+				log.info(condition.toString());
 				commands += "ifne " + thenLabel + "\n"; 
 			}
 		}
@@ -504,8 +503,14 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
 		commands += putStatement.getExpression().accept(this);
+		Type type = putStatement.getExpression().accept(typeChecker);
+		if (type instanceof IntType) {
+			commands += "invokevirtual java/lang/Integer/intValue()I\n";
+		} else if (type instanceof BoolType) {
+			commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
+		} 
 		commands += "invokevirtual java/io/PrintStream/println(" + 
-					getType(putStatement.getExpression().accept(typeChecker)) + ")V\n";
+					getTypeSignature(putStatement.getExpression().accept(typeChecker)) + ")V\n";
 		return commands;
 	}
 
@@ -536,12 +541,13 @@ public class CodeGenerator extends Visitor<String> {
 		commands += binaryExpression.getSecondOperand().accept(this);
 		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		BinaryOperator operator = binaryExpression.getOperator();
+		String cast = "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
 		switch (operator) {
 			// we only have int and bool types so we don't need to check
-			case PLUS		        -> commands += "iadd\n";
-			case MINUS		        -> commands += "isub\n";
-			case MULT		        -> commands += "imul\n";
-			case DIVIDE		        -> commands += "idiv\n";
+			case PLUS		        -> commands += "iadd\n" + cast;
+			case MINUS		        -> commands += "isub\n" + cast;
+			case MULT		        -> commands += "imul\n" + cast;
+			case DIVIDE		        -> commands += "idiv\n" + cast;
 			case EQUAL		        -> commands += "if_icmpeq ";
 			case NOT_EQUAL	        -> commands += "if_icmpne ";
 			case LESS_THAN	        -> commands += "if_icmplt ";
@@ -557,12 +563,27 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(UnaryExpression unaryExpression) {
 		String commands = "";
 		commands += unaryExpression.getExpression().accept(this);
-		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
+
+		if (unaryExpression.getOperator() == UnaryOperator.NOT) {
+			commands += "invokevirtual java/lang/Boolean/booleanValue()Z" + "\n";
+		} else {
+			commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
+		}
+
+		String cast = "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+		String castBool = "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+
+		String store = "";
+		if (unaryExpression.getExpression() instanceof Identifier identifier) {
+			String varName = identifier.getName();
+			int slot = slotOf(varName);
+			store = "astore " + slot + "\n";
+		}
 		switch (unaryExpression.getOperator()) {
-			case MINUS         -> commands += "ineg\n";
-			case NOT           -> commands += "iconst_1\nixor\n";
-			case INC 		   -> commands += "iconst_1\niadd\n";
-			case DEC 		   -> commands += "iconst_1\nisub\n";
+			case MINUS         -> commands += "ineg\n" + cast;
+			case NOT           -> commands += "iconst_1\nixor\n" + castBool;
+			case INC 		   -> commands += "iconst_1\niadd\n" + cast + store;
+			case DEC 		   -> commands += "iconst_1\nisub\n" + cast + store;
 			case null, default -> {}
 		}
 		return commands;
@@ -573,12 +594,12 @@ public class CodeGenerator extends Visitor<String> {
 		String varName = identifier.getName();
 		int slot = slotOf(varName);
 		Type varType = identifier.accept(typeChecker);
-		String commands = "";
-		if (varType instanceof IntType || varType instanceof BoolType) {
-			commands += "iload " + slot + "\n";
-		} else {
-			commands += "aload " + slot + "\n";
-		}
+		String commands = "aload " + slot + "\n";
+		// if (varType instanceof IntType || varType instanceof BoolType) {
+		// 	commands += "iload " + slot + "\n";
+		// } else {
+		// 	commands += "aload " + slot + "\n";
+		// }
 		return commands;
 	}
 

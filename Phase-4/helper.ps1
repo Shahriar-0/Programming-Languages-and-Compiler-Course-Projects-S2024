@@ -18,8 +18,6 @@ function CompileTest() {
         else {
             Write-Host "Test Failed" -ForegroundColor Red
         }
-
-
     }
     else {
         Write-Host "Compilation failed" -ForegroundColor Red
