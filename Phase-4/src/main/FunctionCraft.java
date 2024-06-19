@@ -50,12 +50,17 @@ public class FunctionCraft {
 			ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", "jasmin.jar", "*.j");
 			processBuilder.directory(dir);
 			Process process = processBuilder.start();
+			// thread sleep to wait for the process to finish
+			Thread.sleep(1000);
 			processBuilder = new ProcessBuilder("java", "Main");
 			processBuilder.directory(dir);
 			process = processBuilder.start();
 			printResults(process.getInputStream());
 			printResults(process.getErrorStream());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -67,10 +72,14 @@ public class FunctionCraft {
 			Process process = Runtime
 				.getRuntime()
 				.exec("java -jar jasmin.jar *.j", null, dir);
+			Thread.sleep(1000);
 			process = Runtime.getRuntime().exec("java Main", null, dir);
 			printResults(process.getInputStream());
 			printResults(process.getErrorStream());
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
