@@ -2,6 +2,6 @@ def main()
     a = 10;
     b = - a;
     puts(b);
-    a++;
+    ++a;
     puts(a);
 end

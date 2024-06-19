@@ -1,7 +1,3 @@
 ---------------------------Compilation Successful---------------------------
-10
-ata
-souri
-javad
-nemati
-darabi
+5
+yyy

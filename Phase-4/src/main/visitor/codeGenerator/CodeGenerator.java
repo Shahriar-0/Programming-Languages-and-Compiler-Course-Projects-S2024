@@ -356,7 +356,6 @@ public class CodeGenerator extends Visitor<String> {
 				commands += arg.accept(this);
 				args += getType(argType);
 			}
-			args += ")";
 
 			String returnType = "";
 			
@@ -365,8 +364,14 @@ public class CodeGenerator extends Visitor<String> {
 					FunctionItem.START_KEY + 
 					functionName
 				);
+				for (int i = accessExpression.getArguments().size(); i < functionItem.getArgumentTypes().size(); i++) {
+					args += getType(functionItem.getArgumentTypes().get(i));
+					commands += functionItem.getFunctionDeclaration().getArgs().get(i).getDefaultVal().accept(this);
+				}
 				returnType = getType(functionItem.getReturnType());
 			} catch (ItemNotFound ignored) {}
+
+			args += ")";
 
 			return (
 				commands +
@@ -394,21 +399,45 @@ public class CodeGenerator extends Visitor<String> {
 	@Override
 	public String visit(AssignStatement assignStatement) {
 		String commands = "";
+		AssignOperator assignOperator = assignStatement.getAssignOperator();
 		if (assignStatement.isAccessList()) {
 			String listName = assignStatement.getAssignedId().getName();
 			int slot = slotOf(listName);
 			commands += "aload " + slot + "\n";
 			commands += assignStatement.getAccessListExpression().accept(this);
 			commands += "invokevirtual java/lang/Integer/intValue()I\n";
-			commands += assignStatement.getAssignExpression().accept(this);
-			
+
+			if (assignOperator != AssignOperator.ASSIGN) {
+				commands += "aload " + slot + "\n";
+				commands += assignStatement.getAccessListExpression().accept(this);
+				commands += "invokevirtual java/lang/Integer/intValue()I\n";
+				commands += "invokevirtual List/getElement(I)Ljava/lang/Object;" + "\n";
+				commands += "checkcast java/lang/Integer\n";
+				commands += "invokevirtual java/lang/Integer/intValue()I\n";
+
+				commands += assignStatement.getAssignExpression().accept(this);
+				commands += "invokevirtual java/lang/Integer/intValue()I\n";
+
+				switch (assignOperator) {
+					case PLUS_ASSIGN   -> commands += "iadd\n";
+					case MINUS_ASSIGN  -> commands += "isub\n";
+					case MULT_ASSIGN   -> commands += "imul\n";
+					case DIVIDE_ASSIGN -> commands += "idiv\n";
+					case MOD_ASSIGN    -> commands += "irem\n";
+					case null, default -> {}
+				}
+				commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+				
+			} else {
+				commands += assignStatement.getAssignExpression().accept(this);
+			}
+
 			commands += "invokevirtual List/setElement(ILjava/lang/Object;)V" + "\n";
 			return commands;
 		} 
 		else {
 			Identifier assignedId = assignStatement.getAssignedId();
 			Expression assignExpression = assignStatement.getAssignExpression();
-			AssignOperator assignOperator = assignStatement.getAssignOperator();
 			
 			Type assignExpType = assignStatement.getAssignExpression().accept(typeChecker);
 			VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
@@ -419,7 +448,6 @@ public class CodeGenerator extends Visitor<String> {
 		
 			String varName = assignedId.getName();
 			int slot = slotOf(varName);
-			Type varType = assignStatement.getAssignedId().accept(typeChecker);
 			
 			if (assignOperator == AssignOperator.ASSIGN) {
 				commands += assignExpression.accept(this);
@@ -431,6 +459,7 @@ public class CodeGenerator extends Visitor<String> {
 
 				commands += assignExpression.accept(this);
 				commands += "invokevirtual java/lang/Integer/intValue()I\n";
+
 				switch (assignOperator) {
 					case PLUS_ASSIGN   -> commands += "iadd\n";
 					case MINUS_ASSIGN  -> commands += "isub\n";

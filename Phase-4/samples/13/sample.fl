@@ -3,6 +3,7 @@ def f(a, b , c)
         if (c < a)
             return "salam";
         end
+        return "ahmagh";
     else
         return "hi";
     end

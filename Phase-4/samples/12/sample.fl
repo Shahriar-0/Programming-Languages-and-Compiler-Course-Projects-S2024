@@ -8,7 +8,7 @@ def main()
         end
         if (a < b)
             puts(a);
-            a++;
+            ++a;
             next;
         end
     end
