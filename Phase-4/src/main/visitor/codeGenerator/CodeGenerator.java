@@ -76,12 +76,13 @@ public class CodeGenerator extends Visitor<String> {
 	private String getType(Type element) {
 		String type = "";
 		switch (element) {
+			case NoType noType 		   -> type += "V";
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "Ljava/lang/Integer;";
 			case BoolType boolType     -> type += "Ljava/lang/Boolean;";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
-			case null, default 		   -> {}
+			case null, default 		   -> type += "V";
 		}
 		return type;
 	}
@@ -89,12 +90,13 @@ public class CodeGenerator extends Visitor<String> {
 	private String getTypeSignature(Type element) {
 		String type = "";
 		switch (element) {
+			case NoType noType 		   -> type += "V";
 			case StringType stringType -> type += "Ljava/lang/String;";
 			case IntType intType       -> type += "I";
 			case BoolType boolType     -> type += "Z";
 			case FptrType fptrType     -> type += "LFptr;";
 			case ListType listType     -> type += "LList;";
-			case null, default 		   -> {}
+			case null, default 		   -> type += "V";
 		}
 		return type;
 	}
@@ -291,7 +293,7 @@ public class CodeGenerator extends Visitor<String> {
 		args += ")";
 
 		String returnTypeString = getType(returnType);
-
+		log.info(returnTypeString);
 		commands += ".method public static " + functionDeclaration.getFunctionName().getName();
 		commands += args + returnTypeString + "\n";
 
@@ -308,14 +310,7 @@ public class CodeGenerator extends Visitor<String> {
 			}
 		}
 
-		if (returnType instanceof NoType) {
-			commands += "return\n";
-		} else if (returnType instanceof IntType || returnType instanceof BoolType) {
-			commands += "ireturn\n";
-		} else {
-			commands += "areturn\n";
-		}
-
+		commands += "return" + "\n";
 		commands += ".end method\n\n"; // few new lines for readability
 
 		addCommand(commands);
@@ -394,7 +389,9 @@ public class CodeGenerator extends Visitor<String> {
 				commands += assignExpression.accept(this);
 				if (varType instanceof IntType || varType instanceof BoolType) {
 					commands += "istore " + slot + "\n";
-				} else {
+				} else if (varType instanceof ListType) {
+					commands += "astore " + slot + "\n";
+				}  else {
 					commands += "astore " + slot + "\n";
 				}
 			}
@@ -482,11 +479,17 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ReturnStatement returnStatement) {
-		// since we determined the return type in function declaration, we can just visit the expression and nothing else
-		if (returnStatement.hasRetExpression()) {
-			return returnStatement.getReturnExp().accept(this);
+		String commands = "";
+		
+		if (!returnStatement.hasRetExpression()) {
+			commands += "return\n";
 		}
-		return null;
+		else {
+			commands += returnStatement.getReturnExp().accept(this);
+			commands += "areturn\n";
+		}
+		log.info(commands);
+		return commands;
 	}
 
 	@Override
@@ -498,8 +501,9 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(BinaryExpression binaryExpression) {
 		String commands = "";
 		commands += binaryExpression.getFirstOperand().accept(this);
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		commands += binaryExpression.getSecondOperand().accept(this);
-		// TODO: convert primitive types to objects
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		BinaryOperator operator = binaryExpression.getOperator();
 		switch (operator) {
 			// we only have int and bool types so we don't need to check
@@ -522,6 +526,7 @@ public class CodeGenerator extends Visitor<String> {
 	public String visit(UnaryExpression unaryExpression) {
 		String commands = "";
 		commands += unaryExpression.getExpression().accept(this);
+		commands += "invokevirtual java/lang/Integer/intValue()I" + "\n";
 		switch (unaryExpression.getOperator()) {
 			case MINUS         -> commands += "ineg\n";
 			case NOT           -> commands += "iconst_1\nixor\n";
@@ -540,12 +545,6 @@ public class CodeGenerator extends Visitor<String> {
 		String commands = "";
 		if (varType instanceof IntType || varType instanceof BoolType) {
 			commands += "iload " + slot + "\n";
-		} else if (varType instanceof StringType) {
-			commands += "aload " + slot + "\n";
-		} else if (varType instanceof FptrType) {
-			// TODO: dunno what to do with this yet
-		} else if (varType instanceof ListType) {
-			// TODO: dunno what to do with this yet
 		} else {
 			commands += "aload " + slot + "\n";
 		}
@@ -599,7 +598,7 @@ public class CodeGenerator extends Visitor<String> {
 		
 		if (lenType instanceof StringType) { 
 			commands += "invokevirtual java/lang/String/length()I\n";
-		} else if (lenType instanceof ListType) { // not sure if this is right, i still dunno how to handle lists
+		} else if (lenType instanceof ListType) {
 			commands += "invokevirtual List/size()I\n";
 		} 
 
@@ -629,32 +628,47 @@ public class CodeGenerator extends Visitor<String> {
 
 	@Override
 	public String visit(ListValue listValue) {
-		// Fuck you
-		return null;
+		String commands = "";
+		commands += "new List" + "\n";
+		commands += "dup" + "\n";
+		commands += "new java/util/ArrayList" + "\n";
+		commands += "dup" + "\n";
+		commands += "invokespecial java/util/ArrayList/<init>()V" + "\n";
+		
+		int slot = slotOf("temp");
+		commands += "astore " + slot + "\n";
+		for (var element : listValue.getElements()) {
+			commands += "aload " + slot + "\n";
+			commands += element.accept(this);
+			commands +=  "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z" + "\n";
+			commands += "pop" + "\n";
+		}
+		commands += "aload " + slot + "\n";
+		commands += "invokespecial List/<init>(Ljava/util/ArrayList;)V" + "\n";
+		// slots.remove("temp");
+		return commands;
 	}
 
 	@Override
 	public String visit(IntValue intValue) {
-		//TODO, use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
-		// why? why should we store it with class?
 		String commands = "";
 		commands += "ldc " + intValue.getIntVal() + "\n";
+		commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;" + "\n";
 		return commands;
 	}
 		
 	@Override
 	public String visit(BoolValue boolValue) {
-		//TODO, use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
 		String commands = "";
 		commands += "ldc " + boolValue.getIntValue() + "\n";
+		commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;" + "\n";
 		return commands;
 	}
 
 	@Override
 	public String visit(StringValue stringValue) {
-		//TODO
 		String commands = "";
-		commands += stringValue.getStrWithQuotes() + "\n";
+		commands += "ldc " + stringValue.getStr() + "\n";
 		return commands;
 	}
 }
