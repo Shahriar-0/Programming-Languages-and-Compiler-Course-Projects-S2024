@@ -274,12 +274,14 @@ public class CodeGenerator extends Visitor<String> {
 		String args = "(";
 		Type returnType = new NoType();
 
+		SymbolTable.push(SymbolTable.top.copy());
 		try {
 			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 				FunctionItem.START_KEY + 
 				functionDeclaration.getFunctionName().getName()
 			);
 			returnType = functionItem.getReturnType();
+
 			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
 			for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
 				VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
@@ -324,7 +326,7 @@ public class CodeGenerator extends Visitor<String> {
 
 		commands += "return" + "\n";
 		commands += ".end method\n\n"; // few new lines for readability
-
+		SymbolTable.pop();
 		addCommand(commands);
 		return null;
 	}
@@ -471,23 +473,27 @@ public class CodeGenerator extends Visitor<String> {
 			}
 		}
 
+		SymbolTable.push(SymbolTable.top.copy());
 		for (var statement : ifStatement.getElseBody()) {
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
 		}
-
+		SymbolTable.pop();
+		
 		commands += "goto " + endLabel + "\n";
 		commands += thenLabel + ":\n";
-
+		
+		SymbolTable.push(SymbolTable.top.copy());
 		for (var statement : ifStatement.getThenBody()) {
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
 		}
-
+		SymbolTable.pop();
+		
 		commands += endLabel + ":\n";
 
 		return commands;
@@ -587,12 +593,16 @@ public class CodeGenerator extends Visitor<String> {
 		nextLabels.push(startLabel);
 
 		commands += startLabel + ":\n";
+
+		SymbolTable.push(SymbolTable.top.copy());		
 		for (var statement : loopDoStatement.getLoopBodyStmts()) {
 			String temp = statement.accept(this);
 			if (temp != null) {
 				commands += temp;
 			}
 		}
+		SymbolTable.pop();
+
 		commands += "goto " + startLabel + "\n";
 		
 		breakLabels.pop();
