@@ -71,11 +71,11 @@ public class TypeChecker extends Visitor<Type> {
 			FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
 				FunctionItem.START_KEY +
 				functionDeclaration.getFunctionName().getName()
-				);
+			);
 				
-				ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
-				
-				if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
+			ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+			
+			if (currentArgTypes.size() < functionDeclaration.getArgs().size()) { // default values
 				for (int i = currentArgTypes.size(); i < functionDeclaration.getArgs().size(); i++) {
 					
 					if (functionDeclaration.getArgs().get(i).getDefaultVal() == null) {
