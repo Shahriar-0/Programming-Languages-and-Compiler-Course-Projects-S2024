@@ -2,6 +2,22 @@
 
 - [Programming-Languages-and-Compiler-Course-Projects](#programming-languages-and-compiler-course-projects)
   - [Intro](#intro)
+    - [Code Structure](#code-structure)
+    - [Data Types](#data-types)
+    - [Functions](#functions)
+    - [Patterns](#patterns)
+    - [Lambda Functions](#lambda-functions)
+    - [Function Pointers](#function-pointers)
+    - [If Statement](#if-statement)
+    - [Loops](#loops)
+      - [For Loop](#for-loop)
+      - [Do Loops](#do-loops)
+    - [Default Functions](#default-functions)
+      - [puts](#puts)
+      - [push](#push)
+      - [len](#len)
+      - [chop](#chop)
+      - [chomp](#chomp)
   - [Phase 1](#phase-1)
   - [Phase 2](#phase-2)
   - [Phase 3](#phase-3)
@@ -9,7 +25,203 @@
 
 ## Intro
 
-In this repository, we tried to implement a compiler for a simple language. The new language is called `FunctionCraft`, and it is a functional programming language. The formal documentation for language is available in the `FunctionCraft\Documentation` directory.
+In this repository, we tried to implement a compiler for a simple language. The compiler is written in java and it uses ANTLR4 for parsing the language and generating the parse tree then convert it to AST and then generates java bytecode using Jasmin. The new language is called `FunctionCraft`, and it is a functional programming language. The formal documentation for language is available in the `FunctionCraft\Documentation` directory.
+
+### Code Structure
+
+Each FunctionCraft program consists of some pattern definitions and some function definitions, then the main function is defined. Here is an example of a FunctionCraft program:
+
+```text
+def sum(a, b)
+    return a + b;
+end
+
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib (n-1) + fib (n-2)
+    # This is a comment
+;
+
+
+def main()
+    =begin
+    This is also a comment
+    =end
+    a = 5;
+    b = 6;
+    c = sum(a, b);
+    d = fib.match(5);
+    return c + d;
+end
+
+```
+
+### Data Types
+
+The language supports the following data types:
+
+- int
+- float
+- bool
+- string
+- list
+- function pointer
+
+### Functions
+
+functions are defined using `def` keyword. At the end of each scope in this language, `end` keyword comes. functions can also have default values. They can have multiple return statements or none. Here is an example of a function definition:
+
+```text
+def f(x, [y = 2])
+    if (x > 0)
+        return x + y;
+    else
+        return x - y;
+    end
+end
+```
+
+### Patterns
+
+Patterns are defined using the `pattern` keyword. Patterns are used to match the values of the arguments passed to the function. Patterns can have multiple cases. Here is an example of a pattern definition:
+
+```text
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib (n-1) + fib (n-2)
+;
+```
+
+### Lambda Functions
+
+Lambda functions are defined using the `->` keyword. Lambda functions can be passed as arguments to other functions. Here is an example of a lambda function definition:
+
+```text
+-> (x, y) { return x + y; }
+```
+
+### Function Pointers
+
+Function pointers are defined using the `method` keyword. Function pointers can be passed as arguments to other functions. Here is an example of a function pointer definition:
+
+```text
+def f(x)
+    return x + 1;
+end
+
+def main()
+    f_ptr = method(:f);
+    a = f_ptr(5);
+    puts(a);
+end
+```
+
+### If Statement
+
+Each condition should be in parentheses. Here is an example of an if statement:
+
+```text
+if ((a == 5) && (b == 6))
+    return 1;
+else 
+    return 0;
+end
+```
+
+### Loops
+
+#### For Loop
+
+The for loop is somewhat like the one in Python except for the `:`. Here are the examples of for loops:
+
+```text
+for i in 0..10
+    puts(i);
+end
+
+a = [1, 2, 3, 4];
+for i in a
+    puts(i);
+end
+```
+
+#### Do Loops
+
+The do loop is like a while loop but with no conditions. We should use `break` and `next` keywords to control the flow of the program. Here is an example of a do loop:
+
+```text
+i = 0;
+loop do
+    i += 1;
+    puts(i);
+    if (i == 10)
+        break;
+    end
+end
+```
+
+### Default Functions
+
+#### puts
+
+The `puts` function is used to print the value of a variable. Here is an example of using the `puts` function:
+
+```text
+def main()
+    a = 5;
+    puts(a);
+end
+```
+
+#### push
+
+The `push` function is used to append an element to a list or string. Here is an example of using the `push` function:
+
+```text
+def main()
+    a = [1, 2, 3];
+    push(a, 4);
+    puts(a);
+end
+```
+
+#### len
+
+The `len` function is used to get the length of a list or a string. Here is an example of using the `len` function:
+
+```text
+def main()
+    a = [1, 2, 3];
+    b = len(a);
+    puts(b);
+end
+```
+
+#### chop
+
+The `chop` function is used to remove the last element of a string. Here is an example of using the `chop` function:
+
+```text
+def main()
+    a = "Hello";
+    chop(a);
+    puts(a);
+end
+```
+
+#### chomp
+
+The `chomp` function is used to remove the newline characters (`\n`) from the string. Here is an example of using the `chomp` function:
+
+```text
+def main()
+    a = "H\nell\no";
+    chomp(a);
+    puts(a);
+end
+```
 
 ## Phase 1
 
@@ -17,7 +229,7 @@ In the first phase of the project, we implemented designed the grammar for the l
 
 A sample program and parse tree is as follows (you can use the `intelij` or `antlr` or use `run.ps1` and `check.ps1` scripts to run the program):
 
-```python
+```text
 def list_printer(l, i)
 end
 
@@ -59,7 +271,7 @@ In the second phase of the project, first we implemented and generated an abstra
 
 A sample program and detected errors are as follows (you can use the `intelij` to run the program):
 
-```python
+```text
 def re(re)
     return;
 end
@@ -158,7 +370,7 @@ In the third phase of the project, we implemented the type checking part of the 
 
 A sample program and detected errors are as follows (you can use the `run.ps1` script to run the program):
 
-```python
+```text
 pattern fib(a)
     | (a>1) = 0
     | (a<2) = 2
@@ -210,7 +422,7 @@ In the fourth phase of the project, we implemented the code generation part of t
 
 A sample program that has been implemented in the language is as follows (you can use the `run.ps1` script to run the program):
 
-```python
+```text
 def insertionsort(arr, length)
     i = 1;
     loop do
